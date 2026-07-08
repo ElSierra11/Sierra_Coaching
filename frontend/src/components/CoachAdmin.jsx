@@ -141,6 +141,7 @@ export default function CoachAdmin({ showToast }) {
           ...r,
           routine_name: editRoutineName,
           exercises: editExercises.map((e, idx) => ({
+            id: typeof e.id === 'string' && e.id.startsWith('new_') ? null : e.id,
             name: e.name,
             sets: parseInt(e.sets) || 0,
             reps: e.reps,

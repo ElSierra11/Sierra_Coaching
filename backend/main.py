@@ -596,21 +596,49 @@ def update_client_routines(client_id: int, routines_payload: List[schemas.Routin
         else:
             db_day.routine_name = r_day.routine_name
 
-        # Clean existing exercises
-        db.query(models.Exercise).filter(models.Exercise.routine_day_id == db_day.id).delete()
-        db.commit()
+        # Load existing exercises to update/delete them properly (preserves keys & avoids violating foreign key constraints on lift_logs)
+        existing_exs = {ex.id: ex for ex in db.query(models.Exercise).filter(models.Exercise.routine_day_id == db_day.id).all()}
+        updated_ex_ids = []
 
-        # Add new exercises
-        for idx, ex in enumerate(r_day.exercises):
-            db_ex = models.Exercise(
-                routine_day_id=db_day.id,
-                name=ex.name,
-                sets=ex.sets,
-                reps=ex.reps,
-                notes=ex.notes,
-                order=idx
-            )
-            db.add(db_ex)
+        for idx, ex_data in enumerate(r_day.exercises):
+            ex_obj = None
+            if ex_data.id and ex_data.id in existing_exs:
+                ex_obj = existing_exs[ex_data.id]
+                ex_obj.name = ex_data.name
+                ex_obj.sets = ex_data.sets
+                ex_obj.reps = ex_data.reps
+                ex_obj.notes = ex_data.notes
+                ex_obj.order = idx
+                updated_ex_ids.append(ex_data.id)
+            else:
+                # Fallback: try matching by exact name to preserve id if not passed
+                for ex_id, existing_ex in list(existing_exs.items()):
+                    if existing_ex.name.lower() == ex_data.name.lower() and ex_id not in updated_ex_ids:
+                        ex_obj = existing_ex
+                        ex_obj.sets = ex_data.sets
+                        ex_obj.reps = ex_data.reps
+                        ex_obj.notes = ex_data.notes
+                        ex_obj.order = idx
+                        updated_ex_ids.append(ex_id)
+                        break
+
+            if not ex_obj:
+                # Create brand new exercise
+                db_ex = models.Exercise(
+                    routine_day_id=db_day.id,
+                    name=ex_data.name,
+                    sets=ex_data.sets,
+                    reps=ex_data.reps,
+                    notes=ex_data.notes,
+                    order=idx
+                )
+                db.add(db_ex)
+
+        # Delete any exercises no longer present in the routine payload
+        for ex_id, existing_ex in existing_exs.items():
+            if ex_id not in updated_ex_ids:
+                db.delete(existing_ex)
+                
         db.commit()
 
     return db.query(models.RoutineDay).filter(models.RoutineDay.user_id == client_id).all()
