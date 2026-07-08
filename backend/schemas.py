@@ -246,3 +246,13 @@ class AIGenerateRequest(BaseModel):
     day_name: Optional[str] = "Lunes"
     day_number: Optional[int] = 1
 
+
+class ChatMessage(BaseModel):
+    role: str # "user" | "model"
+    text: str
+
+
+class ChatRequest(BaseModel):
+    message: str
+    history: List[ChatMessage] = []
+

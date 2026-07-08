@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import {
   Droplet, Moon, Flame, Ban, CheckCircle, AlertTriangle,
-  Clock, Trophy, XCircle, Zap, Calendar, TrendingUp, BarChart2
+  Clock, Trophy, XCircle, Zap, Calendar, TrendingUp, BarChart2,
+  TrendingDown, Dumbbell, Sparkles, Send, MessageSquare, X
 } from 'lucide-react';
 
 // --- Streak Counter Widget ---
@@ -65,13 +66,14 @@ function StreakWidget({ client }) {
         {[3, 7, 14, 30].map(m => (
           <span
             key={m}
-            className={`text-[9px] font-extrabold uppercase px-2 py-1 rounded-lg border ${
+            className={`text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-lg border flex items-center gap-1.5 transition-all ${
               streak >= m
-                ? 'bg-gymNeon/10 border-gymNeon/40 text-gymNeon'
+                ? 'bg-gymNeon/10 border-gymNeon/30 text-gymNeon shadow-[0_0_8px_rgba(255,94,58,0.1)]'
                 : 'bg-white/[0.02] border-white/5 text-neutral-600'
             }`}
           >
-            🏅 {m}d
+            <Trophy className="w-2.5 h-2.5" />
+            <span>{m}d</span>
           </span>
         ))}
       </div>
@@ -199,10 +201,10 @@ function AchievementsWidget({ client }) {
   const strongAthlete = liftLogs.length > 0;
   
   const badges = [
-    { id: 'water', label: 'Campeón H2O', desc: 'Beber 2L de agua en un día', active: hitWater, icon: '💧' },
-    { id: 'cardio', label: 'Bestia del Cardio', desc: 'Lograr 5 días de cardio', active: cardioBeast, icon: '🔥' },
-    { id: 'weight', label: 'Evolución Constante', desc: 'Bajar de peso corporal', active: weightDrop, icon: '📉' },
-    { id: 'force', label: 'Atleta de Fuerza', desc: 'Registrar tu primer levantamiento', active: strongAthlete, icon: '🏋️‍♂️' },
+    { id: 'water', label: 'Campeón H2O', desc: 'Beber 2L de agua en un día', active: hitWater, icon: Droplet, color: 'text-blue-400' },
+    { id: 'cardio', label: 'Bestia del Cardio', desc: 'Lograr 5 días de cardio', active: cardioBeast, icon: Flame, color: 'text-gymNeon' },
+    { id: 'weight', label: 'Evolución Constante', desc: 'Bajar de peso corporal', active: weightDrop, icon: TrendingDown, color: 'text-green-400' },
+    { id: 'force', label: 'Atleta de Fuerza', desc: 'Registrar tu primer levantamiento', active: strongAthlete, icon: Dumbbell, color: 'text-purple-400' },
   ];
   
   return (
@@ -213,22 +215,27 @@ function AchievementsWidget({ client }) {
       </div>
       
       <div className="grid grid-cols-2 gap-3">
-        {badges.map(b => (
-          <div 
-            key={b.id} 
-            className={`p-3 rounded-xl border flex items-center gap-3 transition-all ${
-              b.active 
-                ? 'bg-gradient-to-br from-gymNeon/15 to-gymCoral/5 border-gymNeon/30 shadow-[0_0_12px_rgba(255,94,58,0.05)]' 
-                : 'bg-white/[0.01] border-white/5 opacity-40'
-            }`}
-          >
-            <span className="text-2xl">{b.icon}</span>
-            <div>
-              <div className="text-[10px] font-bold text-white uppercase tracking-wider">{b.label}</div>
-              <div className="text-[8px] text-neutral-400 mt-0.5 leading-tight">{b.desc}</div>
+        {badges.map(b => {
+          const IconComponent = b.icon;
+          return (
+            <div 
+              key={b.id} 
+              className={`p-3 rounded-xl border flex items-center gap-3 transition-all ${
+                b.active 
+                  ? 'bg-gradient-to-br from-gymNeon/15 to-gymCoral/5 border-gymNeon/30 shadow-[0_0_12px_rgba(255,94,58,0.05)]' 
+                  : 'bg-white/[0.01] border-white/5 opacity-40'
+              }`}
+            >
+              <div className={`p-1.5 rounded-lg ${b.active ? 'bg-white/5' : 'bg-transparent'}`}>
+                <IconComponent className={`w-5 h-5 ${b.active ? b.color : 'text-neutral-500'}`} />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-white uppercase tracking-wider">{b.label}</div>
+                <div className="text-[8px] text-neutral-400 mt-0.5 leading-tight">{b.desc}</div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -319,6 +326,28 @@ export default function Dashboard({ client, onUpdateClient, showToast, weeklyCha
   const dailyLog = client.daily_habits_log || { water_cups: 0, sleep_hours: 0.0, cardio_done: false, alcohol_avoided: true };
 
   const [saving, setSaving] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!chatMessage.trim() || chatLoading) return;
+    const userMsg = chatMessage.trim();
+    setChatMessage('');
+    const newHistory = [...chatHistory, { role: 'user', text: userMsg }];
+    setChatHistory(newHistory);
+    setChatLoading(true);
+    try {
+      const res = await api.chatWithAI(userMsg, chatHistory);
+      setChatHistory([...newHistory, { role: 'model', text: res.response }]);
+    } catch (err) {
+      setChatHistory([...newHistory, { role: 'model', text: 'Lo siento, ocurrió un error: ' + err.message }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   // Get current weight from logs
   const currentWeight = client.weight_history && client.weight_history.length > 0
@@ -569,6 +598,95 @@ export default function Dashboard({ client, onUpdateClient, showToast, weeklyCha
         </div>
 
       </div>
+
+      {/* Floating Chat Button */}
+      <button 
+        onClick={() => setChatOpen(true)}
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-gymNeon to-gymCoral p-3.5 rounded-full shadow-[0_4px_20px_rgba(255,94,58,0.3)] hover:scale-110 active:scale-95 transition-all text-white z-40 cursor-pointer flex items-center justify-center border border-white/10"
+        title="Chatear con tu Copiloto de IA"
+      >
+        <MessageSquare className="w-6 h-6 animate-pulse" />
+      </button>
+
+      {/* Chat Sidebar Drawer */}
+      {chatOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-end transition-all duration-300">
+          <div className="w-full max-w-md bg-[#0c0c12] border-l border-white/5 h-full flex flex-col shadow-2xl animate-slide-in">
+            {/* Drawer Header */}
+            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/30">
+              <div className="flex items-center gap-2">
+                <div className="bg-gymNeon/10 p-1.5 rounded-lg border border-gymNeon/30">
+                  <Sparkles className="w-4 h-4 text-gymNeon" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-white uppercase tracking-wider">Copiloto IA</h4>
+                  <p className="text-[9px] text-neutral-500 font-bold uppercase mt-0.5">Asistente Personal de Sierra Coaching</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setChatOpen(false)}
+                className="text-neutral-500 hover:text-white transition-colors p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 no-scrollbar">
+              {chatHistory.length === 0 && (
+                <div className="flex flex-col items-center justify-center text-center h-full gap-3 opacity-60 px-6">
+                  <Sparkles className="w-8 h-8 text-gymNeon animate-pulse" />
+                  <p className="text-xs text-white font-semibold">¡Hola! Soy tu Copiloto de IA.</p>
+                  <p className="text-[10px] text-neutral-400">Tengo acceso a tus rutinas y dietas asignadas por Alejandro. Pregúntame dudas de entrenamiento, variaciones de ejercicios o sugerencias de macros.</p>
+                </div>
+              )}
+              {chatHistory.map((m, idx) => (
+                <div 
+                  key={idx} 
+                  className={`flex flex-col max-w-[85%] ${m.role === 'user' ? 'self-end items-end' : 'self-start items-start'}`}
+                >
+                  <div className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                    m.role === 'user' 
+                      ? 'bg-gymNeon/15 border border-gymNeon/30 text-white rounded-tr-none' 
+                      : 'bg-white/[0.02] border border-white/5 text-neutral-200 rounded-tl-none shadow-[0_2px_10px_rgba(0,0,0,0.2)]'
+                  }`}>
+                    {m.text}
+                  </div>
+                  <span className="text-[8px] text-neutral-500 font-bold uppercase mt-1 px-1">
+                    {m.role === 'user' ? 'Tú' : 'Copiloto IA'}
+                  </span>
+                </div>
+              ))}
+              {chatLoading && (
+                <div className="self-start flex items-center gap-1.5 bg-white/[0.01] border border-white/5 p-3 rounded-2xl rounded-tl-none">
+                  <span className="w-1.5 h-1.5 bg-gymNeon rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-gymNeon rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-gymNeon rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              )}
+            </div>
+
+            {/* Message Input Box */}
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-white/5 bg-black/20 flex gap-2">
+              <input 
+                type="text"
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                placeholder="Escribe tu mensaje..."
+                className="flex-1 bg-black/40 border border-white/5 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-gymNeon/40 placeholder:text-neutral-600"
+                disabled={chatLoading}
+              />
+              <button 
+                type="submit"
+                disabled={!chatMessage.trim() || chatLoading}
+                className="bg-gymNeon hover:bg-gymCoral px-3 py-2.5 rounded-xl text-white transition-all duration-300 disabled:opacity-40 cursor-pointer flex items-center justify-center"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

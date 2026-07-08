@@ -181,5 +181,18 @@ export const api = {
       body: JSON.stringify({ profile_pic: profilePic }),
     });
   },
+
+  chatWithAI: async (message, history = []) => {
+    return request("/chat", {
+      method: "POST",
+      body: JSON.stringify({
+        message,
+        history: history.map((h) => ({
+          role: h.role,
+          text: h.text,
+        })),
+      }),
+    });
+  },
 };
 

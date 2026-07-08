@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp } from 'lucide-react';
+import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles } from 'lucide-react';
 
 export default function CoachAdmin({ showToast }) {
   const [clients, setClients] = useState([]);
@@ -604,9 +604,10 @@ export default function CoachAdmin({ showToast }) {
                             type="button"
                             disabled={generatingAI}
                             onClick={handleAIGenerateRoutine}
-                            className="bg-gymNeon/15 hover:bg-gymNeon/25 text-gymNeon font-extrabold border border-gymNeon/30 px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                            className="bg-gymNeon/15 hover:bg-gymNeon/25 text-gymNeon font-extrabold border border-gymNeon/30 px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1"
                           >
-                            {generatingAI ? 'Generando...' : 'Generar con IA 🪄'}
+                            <Sparkles className="w-3 h-3 animate-pulse" />
+                            <span>{generatingAI ? 'Generando...' : 'Generar con IA'}</span>
                           </button>
                           <button
                             type="button"
@@ -718,9 +719,10 @@ export default function CoachAdmin({ showToast }) {
                               type="button"
                               disabled={generatingAI}
                               onClick={() => handleAIGenerateDiet(meal.day_number)}
-                              className="bg-gymNeon/10 hover:bg-gymNeon/25 text-gymNeon font-extrabold border border-gymNeon/20 px-2.5 py-1 rounded-[6px] text-[9px] uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                              className="bg-gymNeon/10 hover:bg-gymNeon/25 text-gymNeon font-extrabold border border-gymNeon/20 px-2.5 py-1 rounded-[6px] text-[9px] uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1"
                             >
-                              Generar Día con IA 🪄
+                              <Sparkles className="w-2.5 h-2.5 animate-pulse" />
+                              <span>Generar Día con IA</span>
                             </button>
                           </div>
                           

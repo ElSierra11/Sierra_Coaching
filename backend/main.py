@@ -917,9 +917,92 @@ def ai_generate_plan(payload: schemas.AIGenerateRequest, db: Session = Depends(g
                 text_content = "\n".join(lines).strip()
             parsed_json = json.loads(text_content)
             return parsed_json
+@app.post("/api/chat")
+def chat_with_ai(payload: schemas.ChatRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    client = current_user
+    latest_weight = 70.0
+    client_height = 1.70
+    client_target = "General"
+    if client.profile:
+        latest_weight = client.profile.initial_weight or 70.0
+        client_height = client.profile.height or 1.70
+        client_target = client.profile.target or "General"
+        
+    if client.weight_logs:
+        latest_weight = client.weight_logs[-1].weight
+        
+    routines_context = ""
+    for r in client.routines:
+        ex_list = ", ".join([f"{ex.name} ({ex.sets}x{ex.reps})" for ex in r.exercises])
+        routines_context += f"- {r.day_name}: {r.routine_name} ({ex_list})\n"
+        
+    diet_context = ""
+    for d in client.diet_meals:
+        diet_context += f"- Día {d.day_number}: Desayuno: {d.desayuno}, Almuerzo: {d.almuerzo}, Cena: {d.cena}, Merienda: {d.merienda} (Calorías: {d.calories} kcal)\n"
+        
+    system_prompt = f"""
+    Eres el Entrenador Personal de Inteligencia Artificial (Copiloto) de Sierra Coaching.
+    Estás chateando con tu alumno: {client.name}.
+    Métricas del alumno:
+    - Altura: {client_height}m
+    - Peso actual: {latest_weight}kg
+    - Objetivo: {client_target}
+    
+    Rutina del alumno asignada por su coach Alejandro:
+    {routines_context}
+    
+    Dieta del alumno asignada por su coach Alejandro:
+    {diet_context}
+    
+    Responde a sus preguntas de fitness, entrenamiento, nutrición o sobre sus planes asignados de forma motivadora, profesional y concisa (máximo 3 párrafos cortos). Usa formato markdown limpio.
+    Si el alumno te pide cambiar un ejercicio de su rutina porque está ocupado, dale una opción equivalente coherente con el patrón de movimiento.
+    """
+    
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return {"response": "Hola. Soy tu Copiloto de IA en Sierra Coaching. (Configura tu GEMINI_API_KEY para respuestas reales del modelo). Te sugiero seguir las rutinas e hidratación asignadas."}
+        
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    headers = {"Content-Type": "application/json"}
+    
+    contents = []
+    contents.append({
+        "role": "user",
+        "parts": [{"text": system_prompt + "\n\nAquí inicia la conversación con el alumno."}]
+    })
+    contents.append({
+        "role": "model",
+        "parts": [{"text": "Entendido. Asistiré al alumno con el mayor profesionalismo posible."}]
+    })
+    
+    for turn in payload.history:
+        contents.append({
+            "role": "user" if turn.role == "user" else "model",
+            "parts": [{"text": turn.text}]
+        })
+        
+    contents.append({
+        "role": "user",
+        "parts": [{"text": payload.message}]
+    })
+    
+    body = {
+        "contents": contents
+    }
+    
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(body).encode("utf-8"),
+            headers=headers,
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=12) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            text_content = res_data["candidates"][0]["content"]["parts"][0]["text"]
+            return {"response": text_content.strip()}
     except Exception as e:
-        print(f"Error llamando a Gemini API ({e}). Usando plan de fallback...")
-        return generate_fallback_plan(client, payload.type, payload.day_name, payload.day_number)
+        return {"response": f"Lo siento, encontré un problema técnico al conectarme con el motor de IA ({e})."}
 
 if __name__ == "__main__":
     import uvicorn

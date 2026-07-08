@@ -11,6 +11,18 @@ export default function ProgressTracker({ client, onUpdateClient, showToast }) {
   const [hip, setHip] = useState('');
   const [thigh, setThigh] = useState('');
 
+  // Calculators states
+  const [calcTab, setCalcTab] = useState('1rm');
+  const [calcWeight, setCalcWeight] = useState(80);
+  const [calcReps, setCalcReps] = useState(5);
+  const [calcGender, setCalcGender] = useState('male');
+  const [calcNeck, setCalcNeck] = useState(38);
+  const [calcWaist, setCalcWaist] = useState(88);
+  const [calcHip, setCalcHip] = useState(94);
+  const [calcHeight, setCalcHeight] = useState(170);
+  const [calcAge, setCalcAge] = useState(25);
+  const [calcActivity, setCalcActivity] = useState(1.375);
+
   // Photos inputs
   const [photoLabel, setPhotoLabel] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
@@ -87,6 +99,52 @@ export default function ProgressTracker({ client, onUpdateClient, showToast }) {
     } finally {
       setSavingPhoto(false);
     }
+  };
+
+  const getEstimated1RM = () => {
+    const w = parseFloat(calcWeight);
+    const r = parseInt(calcReps);
+    if (isNaN(w) || isNaN(r) || r <= 0) return 0;
+    return Math.round(w * (1 + r / 30) * 10) / 10;
+  };
+
+  const getBodyFat = () => {
+    const neck = parseFloat(calcNeck);
+    const waist = parseFloat(calcWaist);
+    const hip = parseFloat(calcHip);
+    const h = parseFloat(calcHeight);
+    if (isNaN(neck) || isNaN(waist) || isNaN(h) || h <= 0) return 0;
+    
+    let bf = 0;
+    if (calcGender === 'male') {
+      const logDiff = Math.log10(waist - neck);
+      const logH = Math.log10(h);
+      if (waist > neck) {
+        bf = 86.010 * logDiff - 70.041 * logH + 36.76;
+      }
+    } else {
+      const logDiff = Math.log10(waist + hip - neck);
+      const logH = Math.log10(h);
+      if ((waist + hip) > neck) {
+        bf = 163.205 * logDiff - 97.684 * logH - 78.387;
+      }
+    }
+    return Math.max(2, Math.round(bf * 10) / 10);
+  };
+
+  const getTDEE = () => {
+    const w = client.weight_history && client.weight_history.length > 0 
+      ? client.weight_history[client.weight_history.length - 1].weight 
+      : (client.profile?.initial_weight || 70.0);
+    const h = (client.profile?.height || 1.70) * 100;
+    
+    let bmr = 0;
+    if (calcGender === 'male') {
+      bmr = 10 * w + 6.25 * h - 5 * calcAge + 5;
+    } else {
+      bmr = 10 * w + 6.25 * h - 5 * calcAge - 161;
+    }
+    return Math.round(bmr * parseFloat(calcActivity));
   };
 
   // --- SVG Chart Calculations ---
@@ -588,6 +646,282 @@ export default function ProgressTracker({ client, onUpdateClient, showToast }) {
             <span>{savingPhoto ? 'Registrando...' : 'Añadir Foto'}</span>
           </button>
         </form>
+      </div>
+
+      {/* ADDITIONAL TOOLS SECTION: CALCULATORS & ANALYTICS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        
+        {/* Calculators Card */}
+        <div className="glass-panel p-6 rounded-2xl shadow-lg flex flex-col gap-5">
+          <div>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <Dumbbell className="w-4 h-4 text-gymNeon" />
+              <span>Calculadoras de Rendimiento y Salud</span>
+            </h4>
+            <p className="text-[10px] text-neutral-500 mt-0.5 ml-5.5">Estima tu fuerza, grasa y gasto energético diario.</p>
+          </div>
+
+          {/* Calculator tab switcher */}
+          <div className="flex bg-neutral-900/50 rounded-xl p-1 border border-white/5 gap-1">
+            <button
+              onClick={() => setCalcTab('1rm')}
+              className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                calcTab === '1rm' ? 'bg-gymNeon/15 text-gymNeon border border-gymNeon/25' : 'text-neutral-500 hover:text-white'
+              }`}
+            >
+              1RM Cargas
+            </button>
+            <button
+              onClick={() => setCalcTab('fat')}
+              className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                calcTab === 'fat' ? 'bg-gymNeon/15 text-gymNeon border border-gymNeon/25' : 'text-neutral-500 hover:text-white'
+              }`}
+            >
+              % Grasa Navy
+            </button>
+            <button
+              onClick={() => setCalcTab('tdee')}
+              className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                calcTab === 'tdee' ? 'bg-gymNeon/15 text-gymNeon border border-gymNeon/25' : 'text-neutral-500 hover:text-white'
+              }`}
+            >
+              Gasto Diario (TDEE)
+            </button>
+          </div>
+
+          {/* Calculator content */}
+          {calcTab === '1rm' && (
+            <div className="flex flex-col gap-4 animate-slide-in">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[8px] font-bold text-neutral-500 uppercase">Peso Levantado (kg)</label>
+                  <input
+                    type="number"
+                    value={calcWeight}
+                    onChange={(e) => setCalcWeight(e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-lg text-xs text-white p-2.5 focus:outline-none focus:border-gymNeon"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[8px] font-bold text-neutral-500 uppercase">Repeticiones Logradas</label>
+                  <input
+                    type="number"
+                    value={calcReps}
+                    onChange={(e) => setCalcReps(e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-lg text-xs text-white p-2.5 focus:outline-none focus:border-gymNeon"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-gymNeon/10 border border-gymNeon/30 rounded-xl p-4 flex flex-col items-center justify-center">
+                <span className="text-[9px] text-neutral-400 font-bold uppercase">1RM Estimado</span>
+                <span className="text-3xl font-black text-white mt-1">{getEstimated1RM()} <span className="text-xs font-bold text-gymNeon">kg</span></span>
+              </div>
+
+              {/* Repetition chart */}
+              <div className="grid grid-cols-4 gap-2">
+                {[1, 3, 5, 10].map(r => {
+                  const oneRM = getEstimated1RM();
+                  const targetLoad = Math.round((oneRM / (1 + r / 30)) * 10) / 10;
+                  return (
+                    <div key={r} className="bg-black/20 rounded-lg p-2 border border-white/5 text-center">
+                      <span className="text-[8px] text-neutral-500 font-bold block uppercase">{r} reps</span>
+                      <span className="text-xs font-bold text-white block mt-1">{targetLoad} kg</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {calcTab === 'fat' && (
+            <div className="flex flex-col gap-4 animate-slide-in">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[8px] font-bold text-neutral-500 uppercase">Género</label>
+                  <select
+                    value={calcGender}
+                    onChange={(e) => setCalcGender(e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-lg text-xs text-white p-2.5 focus:outline-none focus:border-gymNeon font-bold"
+                  >
+                    <option value="male" className="bg-[#0c0c12]">Masculino</option>
+                    <option value="female" className="bg-[#0c0c12]">Femenino</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[8px] font-bold text-neutral-500 uppercase">Cintura (cm)</label>
+                  <input
+                    type="number"
+                    value={calcWaist}
+                    onChange={(e) => setCalcWaist(e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-lg text-xs text-white p-2.5 focus:outline-none focus:border-gymNeon"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[8px] font-bold text-neutral-500 uppercase">Cuello (cm)</label>
+                  <input
+                    type="number"
+                    value={calcNeck}
+                    onChange={(e) => setCalcNeck(e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-lg text-xs text-white p-2.5 focus:outline-none focus:border-gymNeon"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[8px] font-bold text-neutral-500 uppercase">Altura (cm)</label>
+                  <input
+                    type="number"
+                    value={calcHeight}
+                    onChange={(e) => setCalcHeight(e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-lg text-xs text-white p-2.5 focus:outline-none focus:border-gymNeon"
+                  />
+                </div>
+                {calcGender === 'female' && (
+                  <div className="flex flex-col gap-1.5 col-span-2">
+                    <label className="text-[8px] font-bold text-neutral-500 uppercase">Cadera (cm)</label>
+                    <input
+                      type="number"
+                      value={calcHip}
+                      onChange={(e) => setCalcHip(e.target.value)}
+                      className="bg-black/30 border border-white/10 rounded-lg text-xs text-white p-2.5 focus:outline-none focus:border-gymNeon"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-gymNeon/10 border border-gymNeon/30 rounded-xl p-4 flex flex-col items-center justify-center">
+                <span className="text-[9px] text-neutral-400 font-bold uppercase">Grasa Corporal Estimada</span>
+                <span className="text-3xl font-black text-white mt-1">{getBodyFat()}%</span>
+              </div>
+            </div>
+          )}
+
+          {calcTab === 'tdee' && (
+            <div className="flex flex-col gap-4 animate-slide-in">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[8px] font-bold text-neutral-500 uppercase">Edad (años)</label>
+                  <input
+                    type="number"
+                    value={calcAge}
+                    onChange={(e) => setCalcAge(e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-lg text-xs text-white p-2.5 focus:outline-none"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[8px] font-bold text-neutral-500 uppercase">Actividad Física</label>
+                  <select
+                    value={calcActivity}
+                    onChange={(e) => setCalcActivity(e.target.value)}
+                    className="bg-black/30 border border-white/10 rounded-lg text-xs text-white p-2.5 focus:outline-none font-bold"
+                  >
+                    <option value="1.2" className="bg-[#0c0c12]">Sedentario (Oficina)</option>
+                    <option value="1.375" className="bg-[#0c0c12]">Ligero (Entreno 1-3d)</option>
+                    <option value="1.55" className="bg-[#0c0c12]">Moderado (Entreno 3-5d)</option>
+                    <option value="1.725" className="bg-[#0c0c12]">Intenso (Entreno 6-7d)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="bg-gymNeon/10 border border-gymNeon/30 rounded-xl p-4 flex flex-col items-center justify-center">
+                <span className="text-[9px] text-neutral-400 font-bold uppercase">Gasto Energético Total (TDEE)</span>
+                <span className="text-3xl font-black text-white mt-1">{getTDEE()} <span className="text-xs font-bold text-gymNeon">kcal / día</span></span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Habit Analytics Card */}
+        <div className="glass-panel p-6 rounded-2xl shadow-lg flex flex-col gap-4">
+          <div>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <TrendingUp className="w-4 h-4 text-gymNeon" />
+              <span>Analíticas y Progreso de Hábitos</span>
+            </h4>
+            <p className="text-[10px] text-neutral-500 mt-0.5 ml-5.5">Cumplimiento de agua y sueño en las últimas semanas.</p>
+          </div>
+
+          {(() => {
+            const logs = [...(client.all_habit_logs || [])].sort((a, b) => new Date(a.date) - new Date(b.date)).slice(-7);
+            if (logs.length === 0) {
+              return <div className="text-center py-20 text-neutral-500 text-xs italic">Aún no hay logs de hábitos suficientes para mostrar analíticas.</div>;
+            }
+
+            const chartW = 400;
+            const chartH = 140;
+            const pad = 20;
+
+            const waterPoints = logs.map((l, idx) => {
+              const val = l.water_cups * 0.25; 
+              const pct = Math.min(100, (val / 3.0) * 100);
+              const x = pad + (idx * (chartW - pad * 2)) / Math.max(1, logs.length - 1);
+              const y = chartH - pad - (pct * (chartH - pad * 2)) / 100;
+              return { x, y, val, date: l.date?.slice(8) };
+            });
+
+            const sleepPoints = logs.map((l, idx) => {
+              const val = l.sleep_hours;
+              const pct = Math.min(100, (val / 10.0) * 100);
+              const x = pad + (idx * (chartW - pad * 2)) / Math.max(1, logs.length - 1);
+              const y = chartH - pad - (pct * (chartH - pad * 2)) / 100;
+              return { x, y, val };
+            });
+
+            const sleepLine = sleepPoints.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+            return (
+              <div className="flex flex-col gap-4">
+                <div className="bg-black/20 p-2.5 rounded-xl border border-white/5">
+                  <div className="flex gap-4 justify-between items-center mb-2">
+                    <span className="text-[8px] font-bold text-neutral-500 uppercase">Hidratación (L) vs Sueño (h)</span>
+                    <div className="flex gap-3">
+                      <div className="flex items-center gap-1 text-[8px] font-bold text-blue-400">
+                        <div className="w-2 h-2 bg-blue-500/30 border border-blue-400 rounded-sm" />
+                        <span>AGUA</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-[8px] font-bold text-purple-400">
+                        <div className="w-2 h-0.5 bg-purple-400" />
+                        <span>SUEÑO</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full h-auto">
+                    {Array.from({ length: 4 }).map((_, i) => {
+                      const y = pad + (i * (chartH - pad * 2)) / 3;
+                      return <line key={i} x1={pad} y1={y} x2={chartW - pad} y2={y} stroke="rgba(255,255,255,0.03)" strokeWidth="1" />;
+                    })}
+
+                    {waterPoints.map((p, idx) => (
+                      <g key={idx}>
+                        <rect
+                          x={p.x - 6}
+                          y={p.y}
+                          width="12"
+                          height={chartH - pad - p.y}
+                          fill="rgba(96, 165, 250, 0.25)"
+                          stroke="#60a5fa"
+                          strokeWidth="1"
+                          rx="2"
+                        />
+                        <text x={p.x} y={p.y - 4} textAnchor="middle" fill="#60a5fa" className="text-[7px] font-extrabold">{p.val}L</text>
+                      </g>
+                    ))}
+
+                    <path d={sleepLine} fill="none" stroke="#a78bfa" strokeWidth="2.5" strokeLinecap="round" />
+                    {sleepPoints.map((p, idx) => (
+                      <g key={idx}>
+                        <circle cx={p.x} cy={p.y} r="3" fill="#09090c" stroke="#a78bfa" strokeWidth="2" />
+                        <text x={p.x} y={p.y - 8} textAnchor="middle" fill="#a78bfa" className="text-[7px] font-extrabold">{p.val}h</text>
+                        <text x={p.x} y={chartH - 6} textAnchor="middle" fill="rgba(255,255,255,0.2)" className="text-[7px] font-semibold">{waterPoints[idx].date}</text>
+                      </g>
+                    ))}
+                  </svg>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
       </div>
 
     </div>

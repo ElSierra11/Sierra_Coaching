@@ -68,11 +68,35 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
     return Math.round(w * (1 + r / 30) * 10) / 10;
   };
 
+  const playTickBeep = (frequency, duration) => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {
+      console.warn("Tick Audio blocked:", e);
+    }
+  };
+
   useEffect(() => {
     let interval = null;
     if (timerActive && timerSeconds > 0) {
       interval = setInterval(() => {
-        setTimerSeconds(prev => prev - 1);
+        setTimerSeconds(prev => {
+          const nextSec = prev - 1;
+          if (nextSec > 0 && nextSec <= 3) {
+            playTickBeep(600, 0.08);
+          }
+          return nextSec;
+        });
       }, 1000);
     } else if (timerActive && timerSeconds === 0) {
       setTimerActive(false);
