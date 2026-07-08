@@ -4,13 +4,13 @@
 
 
 :root {
-  --gym-dark-950: #0a0a0c;
-  --gym-dark-900: #121216;
-  --gym-dark-800: #16161c;
-  --gym-dark-700: #22222a;
+  --gym-dark-950: #09090c;
+  --gym-dark-900: #121217;
+  --gym-dark-800: #1a1a24;
+  --gym-dark-700: #262633;
   
-  --bg-panel: rgba(22, 22, 28, 0.75);
-  --border-color: rgba(255, 255, 255, 0.08);
+  --bg-panel: rgba(18, 18, 23, 0.7);
+  --border-color: rgba(255, 255, 255, 0.05);
 }
 
 .light-theme {
@@ -52,16 +52,39 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass-panel-neon {
   background: var(--bg-panel);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #ff5722;
-  box-shadow: 0 0 15px rgba(255, 87, 34, 0.15);
+  border: 1px solid #FF5E3A;
+  box-shadow: 0 0 15px rgba(255, 94, 58, 0.15);
   transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bg-gradient-premium {
+  background: linear-gradient(135deg, #FF5E3A 0%, #FF2A54 100%) !important;
+}
+
+.text-gradient-premium {
+  background: linear-gradient(135deg, #FF5E3A 0%, #FF2A54 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.premium-glow {
+  box-shadow: 0 0 20px rgba(255, 94, 58, 0.12);
+}
+
+.premium-glow-hover:hover {
+  box-shadow: 0 0 25px rgba(255, 94, 58, 0.22);
+  transform: translateY(-2px);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 15px rgba(255, 94, 58, 0.15);
 }
 
 /* Hide scrollbar utility */

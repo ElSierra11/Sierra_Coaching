@@ -427,6 +427,7 @@ def get_client_detail(client_id: int, db: Session = Depends(get_db), current_use
     measurements_hist = db.query(models.MeasurementLog).filter(models.MeasurementLog.user_id == client_id).order_by(models.MeasurementLog.date).all()
     photos = db.query(models.ProgressPhoto).filter(models.ProgressPhoto.user_id == client_id).order_by(models.ProgressPhoto.date).all()
     lifts = db.query(models.LiftLog).filter(models.LiftLog.user_id == client_id).order_by(models.LiftLog.week_number, models.LiftLog.set_number).all()
+    all_habit_logs = db.query(models.DailyHabitLog).filter(models.DailyHabitLog.user_id == client_id).order_by(models.DailyHabitLog.date).all()
 
     return {
         "id": client.id,
@@ -440,7 +441,8 @@ def get_client_detail(client_id: int, db: Session = Depends(get_db), current_use
         "weight_history": weight_hist,
         "measurements_history": measurements_hist,
         "progress_photos": photos,
-        "lift_logs": lifts
+        "lift_logs": lifts,
+        "all_habit_logs": all_habit_logs
     }
 
 
@@ -563,7 +565,8 @@ def log_lift_batch(client_id: int, payload: schemas.LiftLogCreateBatch, db: Sess
             date=date_str,
             set_number=item.set_number,
             weight=item.weight,
-            reps=item.reps
+            reps=item.reps,
+            rpe=item.rpe
         )
         db.add(log_entry)
         created_logs.append(log_entry)
@@ -608,6 +611,7 @@ def update_client_routines(client_id: int, routines_payload: List[schemas.Routin
                 ex_obj.sets = ex_data.sets
                 ex_obj.reps = ex_data.reps
                 ex_obj.notes = ex_data.notes
+                ex_obj.video_url = ex_data.video_url
                 ex_obj.order = idx
                 updated_ex_ids.append(ex_data.id)
             else:
@@ -618,6 +622,7 @@ def update_client_routines(client_id: int, routines_payload: List[schemas.Routin
                         ex_obj.sets = ex_data.sets
                         ex_obj.reps = ex_data.reps
                         ex_obj.notes = ex_data.notes
+                        ex_obj.video_url = ex_data.video_url
                         ex_obj.order = idx
                         updated_ex_ids.append(ex_id)
                         break
@@ -630,6 +635,7 @@ def update_client_routines(client_id: int, routines_payload: List[schemas.Routin
                     sets=ex_data.sets,
                     reps=ex_data.reps,
                     notes=ex_data.notes,
+                    video_url=ex_data.video_url,
                     order=idx
                 )
                 db.add(db_ex)
@@ -663,6 +669,10 @@ def update_client_diet(client_id: int, diet_payload: List[schemas.DietMealRespon
         db_meal.almuerzo = meal.almuerzo
         db_meal.cena = meal.cena
         db_meal.merienda = meal.merienda
+        db_meal.calories = meal.calories
+        db_meal.proteins = meal.proteins
+        db_meal.carbs = meal.carbs
+        db_meal.fats = meal.fats
 
     db.commit()
     return db.query(models.DietMeal).filter(models.DietMeal.user_id == client_id).order_by(models.DietMeal.day_number).all()
@@ -705,6 +715,183 @@ def update_profile_pic(client_id: int, payload: schemas.ProfilePicUpdate, db: Se
     db.refresh(profile)
     return profile
 
+
+import json
+import urllib.request
+
+def generate_fallback_plan(client, type_plan: str, day_name: str = "Lunes", day_number: int = 1):
+    target = (client.profile.target or "").lower() if client.profile else ""
+    height = client.profile.height or 1.70 if client.profile else 1.70
+    weight = client.profile.initial_weight or 70.0 if client.profile else 70.0
+    
+    if type_plan == "routine":
+        routines_db = {
+            "Lunes": ("Empuje (Pecho, Hombro, Tríceps) [IA]", [
+                {"name": "Press de Banca con Mancuernas", "sets": 4, "reps": "8-10", "notes": "Céntrate en el estiramiento en la parte baja", "video_url": ""},
+                {"name": "Press Inclinado en Máquina", "sets": 3, "reps": "10", "notes": "Controla la negativa de 3 segundos", "video_url": ""},
+                {"name": "Elevaciones Laterales", "sets": 4, "reps": "12-15", "notes": "Mantén los brazos ligeramente al frente", "video_url": ""},
+                {"name": "Copa de Tríceps a dos manos", "sets": 3, "reps": "10-12", "notes": "Baja profundo", "video_url": ""}
+            ]),
+            "Martes": ("Tracción (Espalda, Bíceps) [IA]", [
+                {"name": "Jalón al Pecho Prono", "sets": 4, "reps": "8-10", "notes": "Lleva los codos hacia la cadera", "video_url": ""},
+                {"name": "Remo con Mancuerna", "sets": 3, "reps": "10", "notes": "Mantén la espalda neutra", "video_url": ""},
+                {"name": "Curl de Bíceps Alterno", "sets": 4, "reps": "10-12", "notes": "Supina el antebrazo al subir", "video_url": ""},
+                {"name": "Curl de Bíceps Martillo", "sets": 3, "reps": "10", "notes": "Mantén tensión constante", "video_url": ""}
+            ]),
+            "Miercoles": ("Pierna Completa [IA]", [
+                {"name": "Prensa de Piernas", "sets": 4, "reps": "10-12", "notes": "Posición de pies media para cuádriceps", "video_url": ""},
+                {"name": "Peso Muerto Rumano", "sets": 3, "reps": "8-10", "notes": "Siente el estiramiento en femorales", "video_url": ""},
+                {"name": "Extensión de Cuádriceps", "sets": 4, "reps": "12-15", "notes": "Sostén 1 segundo arriba", "video_url": ""},
+                {"name": "Elevación de Talones en Máquina", "sets": 4, "reps": "15", "notes": "Estiramiento completo abajo", "video_url": ""}
+            ]),
+            "Jueves": ("Pecho y Espalda [IA]", [
+                {"name": "Press Inclinado en Smith", "sets": 4, "reps": "8-10", "notes": "Ángulo de 30 grados", "video_url": ""},
+                {"name": "Remo en Máquina", "sets": 4, "reps": "10", "notes": "Retracción escapular completa", "video_url": ""},
+                {"name": "Cruce de Poleas", "sets": 3, "reps": "12", "notes": "Cruza ligeramente al frente", "video_url": ""},
+                {"name": "Jalón Supino Cerrado", "sets": 3, "reps": "10", "notes": "Espalda ligeramente inclinada atrás", "video_url": ""}
+            ]),
+            "Viernes": ("Brazos y Hombros [IA]", [
+                {"name": "Press Militar con Mancuerna", "sets": 4, "reps": "8-10", "notes": "Rango completo de movimiento", "video_url": ""},
+                {"name": "Curl de Bíceps en Polea", "sets": 3, "reps": "10-12", "notes": "Aprieta al final de la contracción", "video_url": ""},
+                {"name": "Extensión de Tríceps Polea Alta", "sets": 3, "reps": "12", "notes": "Usa cuerda para mayor rango", "video_url": ""},
+                {"name": "Pájaros con Mancuerna", "sets": 4, "reps": "12-15", "notes": "Para deltoides posterior", "video_url": ""}
+            ]),
+            "Sábado": ("Cardio Activo [IA]", [
+                {"name": "Cinta de correr inclinada", "sets": 1, "reps": "30 min", "notes": "Inclinación al 8%, velocidad moderada", "video_url": ""}
+            ]),
+            "Domingo": ("Descanso Total [IA]", [])
+        }
+        r_name, r_exs = routines_db.get(day_name, ("Rutina de Entrenamiento [IA]", []))
+        return {"routine_name": r_name, "exercises": r_exs}
+        
+    elif type_plan == "diet":
+        is_cutting = any(kw in target for kw in ["defin", "reduc", "perder", "bajar", "grasa", "tonif"])
+        
+        if is_cutting:
+            multiplier = 28
+            cal = int(weight * multiplier)
+            prot = int(weight * 2.2)
+            fats = int(weight * 0.8)
+            carbs = int((cal - (prot * 4) - (fats * 9)) / 4)
+        else:
+            multiplier = 35
+            cal = int(weight * multiplier)
+            prot = int(weight * 2.0)
+            fats = int(weight * 0.9)
+            carbs = int((cal - (prot * 4) - (fats * 9)) / 4)
+            
+        g_val = int(weight * 2)
+        return {
+            "desayuno": f"Huevos revueltos (3 enteros + 2 claras), 50g de avena en hojuelas con canela y fresas picadas, café con un chorrito de leche vegetal.",
+            "almuerzo": f"{g_val}g de pechuga de pollo a la plancha, 1 taza de arroz blanco cocido, brócoli al vapor y ensalada verde.",
+            "cena": f"{g_val}g de filete de salmón o atún magro, 150g de papa cocida al vapor, espárragos salteados.",
+            "merienda": f"1 taza de yogur griego natural sin azúcar, 30g de almendras enteras, 1 banano o manzana mediana.",
+            "calories": cal,
+            "proteins": prot,
+            "carbs": carbs,
+            "fats": fats
+        }
+
+@app.post("/api/coach/ai-generate")
+def ai_generate_plan(payload: schemas.AIGenerateRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_coach)):
+    client = db.query(models.User).filter(models.User.id == payload.client_id).first()
+    if not client or client.role != "client":
+        raise HTTPException(status_code=404, detail="Alumno no encontrado")
+        
+    latest_weight = client.profile.initial_weight or 70.0
+    if client.weight_history:
+        latest_weight = client.weight_history[-1].weight
+        
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("GEMINI_API_KEY no encontrada. Generando plan de fallback local...")
+        return generate_fallback_plan(client, payload.type, payload.day_name, payload.day_number)
+        
+    # Build AI prompt
+    if payload.type == "routine":
+        prompt = f"""
+        Eres un entrenador personal certificado de alto nivel.
+        Crea una rutina de entrenamiento de gimnasio para el día {payload.day_name} adaptada a este alumno:
+        - Nombre: {client.name}
+        - Altura: {client.profile.height}m
+        - Peso: {latest_weight}kg
+        - Objetivo: {client.profile.target}
+
+        Responde ÚNICAMENTE con un objeto JSON válido con la siguiente estructura (no agregues formato markdown como ```json o ```, solo el texto JSON puro para que pueda ser parseado directamente):
+        {{
+            "routine_name": "Nombre descriptivo de la rutina (ej. Empuje - Enfoque Pecho)",
+            "exercises": [
+                {{
+                    "name": "Nombre del ejercicio en español",
+                    "sets": 4,
+                    "reps": "8-10",
+                    "notes": "Instrucciones de ejecución (ej. Controlar la excéntrica)",
+                    "video_url": ""
+                }}
+            ]
+        }}
+        Asegúrate de que contenga de 4 a 6 ejercicios.
+        """
+    elif payload.type == "diet":
+        prompt = f"""
+        Eres un nutricionista deportivo certificado de alto nivel.
+        Crea un plan de alimentación (dieta) diario para el Día {payload.day_number} adaptado a este alumno:
+        - Nombre: {client.name}
+        - Altura: {client.profile.height}m
+        - Peso: {latest_weight}kg
+        - Objetivo: {client.profile.target}
+
+        Responde ÚNICAMENTE con un objeto JSON válido con la siguiente estructura (no agregues formato markdown como ```json o ```, solo el texto JSON puro para que pueda ser parseado directamente):
+        {{
+            "desayuno": "Descripción detallada de la comida en español, cantidades y preparación",
+            "almuerzo": "Descripción detallada de la comida en español, cantidades y preparación",
+            "cena": "Descripción detallada de la comida en español, cantidades y preparación",
+            "merienda": "Descripción detallada de la comida en español, cantidades y preparación",
+            "calories": 2200,
+            "proteins": 160,
+            "carbs": 240,
+            "fats": 65
+        }}
+        Asegúrate de que los macronutrientes calculados coincidan lógicamente con las calorías totales (Proteínas = 4 kcal/g, Carbohidratos = 4 kcal/g, Grasas = 9 kcal/g).
+        """
+    else:
+        raise HTTPException(status_code=400, detail="Tipo de plan inválido")
+        
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    headers = {"Content-Type": "application/json"}
+    body = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }],
+        "generationConfig": {
+            "responseMimeType": "application/json"
+        }
+    }
+    
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(body).encode("utf-8"),
+            headers=headers,
+            method="POST"
+        )
+        
+        with urllib.request.urlopen(req, timeout=12) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            text_content = res_data["candidates"][0]["content"]["parts"][0]["text"]
+            text_content = text_content.strip()
+            if text_content.startswith("```"):
+                lines = text_content.split("\n")
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                text_content = "\n".join(lines).strip()
+            parsed_json = json.loads(text_content)
+            return parsed_json
+    except Exception as e:
+        print(f"Error llamando a Gemini API ({e}). Usando plan de fallback...")
+        return generate_fallback_plan(client, payload.type, payload.day_name, payload.day_number)
 
 if __name__ == "__main__":
     import uvicorn

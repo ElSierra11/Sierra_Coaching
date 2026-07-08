@@ -57,6 +57,56 @@ export default function DietPlan({ client, showToast }) {
         })}
       </div>
 
+      {/* Calories & Macros Summary Panel */}
+      <div className="glass-panel p-5 rounded-2xl flex flex-col gap-4 bg-white/[0.01]">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Objetivo Nutricional</span>
+            <h4 className="text-sm font-bold text-white mt-0.5">Distribución de Macronutrientes</h4>
+          </div>
+          <div className="bg-gymNeon/15 border border-gymNeon/25 px-4 py-2 rounded-xl text-center">
+            <span className="text-[9px] text-neutral-400 block font-bold uppercase">Calorías Totales</span>
+            <span className="text-xl font-black text-white">{currentDayDiet.calories || '—'} <span className="text-xs font-bold text-gymNeon">kcal</span></span>
+          </div>
+        </div>
+
+        {currentDayDiet.calories > 0 ? (
+          <div className="grid grid-cols-3 gap-3">
+            {/* PROTEIN CARD */}
+            <div className="bg-black/20 rounded-xl p-3.5 border border-white/5 flex flex-col gap-1 items-center text-center">
+              <span className="text-[9px] text-neutral-500 font-bold uppercase">Proteínas</span>
+              <span className="text-base font-extrabold text-white">{currentDayDiet.proteins}g</span>
+              <div className="w-full h-1 bg-white/5 rounded-full mt-2 overflow-hidden">
+                <div className="h-full bg-gymNeon rounded-full" style={{ width: '100%' }}></div>
+              </div>
+              <span className="text-[8px] text-neutral-400 mt-1 uppercase font-semibold">{currentDayDiet.proteins * 4} kcal</span>
+            </div>
+            {/* CARBS CARD */}
+            <div className="bg-black/20 rounded-xl p-3.5 border border-white/5 flex flex-col gap-1 items-center text-center">
+              <span className="text-[9px] text-neutral-500 font-bold uppercase">Carbohidratos</span>
+              <span className="text-base font-extrabold text-white">{currentDayDiet.carbs}g</span>
+              <div className="w-full h-1 bg-white/5 rounded-full mt-2 overflow-hidden">
+                <div className="h-full bg-blue-500 rounded-full" style={{ width: '100%' }}></div>
+              </div>
+              <span className="text-[8px] text-neutral-400 mt-1 uppercase font-semibold">{currentDayDiet.carbs * 4} kcal</span>
+            </div>
+            {/* FATS CARD */}
+            <div className="bg-black/20 rounded-xl p-3.5 border border-white/5 flex flex-col gap-1 items-center text-center">
+              <span className="text-[9px] text-neutral-500 font-bold uppercase">Grasas</span>
+              <span className="text-base font-extrabold text-white">{currentDayDiet.fats}g</span>
+              <div className="w-full h-1 bg-white/5 rounded-full mt-2 overflow-hidden">
+                <div className="h-full bg-yellow-500 rounded-full" style={{ width: '100%' }}></div>
+              </div>
+              <span className="text-[8px] text-neutral-400 mt-1 uppercase font-semibold">{currentDayDiet.fats * 9} kcal</span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-4 text-neutral-500 text-xs italic">
+            El coach no ha configurado los macros específicos para este día.
+          </div>
+        )}
+      </div>
+
       {/* Diet recommendations alert card */}
       <div className="glass-panel p-4 rounded-xl flex items-start gap-3 border-l-4 border-gymNeon bg-gymNeon/5">
         <div className="text-gymNeon flex-shrink-0 mt-0.5">

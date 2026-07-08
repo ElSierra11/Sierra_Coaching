@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { ClipboardList, Zap, Check, ChevronDown, Clock } from 'lucide-react';
+import { ClipboardList, Zap, Check, ChevronDown, Clock, Play, Search, ExternalLink, HelpCircle, X } from 'lucide-react';
 
 export default function RoutineTracker({ client, onUpdateClient, showToast }) {
   const [activeDay, setActiveDay] = useState('Lunes');
@@ -15,6 +15,58 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [initialSeconds, setInitialSeconds] = useState(90); // default to 90s
   const [timerActive, setTimerActive] = useState(false);
+
+  // Video Modal State
+  const [videoModal, setVideoModal] = useState({ isOpen: false, url: '', name: '', fallbackSearch: '' });
+
+  const getTechnicalVideo = (exercise) => {
+    if (exercise.video_url && exercise.video_url.trim() !== '') {
+      return exercise.video_url;
+    }
+    const name = exercise.name.toLowerCase();
+    const mappings = [
+      { keys: ["banca", "chest", "pecho"], url: "https://www.youtube.com/embed/gViDbVeeXpU" },
+      { keys: ["sentadilla", "squat", "pierna"], url: "https://www.youtube.com/embed/yvD5_a6pI7M" },
+      { keys: ["peso muerto", "deadlift"], url: "https://www.youtube.com/embed/r4MzxtBKyNE" },
+      { keys: ["jalon", "espalda", "pulldown", "remo"], url: "https://www.youtube.com/embed/kK3hN7rQc34" },
+      { keys: ["biceps", "curl"], url: "https://www.youtube.com/embed/ly7d1FmB4v8" },
+      { keys: ["triceps", "extens", "copa"], url: "https://www.youtube.com/embed/sU1E2dG_dmo" },
+      { keys: ["militar", "hombro", "press press"], url: "https://www.youtube.com/embed/xS6Kj6B5q3k" },
+      { keys: ["zancada", "lung", "desplante"], url: "https://www.youtube.com/embed/COXYKsn949M" }
+    ];
+    for (const map of mappings) {
+      if (map.keys.some(key => name.includes(key))) {
+        return map.url;
+      }
+    }
+    return null;
+  };
+
+  const formatEmbedUrl = (url) => {
+    if (!url) return '';
+    if (url.includes('youtube.com/embed/')) return url;
+    if (url.includes('youtu.be/')) {
+      const id = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${id}`;
+    }
+    if (url.includes('youtube.com/watch')) {
+      try {
+        const urlParams = new URLSearchParams(url.split('?')[1]);
+        const id = urlParams.get('v');
+        return id ? `https://www.youtube.com/embed/${id}` : url;
+      } catch (e) {
+        return url;
+      }
+    }
+    return url;
+  };
+
+  const calc1RM = (weight, reps) => {
+    const w = parseFloat(weight);
+    const r = parseInt(reps);
+    if (isNaN(w) || isNaN(r) || r <= 0) return 0;
+    return Math.round(w * (1 + r / 30) * 10) / 10;
+  };
 
   useEffect(() => {
     let interval = null;
@@ -87,12 +139,14 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
     for (let s = 1; s <= exercise.sets; s++) {
       const weight = inputs[`${exercise.id}_${s}_weight`];
       const reps = inputs[`${exercise.id}_${s}_reps`];
+      const rpe = inputs[`${exercise.id}_${s}_rpe`];
       
       if (weight && reps) {
         setsData.push({
           set_number: s,
           weight: parseFloat(weight),
-          reps: parseInt(reps)
+          reps: parseInt(reps),
+          rpe: parseInt(rpe || 8)
         });
       }
     }
@@ -192,10 +246,10 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
       </div>
 
       {/* Rest Timer Panel */}
-      <div className="glass-panel p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 bg-gymNeon/5 border-gymNeon/20 shadow-lg">
+      <div className="glass-panel p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 bg-gradient-to-r from-gymNeon/15 via-gymCoral/5 to-transparent border border-white/5 shadow-[0_0_20px_rgba(255,94,58,0.06)]">
         <div className="flex items-center gap-3">
-          <div className="bg-gymNeon/10 text-gymNeon w-11 h-11 rounded-xl flex items-center justify-center border border-gymNeon/20">
-            <Clock className="w-5 h-5 animate-pulse" />
+          <div className="bg-gymNeon/10 text-gymNeon w-11 h-11 rounded-xl flex items-center justify-center border border-gymNeon/25">
+            <Clock className="w-5 h-5 animate-pulse text-gymNeon" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-white uppercase tracking-wider">Temporizador de Descanso</h4>
@@ -327,7 +381,27 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
                       {idx + 1}
                     </div>
                     <div>
-                      <h5 className="text-sm font-bold text-white leading-normal">{ex.name}</h5>
+                      <div className="flex items-center gap-2">
+                        <h5 className="text-sm font-bold text-white leading-normal">{ex.name}</h5>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const videoUrl = getTechnicalVideo(ex);
+                            const embedUrl = formatEmbedUrl(videoUrl);
+                            setVideoModal({
+                              isOpen: true,
+                              url: embedUrl,
+                              name: ex.name,
+                              fallbackSearch: `https://www.youtube.com/results?search_query=tecnica+${encodeURIComponent(ex.name)}`
+                            });
+                          }}
+                          className="w-5.5 h-5.5 rounded-full bg-gymNeon/10 hover:bg-gymNeon/30 text-gymNeon flex items-center justify-center transition-all cursor-pointer border border-gymNeon/25"
+                          title="Ver video de técnica"
+                        >
+                          <Play className="w-2.5 h-2.5 fill-gymNeon text-gymNeon" />
+                        </button>
+                      </div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="bg-gymNeon/10 text-gymNeon text-[9px] font-bold px-2 py-0.5 rounded border border-gymNeon/10">
                           {ex.sets}x{ex.reps}
@@ -380,8 +454,10 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
                           <tr className="text-neutral-500 border-b border-white/5 pb-2">
                             <th className="pb-2 font-bold uppercase tracking-wider w-16">Serie</th>
                             <th className="pb-2 font-bold uppercase tracking-wider">Semana Anterior ({selectedWeek - 1})</th>
-                            <th className="pb-2 font-bold uppercase tracking-wider w-32">Peso Hoy (kg)</th>
-                            <th className="pb-2 font-bold uppercase tracking-wider w-32">Repes Hoy</th>
+                            <th className="pb-2 font-bold uppercase tracking-wider w-24">Peso (kg)</th>
+                            <th className="pb-2 font-bold uppercase tracking-wider w-20">Reps</th>
+                            <th className="pb-2 font-bold uppercase tracking-wider w-20">RPE</th>
+                            <th className="pb-2 font-bold uppercase tracking-wider w-20 text-right">1RM Est.</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -390,36 +466,55 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
                             const prevLog = getLiftLog(ex.id, selectedWeek - 1, setNum);
                             const currentLog = getLiftLog(ex.id, selectedWeek, setNum);
 
+                            const currentWeightVal = inputs[`${ex.id}_${setNum}_weight`] || (currentLog ? currentLog.weight : '');
+                            const currentRepsVal = inputs[`${ex.id}_${setNum}_reps`] || (currentLog ? currentLog.reps : '');
+
                             return (
                               <tr key={setNum}>
                                 <td className="py-3 font-bold text-neutral-400">Set {setNum}</td>
                                 <td className="py-3">
                                   {prevLog ? (
                                     <span className="text-white font-medium">
-                                      {prevLog.weight} kg x {prevLog.reps} repes
+                                      {prevLog.weight} kg x {prevLog.reps} {prevLog.rpe ? `@RPE${prevLog.rpe}` : ''}
                                     </span>
                                   ) : (
                                     <span className="text-neutral-600 italic">Sin registro</span>
                                   )}
                                 </td>
-                                <td className="py-2 pr-4">
+                                <td className="py-2 pr-2">
                                   <input 
                                     type="number" 
                                     step="0.5"
                                     placeholder={currentLog ? String(currentLog.weight) : prevLog ? String(prevLog.weight) : "0"}
                                     value={inputs[`${ex.id}_${setNum}_weight`] || ''}
                                     onChange={(e) => handleInputChange(ex.id, setNum, 'weight', e.target.value)}
-                                    className="bg-black/40 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white focus:border-gymNeon focus:outline-none w-24"
+                                    className="bg-black/40 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white focus:border-gymNeon focus:outline-none w-20"
                                   />
                                 </td>
-                                <td className="py-2">
+                                <td className="py-2 pr-2">
                                   <input 
                                     type="number" 
                                     placeholder={currentLog ? String(currentLog.reps) : prevLog ? "10" : "8"}
                                     value={inputs[`${ex.id}_${setNum}_reps`] || ''}
                                     onChange={(e) => handleInputChange(ex.id, setNum, 'reps', e.target.value)}
-                                    className="bg-black/40 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white focus:border-gymNeon focus:outline-none w-20"
+                                    className="bg-black/40 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white focus:border-gymNeon focus:outline-none w-16"
                                   />
+                                </td>
+                                <td className="py-2 pr-2">
+                                  <input 
+                                    type="number" 
+                                    min="1"
+                                    max="10"
+                                    placeholder={currentLog ? String(currentLog.rpe || 8) : "8"}
+                                    value={inputs[`${ex.id}_${setNum}_rpe`] || ''}
+                                    onChange={(e) => handleInputChange(ex.id, setNum, 'rpe', e.target.value)}
+                                    className="bg-black/40 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white focus:border-gymNeon focus:outline-none w-16"
+                                  />
+                                </td>
+                                <td className="py-2 text-right font-extrabold text-gymNeon">
+                                  {calc1RM(currentWeightVal, currentRepsVal) > 0 
+                                    ? `${calc1RM(currentWeightVal, currentRepsVal)} kg` 
+                                    : '—'}
                                 </td>
                               </tr>
                             );
@@ -443,6 +538,63 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
           })
         )}
       </div>
+
+      {/* Video Guide Modal */}
+      {videoModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-slide-in">
+          <div className="glass-panel w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex flex-col bg-gymDark-900">
+            {/* Modal Header */}
+            <div className="p-4 flex justify-between items-center border-b border-white/5">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <Play className="w-4 h-4 text-gymNeon fill-gymNeon" />
+                <span>Técnica: {videoModal.name}</span>
+              </h3>
+              <button
+                onClick={() => setVideoModal({ isOpen: false, url: '', name: '', fallbackSearch: '' })}
+                className="text-neutral-400 hover:text-white transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-5 flex flex-col gap-4">
+              {videoModal.url ? (
+                <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 bg-black">
+                  <iframe
+                    src={videoModal.url}
+                    title={`Video técnica ${videoModal.name}`}
+                    className="absolute inset-0 w-full h-full"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  ></iframe>
+                </div>
+              ) : (
+                <div className="text-center py-10 flex flex-col items-center gap-3 border border-dashed border-white/10 rounded-xl bg-white/[0.01]">
+                  <HelpCircle className="w-10 h-10 text-neutral-500" />
+                  <p className="text-xs text-neutral-400 max-w-sm">
+                    No hay video predeterminado para este ejercicio ni el coach ha subido una demostración específica.
+                  </p>
+                </div>
+              )}
+              
+              <div className="flex justify-between items-center mt-2 border-t border-white/5 pt-4">
+                <span className="text-[10px] text-neutral-500">Sierra Coaching Técnica</span>
+                <a
+                  href={videoModal.fallbackSearch}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 bg-gymNeon text-black font-extrabold uppercase text-[10px] tracking-wider px-4 py-2.5 rounded-lg shadow hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Buscar técnica en YouTube</span>
+                  <ExternalLink className="w-3 h-3 ml-0.5" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -22,7 +22,54 @@ export default function CoachAdmin({ showToast }) {
   const [editDiet, setEditDiet] = useState([]); // Copy of client's diet array
 
   const [saving, setSaving] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
   const [challengeText, setChallengeText] = useState("");
+
+  const handleAIGenerateRoutine = async () => {
+    if (generatingAI || !selectedClient) return;
+    setGeneratingAI(true);
+    showToast(`Generando rutina de ${routineDay} con IA (Gemini)... Por favor espera.`, "info");
+    try {
+      const data = await api.aiGeneratePlan(selectedClient.id, "routine", routineDay);
+      setEditRoutineName(data.routine_name || `Rutina de ${routineDay}`);
+      const exercisesWithTempIds = (data.exercises || []).map((ex, idx) => ({
+        id: 'new_' + Date.now() + Math.random() + '_' + idx,
+        name: ex.name,
+        sets: ex.sets,
+        reps: ex.reps,
+        notes: ex.notes,
+        video_url: ex.video_url || ''
+      }));
+      setEditExercises(exercisesWithTempIds);
+      showToast("Borrador generado con éxito por la IA. ¡Ajusta y guarda!", "success");
+    } catch (e) {
+      showToast("Error al generar rutina con IA: " + e.message, "error");
+    } finally {
+      setGeneratingAI(false);
+    }
+  };
+
+  const handleAIGenerateDiet = async (dayNum) => {
+    if (generatingAI || !selectedClient) return;
+    setGeneratingAI(true);
+    showToast(`Generando dieta Día ${dayNum} con IA... Por favor espera.`, "info");
+    try {
+      const data = await api.aiGeneratePlan(selectedClient.id, "diet", null, dayNum);
+      handleDietMealChange(dayNum, 'desayuno', data.desayuno || '');
+      handleDietMealChange(dayNum, 'almuerzo', data.almuerzo || '');
+      handleDietMealChange(dayNum, 'cena', data.cena || '');
+      handleDietMealChange(dayNum, 'merienda', data.merienda || '');
+      handleDietMealChange(dayNum, 'calories', data.calories || 0);
+      handleDietMealChange(dayNum, 'proteins', data.proteins || 0);
+      handleDietMealChange(dayNum, 'carbs', data.carbs || 0);
+      handleDietMealChange(dayNum, 'fats', data.fats || 0);
+      showToast(`Menú del Día ${dayNum} generado. ¡Revisa y guarda!`, "success");
+    } catch (e) {
+      showToast("Error al generar dieta con IA: " + e.message, "error");
+    } finally {
+      setGeneratingAI(false);
+    }
+  };
 
   // Load clients list on mount
   useEffect(() => {
@@ -146,6 +193,7 @@ export default function CoachAdmin({ showToast }) {
             sets: parseInt(e.sets) || 0,
             reps: e.reps,
             notes: e.notes,
+            video_url: e.video_url || '',
             order: idx
           }))
         };
@@ -551,13 +599,23 @@ export default function CoachAdmin({ showToast }) {
                     <div className="flex flex-col gap-3">
                       <div className="flex justify-between items-center border-b border-white/5 pb-2">
                         <label className="text-xs font-bold text-neutral-400 uppercase tracking-wide">Ejercicios</label>
-                        <button
-                          type="button"
-                          onClick={handleAddExercise}
-                          className="bg-white/5 hover:bg-white/10 text-white font-bold border border-white/15 px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider"
-                        >
-                          + Añadir Ejercicio
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={generatingAI}
+                            onClick={handleAIGenerateRoutine}
+                            className="bg-gymNeon/15 hover:bg-gymNeon/25 text-gymNeon font-extrabold border border-gymNeon/30 px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                          >
+                            {generatingAI ? 'Generando...' : 'Generar con IA 🪄'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleAddExercise}
+                            className="bg-white/5 hover:bg-white/10 text-white font-bold border border-white/15 px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all cursor-pointer"
+                          >
+                            + Añadir Ejercicio
+                          </button>
+                        </div>
                       </div>
 
                       <div className="flex flex-col gap-3 max-h-[350px] overflow-y-auto pr-1">
@@ -599,13 +657,23 @@ export default function CoachAdmin({ showToast }) {
                                     className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white"
                                   />
                                 </div>
-                                <div className="sm:col-span-4 flex flex-col gap-1">
+                                <div className="sm:col-span-2 flex flex-col gap-1">
                                   <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-wider">Notas / Instrucciones Especiales</span>
                                   <input
                                     type="text"
-                                    placeholder="Ej. Dropset en última serie / controlando la negativa"
+                                    placeholder="Ej. Dropset en última serie / negativa lenta"
                                     value={ex.notes || ''}
                                     onChange={(e) => handleExerciseChange(idx, 'notes', e.target.value)}
+                                    className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white"
+                                  />
+                                </div>
+                                <div className="sm:col-span-2 flex flex-col gap-1">
+                                  <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-wider">URL Video Técnico (Opcional)</span>
+                                  <input
+                                    type="text"
+                                    placeholder="Ej. https://www.youtube.com/watch?v=..."
+                                    value={ex.video_url || ''}
+                                    onChange={(e) => handleExerciseChange(idx, 'video_url', e.target.value)}
                                     className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white"
                                   />
                                 </div>
@@ -644,7 +712,17 @@ export default function CoachAdmin({ showToast }) {
                     <div className="flex flex-col gap-4 max-h-[420px] overflow-y-auto pr-1">
                       {editDiet.map((meal) => (
                         <div key={meal.day_number} className="bg-black/20 p-5 rounded-xl border border-white/5 flex flex-col gap-4">
-                          <span className="text-xs font-extrabold text-gymNeon uppercase tracking-widest">Día {meal.day_number}</span>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-extrabold text-gymNeon uppercase tracking-widest">Día {meal.day_number}</span>
+                            <button
+                              type="button"
+                              disabled={generatingAI}
+                              onClick={() => handleAIGenerateDiet(meal.day_number)}
+                              className="bg-gymNeon/10 hover:bg-gymNeon/25 text-gymNeon font-extrabold border border-gymNeon/20 px-2.5 py-1 rounded-[6px] text-[9px] uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                            >
+                              Generar Día con IA 🪄
+                            </button>
+                          </div>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="flex flex-col gap-1.5">
@@ -681,6 +759,45 @@ export default function CoachAdmin({ showToast }) {
                                 onChange={(e) => handleDietMealChange(meal.day_number, 'merienda', e.target.value)}
                                 rows="2"
                                 className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white w-full"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-white/5 pt-3 mt-1">
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-wider">Calorías (kcal)</span>
+                              <input
+                                type="number"
+                                value={meal.calories || 0}
+                                onChange={(e) => handleDietMealChange(meal.day_number, 'calories', parseInt(e.target.value) || 0)}
+                                className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white"
+                              />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-wider">Proteínas (g)</span>
+                              <input
+                                type="number"
+                                value={meal.proteins || 0}
+                                onChange={(e) => handleDietMealChange(meal.day_number, 'proteins', parseInt(e.target.value) || 0)}
+                                className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white"
+                              />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-wider">Carbohidratos (g)</span>
+                              <input
+                                type="number"
+                                value={meal.carbs || 0}
+                                onChange={(e) => handleDietMealChange(meal.day_number, 'carbs', parseInt(e.target.value) || 0)}
+                                className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white"
+                              />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-wider">Grasas (g)</span>
+                              <input
+                                type="number"
+                                value={meal.fats || 0}
+                                onChange={(e) => handleDietMealChange(meal.day_number, 'fats', parseInt(e.target.value) || 0)}
+                                className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white"
                               />
                             </div>
                           </div>

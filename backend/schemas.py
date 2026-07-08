@@ -56,6 +56,7 @@ class ExerciseBase(BaseModel):
     sets: int
     reps: str
     notes: Optional[str] = ""
+    video_url: Optional[str] = ""
 
 class ExerciseCreate(ExerciseBase):
     pass
@@ -103,6 +104,10 @@ class DietMealBase(BaseModel):
     almuerzo: str
     cena: str
     merienda: str
+    calories: Optional[int] = 0
+    proteins: Optional[int] = 0
+    carbs: Optional[int] = 0
+    fats: Optional[int] = 0
 
 class DietMealResponse(DietMealBase):
     id: int
@@ -166,6 +171,7 @@ class LiftLogItem(BaseModel):
     set_number: int
     weight: float
     reps: int
+    rpe: Optional[int] = 0
 
 class LiftLogCreateBatch(BaseModel):
     exercise_id: int
@@ -181,6 +187,7 @@ class LiftLogResponse(BaseModel):
     set_number: int
     weight: float
     reps: int
+    rpe: Optional[int] = 0
 
     class Config:
         from_attributes = True
@@ -210,6 +217,7 @@ class ClientDetailResponse(BaseModel):
     measurements_history: List[MeasurementLogResponse] = []
     progress_photos: List[ProgressPhotoResponse] = []
     lift_logs: List[LiftLogResponse] = []
+    all_habit_logs: List[DailyHabitLogResponse] = []
 
     class Config:
         from_attributes = True
@@ -229,4 +237,11 @@ class SystemSettingUpdate(BaseModel):
 
 class ProfilePicUpdate(BaseModel):
     profile_pic: str
+
+
+class AIGenerateRequest(BaseModel):
+    client_id: int
+    type: str # "routine" | "diet"
+    day_name: Optional[str] = "Lunes"
+    day_number: Optional[int] = 1
 

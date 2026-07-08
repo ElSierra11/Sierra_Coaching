@@ -81,6 +81,7 @@ class Exercise(Base):
     sets = Column(Integer, nullable=False)
     reps = Column(String, nullable=False) # e.g. "8-10" or "10"
     notes = Column(String, nullable=True)
+    video_url = Column(String, nullable=True, default="")
     order = Column(Integer, default=0)
 
     routine_day = relationship("RoutineDay", back_populates="exercises")
@@ -97,6 +98,10 @@ class DietMeal(Base):
     almuerzo = Column(String, default="Sin asignar")
     cena = Column(String, default="Sin asignar")
     merienda = Column(String, default="Sin asignar")
+    calories = Column(Integer, default=0)
+    proteins = Column(Integer, default=0)
+    carbs = Column(Integer, default=0)
+    fats = Column(Integer, default=0)
 
     user = relationship("User", back_populates="diet_meals")
     __table_args__ = (UniqueConstraint('user_id', 'day_number', name='_user_day_number_uc'),)
@@ -149,6 +154,7 @@ class LiftLog(Base):
     set_number = Column(Integer, nullable=False) # 1-indexed
     weight = Column(Float, nullable=False)
     reps = Column(Integer, nullable=False)
+    rpe = Column(Integer, nullable=True, default=0)
 
     user = relationship("User", back_populates="lift_logs")
     exercise = relationship("Exercise", back_populates="lift_logs")

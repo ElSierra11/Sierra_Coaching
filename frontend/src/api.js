@@ -146,7 +146,20 @@ export const api = {
           set_number: parseInt(s.set_number),
           weight: parseFloat(s.weight),
           reps: parseInt(s.reps),
+          rpe: parseInt(s.rpe || 0),
         })),
+      }),
+    });
+  },
+
+  aiGeneratePlan: async (clientId, type, dayName = "Lunes", dayNumber = 1) => {
+    return request("/coach/ai-generate", {
+      method: "POST",
+      body: JSON.stringify({
+        client_id: parseInt(clientId),
+        type,
+        day_name: dayName,
+        day_number: parseInt(dayNumber),
       }),
     });
   },

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { api } from '../api';
-import { Scale, Ruler, Camera, Plus } from 'lucide-react';
+import { Scale, Ruler, Camera, Plus, Dumbbell, TrendingUp } from 'lucide-react';
 
 export default function ProgressTracker({ client, onUpdateClient, showToast }) {
   const [newWeight, setNewWeight] = useState('');
+  const [selectedForceExerciseId, setSelectedForceExerciseId] = useState('');
   
   // Measurements inputs
   const [waist, setWaist] = useState('');
@@ -182,8 +183,140 @@ export default function ProgressTracker({ client, onUpdateClient, showToast }) {
     );
   };
 
+  const renderStrengthChart = () => {
+    const liftLogs = client.lift_logs || [];
+    if (liftLogs.length === 0) return null;
+
+    const exerciseNamesMap = {};
+    
+    (client.routines || []).forEach(day => {
+      (day.exercises || []).forEach(ex => {
+        exerciseNamesMap[ex.id] = ex.name;
+      });
+    });
+
+    const loggedExIds = [...new Set(liftLogs.map(l => l.exercise_id))];
+    const exerciseOptions = loggedExIds.map(id => ({
+      id,
+      name: exerciseNamesMap[id] || `Ejercicio #${id}`
+    }));
+
+    const activeExId = selectedForceExerciseId || (exerciseOptions[0]?.id || '');
+    if (!selectedForceExerciseId && activeExId) {
+      setSelectedForceExerciseId(activeExId);
+    }
+
+    const exerciseLogs = liftLogs.filter(l => l.exercise_id === Number(activeExId));
+    if (exerciseLogs.length === 0) {
+      return (
+        <div className="flex flex-col gap-2">
+          <select 
+            value={selectedForceExerciseId} 
+            onChange={(e) => setSelectedForceExerciseId(e.target.value)}
+            className="bg-black/40 border border-white/10 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none w-full"
+          >
+            {exerciseOptions.map(opt => <option key={opt.id} value={opt.id}>{opt.name}</option>)}
+          </select>
+          <div className="text-center py-10 text-neutral-500 text-xs italic">Sin registros para este ejercicio.</div>
+        </div>
+      );
+    }
+
+    const calc1RM = (weight, reps) => weight * (1 + reps / 30);
+    const weekly1RM = {};
+    exerciseLogs.forEach(log => {
+      const oneRM = calc1RM(log.weight, log.reps);
+      const week = log.week_number;
+      if (!weekly1RM[week] || oneRM > weekly1RM[week]) {
+        weekly1RM[week] = oneRM;
+      }
+    });
+
+    const chartData = Object.keys(weekly1RM).map(wk => ({
+      week: Number(wk),
+      oneRM: Math.round(weekly1RM[wk] * 10) / 10
+    })).sort((a, b) => a.week - b.week);
+
+    if (chartData.length === 0) return null;
+
+    const oneRMs = chartData.map(d => d.oneRM);
+    const minRM = Math.min(...oneRMs) - 2;
+    const maxRM = Math.max(...oneRMs) + 2;
+    const rmRange = maxRM - minRM || 1;
+
+    const width = 500;
+    const height = 160;
+    const padding = 25;
+
+    const points = chartData.map((d, idx) => {
+      const x = padding + (idx * (width - (padding * 2))) / Math.max(1, chartData.length - 1);
+      const y = height - padding - ((d.oneRM - minRM) * (height - (padding * 2))) / rmRange;
+      return { x, y, oneRM: d.oneRM, week: d.week };
+    });
+
+    const linePath = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+    const areaPath = points.length > 0 
+      ? `${linePath} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`
+      : "";
+
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="flex justify-between items-center gap-4">
+          <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">Seleccionar Ejercicio</label>
+          <select 
+            value={activeExId} 
+            onChange={(e) => setSelectedForceExerciseId(e.target.value)}
+            className="bg-black/40 border border-white/10 rounded px-2.5 py-1.5 text-xs text-gymNeon focus:outline-none w-52 font-bold"
+          >
+            {exerciseOptions.map(opt => <option key={opt.id} value={opt.id}>{opt.name}</option>)}
+          </select>
+        </div>
+        
+        <div className="bg-black/20 p-2.5 rounded-xl border border-white/5">
+          <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto animate-slide-in">
+            <defs>
+              <linearGradient id="forceGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#ff5e3a" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#ff2a54" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+
+            {Array.from({ length: 4 }).map((_, i) => {
+              const yVal = padding + (i * (height - (padding * 2))) / 3;
+              return <line key={i} x1={padding} y1={yVal} x2={width - padding} y2={yVal} stroke="rgba(255,255,255,0.03)" strokeWidth="1" />;
+            })}
+
+            {areaPath && <path d={areaPath} fill="url(#forceGrad)" />}
+
+            <path 
+              d={linePath} 
+              fill="none" 
+              stroke="#ff5e3a" 
+              strokeWidth="3" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="drop-shadow-[0_0_6px_rgba(255,94,58,0.5)]"
+            />
+
+            {points.map((p, idx) => (
+              <g key={idx} className="group cursor-pointer">
+                <circle cx={p.x} cy={p.y} r="4.5" fill="#09090c" stroke="#ff5e3a" strokeWidth="2.5" />
+                <text x={p.x} y={p.y - 10} textAnchor="middle" fill="#ffffff" className="text-[9px] font-bold">
+                  {p.oneRM} kg
+                </text>
+                <text x={p.x} y={height - 6} textAnchor="middle" fill="rgba(255,255,255,0.25)" className="text-[8px]">
+                  Sem {p.week}
+                </text>
+              </g>
+            ))}
+          </svg>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-in">
       
       {/* LEFT SECTION: WEIGHT PROGRESS CHART */}
       <div className="lg:col-span-2 flex flex-col gap-6">
@@ -229,6 +362,20 @@ export default function ProgressTracker({ client, onUpdateClient, showToast }) {
             </button>
           </form>
         </div>
+
+        {/* Strength Progress Card */}
+        {client.lift_logs && client.lift_logs.length > 0 && (
+          <div className="glass-panel p-6 rounded-2xl shadow-lg flex flex-col gap-4">
+            <div>
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Dumbbell className="w-4 h-4 text-gymNeon" />
+                <span>Historial de Fuerza Progresiva</span>
+              </h4>
+              <p className="text-[10px] text-neutral-500 mt-0.5 ml-5.5">1-Rep Max estimado en base a tus entrenamientos.</p>
+            </div>
+            {renderStrengthChart()}
+          </div>
+        )}
 
         {/* Measurements List Card */}
         <div className="glass-panel p-6 rounded-2xl shadow-lg flex flex-col gap-4">

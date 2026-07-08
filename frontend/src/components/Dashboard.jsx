@@ -7,13 +7,10 @@ import {
 
 // --- Streak Counter Widget ---
 function StreakWidget({ client }) {
-  // Compute streak from habit_logs if they exist, otherwise simulate from seed data
-  // We calculate consecutive days where all 4 habits are met
   const habitLogs = client.all_habit_logs || [];
   
   let streak = 0;
   if (habitLogs.length > 0) {
-    // Sort descending by date
     const sorted = [...habitLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
     for (const log of sorted) {
       const allDone = log.water_cups >= 8 && log.sleep_hours >= 7 && log.cardio_done && log.alcohol_avoided;
@@ -21,8 +18,7 @@ function StreakWidget({ client }) {
       else break;
     }
   } else {
-    // Fallback: show a fixed demo streak of 5 for seeded data
-    streak = 5;
+    streak = 0;
   }
 
   const milestones = [3, 7, 14, 30, 60, 90];
@@ -77,6 +73,161 @@ function StreakWidget({ client }) {
           >
             🏅 {m}d
           </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// --- Consistency Heatmap Widget (GitHub style) ---
+function ConsistencyHeatmap({ client }) {
+  const habitLogs = client.all_habit_logs || [];
+  
+  // Generate the last 12 weeks (84 days) ending today
+  const days = [];
+  const today = new Date();
+  for (let i = 83; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    days.push(d);
+  }
+  
+  // Map logs by date string (YYYY-MM-DD)
+  const logsMap = {};
+  habitLogs.forEach(log => {
+    logsMap[log.date] = log;
+  });
+  
+  // Score function: counts completed habits (max 4)
+  const getHabitScore = (log) => {
+    if (!log) return 0;
+    let score = 0;
+    if (log.water_cups >= 8) score++;
+    if (log.sleep_hours >= 7) score++;
+    if (log.cardio_done) score++;
+    if (log.alcohol_avoided) score++;
+    return score;
+  };
+  
+  // Color picker based on score
+  const getColor = (score) => {
+    switch(score) {
+      case 4:  return '#FF5E3A'; // Full neon orange
+      case 3:  return '#D8492C'; 
+      case 2:  return '#A2341F';
+      case 1:  return '#5C1D13';
+      default: return 'rgba(255, 255, 255, 0.03)'; // Empty dark cell
+    }
+  };
+  
+  // Group days by weeks (12 weeks of 7 days)
+  const weeks = [];
+  for (let i = 0; i < 84; i += 7) {
+    weeks.push(days.slice(i, i + 7));
+  }
+  
+  return (
+    <div className="glass-panel p-5 rounded-2xl flex flex-col gap-4">
+      <div>
+        <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Mapa de Consistencia</span>
+        <h3 className="text-sm font-bold text-white mt-0.5">Tus hábitos en los últimos 3 meses</h3>
+      </div>
+      
+      <div className="flex justify-center py-2 overflow-x-auto no-scrollbar">
+        {/* SVG grid */}
+        <svg width="240" height="74" viewBox="0 0 240 74" className="overflow-visible">
+          {weeks.map((week, wIdx) => (
+            <g key={wIdx} transform={`translate(${wIdx * 19}, 0)`}>
+              {week.map((day, dIdx) => {
+                const dateStr = day.toISOString().split('T')[0];
+                const log = logsMap[dateStr];
+                const score = getHabitScore(log);
+                const color = getColor(score);
+                
+                return (
+                  <rect
+                    key={dIdx}
+                    y={dIdx * 10}
+                    width="8"
+                    height="8"
+                    rx="1.5"
+                    fill={color}
+                    className="transition-all duration-300 hover:scale-125 cursor-pointer origin-center"
+                    title={`${dateStr}: ${score}/4 hábitos cumplidos`}
+                  />
+                );
+              })}
+            </g>
+          ))}
+        </svg>
+      </div>
+      
+      <div className="flex justify-between items-center text-[9px] text-neutral-500 font-bold px-1 mt-1">
+        <span>Menos activo</span>
+        <div className="flex gap-1 items-center">
+          <div className="w-2 h-2 rounded bg-white/5" />
+          <div className="w-2 h-2 rounded" style={{ background: '#5C1D13' }} />
+          <div className="w-2 h-2 rounded" style={{ background: '#A2341F' }} />
+          <div className="w-2 h-2 rounded" style={{ background: '#D8492C' }} />
+          <div className="w-2 h-2 rounded" style={{ background: '#FF5E3A' }} />
+        </div>
+        <span>Más activo</span>
+      </div>
+    </div>
+  );
+}
+
+// --- Achievements Widget ---
+function AchievementsWidget({ client }) {
+  const habitLogs = client.all_habit_logs || [];
+  const liftLogs = client.lift_logs || [];
+  const weightLogs = client.weight_history || [];
+  
+  // 1. Water champion: had 8+ cups at least once
+  const hitWater = habitLogs.some(log => log.water_cups >= 8);
+  
+  // 2. Cardio Beast: completed cardio 5 times total
+  const cardioCount = habitLogs.filter(log => log.cardio_done).length;
+  const cardioBeast = cardioCount >= 5;
+  
+  // 3. Weight dropper: weight history has decreased compared to initial
+  const initialWeight = client.profile?.initial_weight || 0;
+  const currentWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weight : initialWeight;
+  const weightDrop = initialWeight > 0 && currentWeight < initialWeight;
+  
+  // 4. Force Beast: has registered lifts
+  const strongAthlete = liftLogs.length > 0;
+  
+  const badges = [
+    { id: 'water', label: 'Campeón H2O', desc: 'Beber 2L de agua en un día', active: hitWater, icon: '💧' },
+    { id: 'cardio', label: 'Bestia del Cardio', desc: 'Lograr 5 días de cardio', active: cardioBeast, icon: '🔥' },
+    { id: 'weight', label: 'Evolución Constante', desc: 'Bajar de peso corporal', active: weightDrop, icon: '📉' },
+    { id: 'force', label: 'Atleta de Fuerza', desc: 'Registrar tu primer levantamiento', active: strongAthlete, icon: '🏋️‍♂️' },
+  ];
+  
+  return (
+    <div className="glass-panel p-5 rounded-2xl flex flex-col gap-4">
+      <div>
+        <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Insignias y Logros</span>
+        <h3 className="text-sm font-bold text-white mt-0.5">Tus hitos desbloqueados</h3>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-3">
+        {badges.map(b => (
+          <div 
+            key={b.id} 
+            className={`p-3 rounded-xl border flex items-center gap-3 transition-all ${
+              b.active 
+                ? 'bg-gradient-to-br from-gymNeon/15 to-gymCoral/5 border-gymNeon/30 shadow-[0_0_12px_rgba(255,94,58,0.05)]' 
+                : 'bg-white/[0.01] border-white/5 opacity-40'
+            }`}
+          >
+            <span className="text-2xl">{b.icon}</span>
+            <div>
+              <div className="text-[10px] font-bold text-white uppercase tracking-wider">{b.label}</div>
+              <div className="text-[8px] text-neutral-400 mt-0.5 leading-tight">{b.desc}</div>
+            </div>
+          </div>
         ))}
       </div>
     </div>
@@ -249,10 +400,12 @@ export default function Dashboard({ client, onUpdateClient, showToast, weeklyCha
         </div>
       </section>
 
-      {/* 2. Streak + Weekly Recap Row */}
+      {/* 2. Streak + Weekly Recap + Consistency heatmaps Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <StreakWidget client={client} />
         <WeeklyRecap client={client} />
+        <ConsistencyHeatmap client={client} />
+        <AchievementsWidget client={client} />
       </div>
 
       {/* 3. Habits Dashboard Grid */}

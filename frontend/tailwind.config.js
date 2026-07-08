@@ -14,9 +14,12 @@ export default {
           700: 'var(--gym-dark-700)',
         },
         gymNeon: {
-          DEFAULT: '#ff5722',
-          500: '#f4511e',
-          600: '#e64a19',
+          DEFAULT: '#FF5E3A',
+          500: '#FF2A54',
+          600: '#E03D1A',
+        },
+        gymCoral: {
+          DEFAULT: '#FF2A54',
         }
       },
       fontFamily: {
