@@ -140,6 +140,20 @@ def seed_data(db: Session):
             profile_pic=""
         )
         db.add(profile)
+    else:
+        # Ensure profile exists for existing user to avoid NoneType errors
+        profile = db.query(models.ClientProfile).filter(models.ClientProfile.user_id == client.id).first()
+        if not profile:
+            profile = models.ClientProfile(
+                user_id=client.id,
+                height=1.67,
+                initial_weight=83.0,
+                target="Tonificar y reducir porcentaje de grasa corporal",
+                joined_date="2026-06-01",
+                profile_pic=""
+            )
+            db.add(profile)
+            db.commit()
 
         # Create Denilson's diet (Days 1 to 7)
         diet_data = [
@@ -805,7 +819,14 @@ def ai_generate_plan(payload: schemas.AIGenerateRequest, db: Session = Depends(g
     if not client or client.role != "client":
         raise HTTPException(status_code=404, detail="Alumno no encontrado")
         
-    latest_weight = client.profile.initial_weight or 70.0
+    latest_weight = 70.0
+    client_height = 1.70
+    client_target = "General"
+    if client.profile:
+        latest_weight = client.profile.initial_weight or 70.0
+        client_height = client.profile.height or 1.70
+        client_target = client.profile.target or "General"
+        
     if client.weight_history:
         latest_weight = client.weight_history[-1].weight
         
@@ -820,9 +841,9 @@ def ai_generate_plan(payload: schemas.AIGenerateRequest, db: Session = Depends(g
         Eres un entrenador personal certificado de alto nivel.
         Crea una rutina de entrenamiento de gimnasio para el día {payload.day_name} adaptada a este alumno:
         - Nombre: {client.name}
-        - Altura: {client.profile.height}m
+        - Altura: {client_height}m
         - Peso: {latest_weight}kg
-        - Objetivo: {client.profile.target}
+        - Objetivo: {client_target}
 
         Responde ÚNICAMENTE con un objeto JSON válido con la siguiente estructura (no agregues formato markdown como ```json o ```, solo el texto JSON puro para que pueda ser parseado directamente):
         {{
@@ -844,9 +865,9 @@ def ai_generate_plan(payload: schemas.AIGenerateRequest, db: Session = Depends(g
         Eres un nutricionista deportivo certificado de alto nivel.
         Crea un plan de alimentación (dieta) diario para el Día {payload.day_number} adaptado a este alumno:
         - Nombre: {client.name}
-        - Altura: {client.profile.height}m
+        - Altura: {client_height}m
         - Peso: {latest_weight}kg
-        - Objetivo: {client.profile.target}
+        - Objetivo: {client_target}
 
         Responde ÚNICAMENTE con un objeto JSON válido con la siguiente estructura (no agregues formato markdown como ```json o ```, solo el texto JSON puro para que pueda ser parseado directamente):
         {{

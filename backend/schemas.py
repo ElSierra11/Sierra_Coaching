@@ -89,6 +89,7 @@ class ExerciseUpdate(BaseModel):
     sets: int
     reps: str
     notes: Optional[str] = ""
+    video_url: Optional[str] = ""
     order: Optional[int] = None
 
 class RoutineDayUpdatePayload(BaseModel):
