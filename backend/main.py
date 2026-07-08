@@ -140,20 +140,6 @@ def seed_data(db: Session):
             profile_pic=""
         )
         db.add(profile)
-    else:
-        # Ensure profile exists for existing user to avoid NoneType errors
-        profile = db.query(models.ClientProfile).filter(models.ClientProfile.user_id == client.id).first()
-        if not profile:
-            profile = models.ClientProfile(
-                user_id=client.id,
-                height=1.67,
-                initial_weight=83.0,
-                target="Tonificar y reducir porcentaje de grasa corporal",
-                joined_date="2026-06-01",
-                profile_pic=""
-            )
-            db.add(profile)
-            db.commit()
 
         # Create Denilson's diet (Days 1 to 7)
         diet_data = [
@@ -296,6 +282,20 @@ def seed_data(db: Session):
             db.add(models.LiftLog(user_id=client.id, exercise_id=e1_id, week_number=3, date="2026-06-22", set_number=s_idx, weight=wt, reps=reps))
 
         db.commit()
+    else:
+        # Ensure profile exists for existing user to avoid NoneType errors
+        profile = db.query(models.ClientProfile).filter(models.ClientProfile.user_id == client.id).first()
+        if not profile:
+            profile = models.ClientProfile(
+                user_id=client.id,
+                height=1.67,
+                initial_weight=83.0,
+                target="Tonificar y reducir porcentaje de grasa corporal",
+                joined_date="2026-06-01",
+                profile_pic=""
+            )
+            db.add(profile)
+            db.commit()
 
 
 from migrate_db_v2 import migrate as run_migrations
