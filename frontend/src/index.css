@@ -1,0 +1,169 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --gym-dark-950: #0a0a0c;
+  --gym-dark-900: #121216;
+  --gym-dark-800: #16161c;
+  --gym-dark-700: #22222a;
+  
+  --bg-panel: rgba(22, 22, 28, 0.75);
+  --border-color: rgba(255, 255, 255, 0.08);
+}
+
+.light-theme {
+  --gym-dark-950: #f4f4f7;
+  --gym-dark-900: #ffffff;
+  --gym-dark-800: #e4e4e7;
+  --gym-dark-700: #d4d4d8;
+  
+  --bg-panel: rgba(255, 255, 255, 0.85);
+  --border-color: rgba(0, 0, 0, 0.08);
+}
+
+@layer base {
+  body {
+    @apply bg-gymDark-950 text-white font-sports min-h-screen overflow-x-hidden antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--gym-dark-950);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gym-dark-800);
+  border: 2px solid var(--gym-dark-950);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Glassmorphism custom classes */
+.glass-panel {
+  background: var(--bg-panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-panel-neon {
+  background: var(--bg-panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid #ff5722;
+  box-shadow: 0 0 15px rgba(255, 87, 34, 0.15);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Light Theme Force Overrides */
+.light-theme {
+  color: #1c1c1f !important;
+}
+
+.light-theme body {
+  color: #1c1c1f !important;
+}
+
+.light-theme h1,
+.light-theme h2,
+.light-theme h3,
+.light-theme h4,
+.light-theme h5,
+.light-theme h6 {
+  color: #1c1c1f !important;
+}
+
+.light-theme .text-white {
+  color: #1c1c1f !important;
+}
+
+.light-theme .text-neutral-100,
+.light-theme .text-neutral-200,
+.light-theme .text-neutral-300,
+.light-theme .text-neutral-400,
+.light-theme .text-neutral-500 {
+  color: #4a4a4f !important;
+}
+
+.light-theme .text-neutral-600,
+.light-theme .text-neutral-700 {
+  color: #71717a !important;
+}
+
+.light-theme .border-white\/5,
+.light-theme .border-white\/10,
+.light-theme .border-white\/20,
+.light-theme .border-dashed {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.light-theme .bg-white\/5,
+.light-theme .bg-white\/10,
+.light-theme .bg-white\/80 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.light-theme .bg-black\/30,
+.light-theme .bg-black\/40,
+.light-theme .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+.light-theme .bg-neutral-900,
+.light-theme .bg-neutral-900\/50,
+.light-theme .bg-neutral-900\/60,
+.light-theme .bg-neutral-900\/80 {
+  background-color: #e4e4e7 !important;
+}
+
+.light-theme .bg-gymDark-950 {
+  background-color: #f4f4f7 !important;
+}
+
+.light-theme .bg-gymDark-900 {
+  background-color: #ffffff !important;
+}
+
+.light-theme .bg-gymDark-800 {
+  background-color: #e4e4e7 !important;
+}
+
+.light-theme .bg-gymDark-700 {
+  background-color: #d4d4d8 !important;
+}
+
+.light-theme .bg-gymDark-900\/50,
+.light-theme .bg-gymDark-900\/60 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}

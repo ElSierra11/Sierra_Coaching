@@ -1,0 +1,21 @@
+{
+  "short_name": "SierraCoach",
+  "name": "Sierra Coaching App",
+  "icons": [
+    {
+      "src": "/logo-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0a0a0c",
+  "theme_color": "#ff5722",
+  "display": "standalone",
+  "orientation": "portrait"
+}

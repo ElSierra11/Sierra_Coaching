@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+dist/
+.cache/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
