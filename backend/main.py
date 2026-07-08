@@ -284,9 +284,16 @@ def seed_data(db: Session):
         db.commit()
 
 
+from migrate_db_v2 import migrate as run_migrations
+
 # Run seeding on startup
 @app.on_event("startup")
 def startup_event():
+    try:
+        run_migrations()
+    except Exception as e:
+        print(f"Error running database migrations: {e}")
+        
     db = SessionLocal()
     try:
         seed_data(db)
