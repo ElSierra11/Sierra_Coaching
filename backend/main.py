@@ -827,8 +827,8 @@ def ai_generate_plan(payload: schemas.AIGenerateRequest, db: Session = Depends(g
         client_height = client.profile.height or 1.70
         client_target = client.profile.target or "General"
         
-    if client.weight_history:
-        latest_weight = client.weight_history[-1].weight
+    if client.weight_logs:
+        latest_weight = client.weight_logs[-1].weight
         
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
