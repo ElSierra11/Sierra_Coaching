@@ -1,6 +1,7 @@
 @import "tailwindcss";
-@config "../tailwind.config.js";
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@config "../tailwind.config.js";
+
 
 :root {
   --gym-dark-950: #0a0a0c;
