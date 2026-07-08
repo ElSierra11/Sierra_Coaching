@@ -917,6 +917,10 @@ def ai_generate_plan(payload: schemas.AIGenerateRequest, db: Session = Depends(g
                 text_content = "\n".join(lines).strip()
             parsed_json = json.loads(text_content)
             return parsed_json
+    except Exception as e:
+        print(f"Error llamando a Gemini API ({e}). Usando plan de fallback...")
+        return generate_fallback_plan(client, payload.type, payload.day_name, payload.day_number)
+
 @app.post("/api/chat")
 def chat_with_ai(payload: schemas.ChatRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     client = current_user
