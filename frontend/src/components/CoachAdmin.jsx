@@ -341,55 +341,55 @@ export default function CoachAdmin({ showToast }) {
               </div>
               
               {/* Workspace tabs switcher */}
-              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-                <div className="overflow-x-auto -mx-1 px-1">
+              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full sm:w-auto">
+                <div className="overflow-x-auto w-full no-scrollbar pb-1">
                   <div className="flex bg-neutral-900 border border-white/5 rounded-xl p-1 gap-1 min-w-max">
-                  <button
-                    onClick={() => setAdminTab('overview')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      adminTab === 'overview' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    Vista General
-                  </button>
-                  <button
-                    onClick={() => setAdminTab('summary')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      adminTab === 'summary' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    Resumen
-                  </button>
-                  <button
-                    onClick={() => setAdminTab('routine')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      adminTab === 'routine' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    Editar Rutina
-                  </button>
-                  <button
-                    onClick={() => setAdminTab('diet')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      adminTab === 'diet' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    Editar Dieta
-                  </button>
-                  <button
-                    onClick={() => setAdminTab('business')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      adminTab === 'business' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    Negocio & Retos
-                  </button>
+                    <button
+                      onClick={() => setAdminTab('overview')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                        adminTab === 'overview' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      Vista General
+                    </button>
+                    <button
+                      onClick={() => setAdminTab('summary')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                        adminTab === 'summary' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      Resumen
+                    </button>
+                    <button
+                      onClick={() => setAdminTab('routine')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                        adminTab === 'routine' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      Editar Rutina
+                    </button>
+                    <button
+                      onClick={() => setAdminTab('diet')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                        adminTab === 'diet' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      Editar Dieta
+                    </button>
+                    <button
+                      onClick={() => setAdminTab('business')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                        adminTab === 'business' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      Negocio & Retos
+                    </button>
+                  </div>
                 </div>
-              </div>
                 {selectedClient && (
                   <button
                     onClick={handleExportPDF}
-                    className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-bold uppercase px-3 py-2 rounded-xl transition-all cursor-pointer ml-auto"
+                    className="flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-bold uppercase px-3 py-2.5 rounded-xl transition-all cursor-pointer w-full sm:w-auto sm:ml-auto"
                   >
                     <FileDown className="w-3.5 h-3.5 text-gymNeon" />
                     <span>Exportar PDF</span>
@@ -569,12 +569,12 @@ export default function CoachAdmin({ showToast }) {
                   <div className="glass-panel p-6 rounded-2xl shadow-lg flex flex-col gap-5">
                     
                     {/* Day selector tabs */}
-                    <div className="flex bg-neutral-900 border border-white/5 rounded-xl p-1 overflow-x-auto gap-1">
+                    <div className="flex bg-neutral-900 border border-white/5 rounded-xl p-1 overflow-x-auto no-scrollbar gap-1">
                       {['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'].map(d => (
                         <button
                           key={d}
                           onClick={() => handleRoutineDayChange(d)}
-                          className={`flex-1 min-w-[70px] text-center py-2 rounded-lg text-xs font-semibold transition-all ${
+                          className={`flex-1 shrink-0 min-w-[75px] text-center py-2 rounded-lg text-xs font-semibold transition-all ${
                             routineDay === d ? 'bg-gymNeon text-black font-extrabold' : 'text-neutral-400 hover:text-white'
                           }`}
                         >

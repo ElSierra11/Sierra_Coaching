@@ -338,7 +338,7 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
                 setActiveDay(day);
                 setExpandedExercise(null);
               }}
-              className={`flex-1 min-w-[100px] text-center py-3 rounded-xl transition-all cursor-pointer ${
+              className={`flex-1 shrink-0 min-w-[100px] text-center py-3 rounded-xl transition-all cursor-pointer ${
                 activeDay === day 
                   ? 'bg-gymNeon text-black font-extrabold shadow-md' 
                   : 'text-neutral-400 hover:text-white hover:bg-white/[0.02]'
@@ -476,12 +476,12 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
                       <table className="w-full text-left text-xs">
                         <thead>
                           <tr className="text-neutral-500 border-b border-white/5 pb-2">
-                            <th className="pb-2 font-bold uppercase tracking-wider w-16">Serie</th>
-                            <th className="pb-2 font-bold uppercase tracking-wider">Semana Anterior ({selectedWeek - 1})</th>
-                            <th className="pb-2 font-bold uppercase tracking-wider w-24">Peso (kg)</th>
-                            <th className="pb-2 font-bold uppercase tracking-wider w-20">Reps</th>
-                            <th className="pb-2 font-bold uppercase tracking-wider w-20">RPE</th>
-                            <th className="pb-2 font-bold uppercase tracking-wider w-20 text-right">1RM Est.</th>
+                            <th className="pb-2 font-bold uppercase tracking-wider w-16 whitespace-nowrap">Serie</th>
+                            <th className="pb-2 font-bold uppercase tracking-wider whitespace-nowrap">Semana Anterior ({selectedWeek - 1})</th>
+                            <th className="pb-2 font-bold uppercase tracking-wider w-24 whitespace-nowrap">Peso (kg)</th>
+                            <th className="pb-2 font-bold uppercase tracking-wider w-20 whitespace-nowrap">Reps</th>
+                            <th className="pb-2 font-bold uppercase tracking-wider w-20 whitespace-nowrap">RPE</th>
+                            <th className="pb-2 font-bold uppercase tracking-wider w-20 text-right whitespace-nowrap">1RM Est.</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">

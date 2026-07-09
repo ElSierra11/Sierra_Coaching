@@ -45,7 +45,7 @@ export default function DietPlan({ client, showToast }) {
             <button
               key={dayNum}
               onClick={() => setActiveDay(dayNum)}
-              className={`flex-1 min-w-[70px] text-center py-3 rounded-xl transition-all cursor-pointer ${
+              className={`flex-1 shrink-0 min-w-[70px] text-center py-3 rounded-xl transition-all cursor-pointer ${
                 isActive 
                   ? 'bg-gymNeon text-black font-extrabold shadow-md' 
                   : 'text-neutral-400 hover:text-white hover:bg-white/[0.02]'
