@@ -887,7 +887,7 @@ def ai_generate_plan(payload: schemas.AIGenerateRequest, db: Session = Depends(g
     else:
         raise HTTPException(status_code=400, detail="Tipo de plan inválido")
         
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     body = {
         "contents": [{
@@ -968,7 +968,7 @@ def chat_with_ai(payload: schemas.ChatRequest, db: Session = Depends(get_db), cu
     if not api_key:
         return {"response": "Hola. Soy tu Copiloto de IA en Sierra Coaching. (Configura tu GEMINI_API_KEY para respuestas reales del modelo). Te sugiero seguir las rutinas e hidratación asignadas."}
         
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     
     contents = []
