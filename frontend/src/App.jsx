@@ -8,6 +8,7 @@ import DietPlan from './components/DietPlan';
 import ProgressTracker from './components/ProgressTracker';
 import CoachAdmin from './components/CoachAdmin';
 import { LayoutDashboard, Dumbbell, Apple, TrendingUp, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
+import InstallPrompt from './components/InstallPrompt';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -202,6 +203,9 @@ export default function App() {
           </div>
         ))}
       </div>
+
+      {/* PWA Install Prompt Banner */}
+      <InstallPrompt />
     </div>
   );
 }
