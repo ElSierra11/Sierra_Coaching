@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles } from 'lucide-react';
+import ChatWindow from './ChatWindow';
 
 export default function CoachAdmin({ showToast }) {
   const [clients, setClients] = useState([]);
@@ -375,6 +376,22 @@ export default function CoachAdmin({ showToast }) {
                       }`}
                     >
                       Editar Dieta
+                    </button>
+                    <button
+                      onClick={() => setAdminTab('feedback')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+                        adminTab === 'feedback' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      Notas de Sesión
+                    </button>
+                    <button
+                      onClick={() => setAdminTab('chat')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 relative ${
+                        adminTab === 'chat' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      Chat
                     </button>
                     <button
                       onClick={() => setAdminTab('business')}
@@ -866,6 +883,64 @@ export default function CoachAdmin({ showToast }) {
                         Publicar Reto
                       </button>
                     </div>
+                  </div>
+                )}
+                {/* VIEW 5: FEEDBACK / WORKOUT SESSIONS TAB */}
+                {adminTab === 'feedback' && (
+                  <div className="flex flex-col gap-6">
+                    <div>
+                      <h4 className="text-sm font-bold text-white uppercase tracking-wider">Diario de Entrenamientos — Notas de Sesión</h4>
+                      <p className="text-[10px] text-neutral-500 mt-0.5">Historial de entrenamientos finalizados por el alumno y sus comentarios.</p>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                      {(!selectedClient.workout_feedbacks || selectedClient.workout_feedbacks.length === 0) ? (
+                        <div className="glass-panel p-12 text-center text-neutral-500 text-xs italic rounded-2xl bg-white/[0.01] border border-white/5">
+                          El alumno aún no ha finalizado ningún entrenamiento ni enviado notas de sesión.
+                        </div>
+                      ) : (
+                        selectedClient.workout_feedbacks.map((f, idx) => (
+                          <div key={idx} className="glass-panel p-5 rounded-2xl flex flex-col gap-3 border border-white/5 bg-white/[0.01]">
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-3">
+                                <span className="text-2xl">{f.mood_emoji}</span>
+                                <div>
+                                  <span className="text-xs font-black text-white">{f.routine_name}</span>
+                                  <span className="text-[9px] text-neutral-500 block">{f.date}</span>
+                                </div>
+                              </div>
+                              <span className={`text-[10px] font-black px-2.5 py-1 rounded-full ${
+                                f.effort_rating >= 8 ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                f.effort_rating >= 5 ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
+                                'bg-green-500/10 text-green-400 border border-green-500/20'
+                              }`}>
+                                Esfuerzo: {f.effort_rating}/10
+                              </span>
+                            </div>
+                            {f.notes && (
+                              <p className="text-xs text-neutral-300 bg-black/20 rounded-xl p-3 border border-white/5 italic leading-relaxed">
+                                "{f.notes}"
+                              </p>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+                {/* VIEW 6: CHAT TAB */}
+                {adminTab === 'chat' && (
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-white uppercase tracking-wider">Chat Directo con {selectedClient.name}</h4>
+                      <p className="text-[10px] text-neutral-500 mt-0.5">Resuelve dudas sobre el plan de entrenamiento o la dieta de forma interactiva.</p>
+                    </div>
+                    <ChatWindow 
+                      contactId={selectedClient.id}
+                      contactName={selectedClient.name}
+                      currentUserId={JSON.parse(sessionStorage.getItem('gym_auth_user') || '{}').id || 1}
+                      showToast={showToast}
+                    />
                   </div>
                 )}
               </>

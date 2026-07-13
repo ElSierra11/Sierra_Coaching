@@ -443,6 +443,27 @@ def get_client_detail(client_id: int, db: Session = Depends(get_db), current_use
         db.commit()
         db.refresh(habits_log)
 
+    # Fetch today's daily nutrition log
+    nutrition_log = db.query(models.DailyNutritionLog).filter(
+        models.DailyNutritionLog.user_id == client_id,
+        models.DailyNutritionLog.date == today_str
+    ).first()
+
+    # If nutrition log doesn't exist for today, create a default one
+    if not nutrition_log:
+        nutrition_log = models.DailyNutritionLog(
+            user_id=client_id,
+            date=today_str,
+            calories_consumed=0,
+            proteins_consumed=0,
+            carbs_consumed=0,
+            fats_consumed=0,
+            meals_completed="{}"
+        )
+        db.add(nutrition_log)
+        db.commit()
+        db.refresh(nutrition_log)
+
     # Build Response
     diet_sorted = db.query(models.DietMeal).filter(models.DietMeal.user_id == client_id).order_by(models.DietMeal.day_number).all()
     routines = db.query(models.RoutineDay).filter(models.RoutineDay.user_id == client_id).all()
@@ -451,6 +472,14 @@ def get_client_detail(client_id: int, db: Session = Depends(get_db), current_use
     photos = db.query(models.ProgressPhoto).filter(models.ProgressPhoto.user_id == client_id).order_by(models.ProgressPhoto.date).all()
     lifts = db.query(models.LiftLog).filter(models.LiftLog.user_id == client_id).order_by(models.LiftLog.week_number, models.LiftLog.set_number).all()
     all_habit_logs = db.query(models.DailyHabitLog).filter(models.DailyHabitLog.user_id == client_id).order_by(models.DailyHabitLog.date).all()
+    
+    notifications_list = db.query(models.Notification).filter(
+        models.Notification.user_id == client_id
+    ).order_by(models.Notification.id.desc()).limit(30).all()
+
+    workout_feedbacks_list = db.query(models.WorkoutFeedback).filter(
+        models.WorkoutFeedback.user_id == client_id
+    ).order_by(models.WorkoutFeedback.date.desc()).all()
 
     return {
         "id": client.id,
@@ -465,7 +494,10 @@ def get_client_detail(client_id: int, db: Session = Depends(get_db), current_use
         "measurements_history": measurements_hist,
         "progress_photos": photos,
         "lift_logs": lifts,
-        "all_habit_logs": all_habit_logs
+        "all_habit_logs": all_habit_logs,
+        "notifications": notifications_list,
+        "workout_feedbacks": workout_feedbacks_list,
+        "today_nutrition_log": nutrition_log
     }
 
 
@@ -670,6 +702,18 @@ def update_client_routines(client_id: int, routines_payload: List[schemas.Routin
                 
         db.commit()
 
+    # Enviar notificación de actualización de rutina al cliente
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    db.add(models.Notification(
+        user_id=client_id,
+        title="¡Rutina Actualizada!",
+        message="Tu coach Alejandro ha actualizado tu plan de rutinas semanal.",
+        type="routine",
+        is_read=False,
+        created_at=now_str
+    ))
+    db.commit()
+
     return db.query(models.RoutineDay).filter(models.RoutineDay.user_id == client_id).all()
 
 
@@ -698,6 +742,19 @@ def update_client_diet(client_id: int, diet_payload: List[schemas.DietMealRespon
         db_meal.fats = meal.fats
 
     db.commit()
+
+    # Enviar notificación de actualización de dieta al cliente
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    db.add(models.Notification(
+        user_id=client_id,
+        title="¡Dieta Actualizada!",
+        message="Tu coach Alejandro ha modificado tu plan de alimentación semanal.",
+        type="diet",
+        is_read=False,
+        created_at=now_str
+    ))
+    db.commit()
+
     return db.query(models.DietMeal).filter(models.DietMeal.user_id == client_id).order_by(models.DietMeal.day_number).all()
 
 
@@ -922,6 +979,229 @@ def ai_generate_plan(payload: schemas.AIGenerateRequest, db: Session = Depends(g
     except Exception as e:
         print(f"Error llamando a Gemini API ({e}). Usando plan de fallback...")
         return generate_fallback_plan(client, payload.type, payload.day_name, payload.day_number)
+
+# --- ENDPOINTS NUEVOS: NUTRICIÓN AVANZADA ---
+
+@app.post("/api/clients/{client_id}/tdee", response_model=schemas.ClientProfileResponse)
+def save_tdee(client_id: int, payload: schemas.TDEESaveRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    if current_user.role != "coach" and current_user.id != client_id:
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+    
+    profile = db.query(models.ClientProfile).filter(models.ClientProfile.user_id == client_id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+        
+    profile.tdee = payload.tdee
+    profile.target_calories = payload.target_calories
+    profile.target_proteins = payload.target_proteins
+    profile.target_carbs = payload.target_carbs
+    profile.target_fats = payload.target_fats
+    profile.gender = payload.gender
+    profile.activity_level = payload.activity_level
+    profile.age = payload.age
+    
+    db.commit()
+    db.refresh(profile)
+    return profile
+
+
+@app.get("/api/clients/{client_id}/nutrition/today", response_model=schemas.DailyNutritionLogResponse)
+def get_today_nutrition(client_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    if current_user.role != "coach" and current_user.id != client_id:
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+        
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    log = db.query(models.DailyNutritionLog).filter(
+        models.DailyNutritionLog.user_id == client_id,
+        models.DailyNutritionLog.date == today_str
+    ).first()
+    
+    if not log:
+        log = models.DailyNutritionLog(
+            user_id=client_id,
+            date=today_str,
+            calories_consumed=0,
+            proteins_consumed=0,
+            carbs_consumed=0,
+            fats_consumed=0,
+            meals_completed="{}"
+        )
+        db.add(log)
+        db.commit()
+        db.refresh(log)
+        
+    return log
+
+
+@app.post("/api/clients/{client_id}/nutrition/today", response_model=schemas.DailyNutritionLogResponse)
+def update_today_nutrition(client_id: int, payload: schemas.DailyNutritionLogBase, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    if current_user.role != "coach" and current_user.id != client_id:
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+        
+    today_str = datetime.date.today().strftime("%Y-%m-%d")
+    log = db.query(models.DailyNutritionLog).filter(
+        models.DailyNutritionLog.user_id == client_id,
+        models.DailyNutritionLog.date == today_str
+    ).first()
+    
+    if not log:
+        log = models.DailyNutritionLog(
+            user_id=client_id,
+            date=today_str
+        )
+        db.add(log)
+        
+    log.calories_consumed = payload.calories_consumed
+    log.proteins_consumed = payload.proteins_consumed
+    log.carbs_consumed = payload.carbs_consumed
+    log.fats_consumed = payload.fats_consumed
+    log.meals_completed = payload.meals_completed
+    
+    db.commit()
+    db.refresh(log)
+    return log
+
+
+# --- ENDPOINTS NUEVOS: DIARIO DE ENTRENAMIENTO ---
+
+@app.post("/api/clients/{client_id}/workout-feedback", response_model=schemas.WorkoutFeedbackResponse)
+def add_workout_feedback(client_id: int, payload: schemas.WorkoutFeedbackCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    if current_user.role != "coach" and current_user.id != client_id:
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+        
+    date_str = payload.date if payload.date else datetime.date.today().strftime("%Y-%m-%d")
+    
+    new_feedback = models.WorkoutFeedback(
+        user_id=client_id,
+        date=date_str,
+        routine_name=payload.routine_name,
+        effort_rating=payload.effort_rating,
+        mood_emoji=payload.mood_emoji,
+        notes=payload.notes
+    )
+    db.add(new_feedback)
+    db.commit()
+    db.refresh(new_feedback)
+    return new_feedback
+
+
+@app.get("/api/clients/{client_id}/workout-feedback", response_model=List[schemas.WorkoutFeedbackResponse])
+def get_workout_feedback_history(client_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    if current_user.role != "coach" and current_user.id != client_id:
+        raise HTTPException(status_code=403, detail="Acceso denegado")
+        
+    return db.query(models.WorkoutFeedback).filter(
+        models.WorkoutFeedback.user_id == client_id
+    ).order_by(models.WorkoutFeedback.date.desc()).all()
+
+
+# --- ENDPOINTS NUEVOS: NOTIFICACIONES ---
+
+@app.get("/api/notifications", response_model=List[schemas.NotificationResponse])
+def get_my_notifications(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    return db.query(models.Notification).filter(
+        models.Notification.user_id == current_user.id
+    ).order_by(models.Notification.id.desc()).limit(50).all()
+
+
+@app.put("/api/notifications/{notification_id}/read", response_model=schemas.NotificationResponse)
+def mark_notification_as_read(notification_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    notification = db.query(models.Notification).filter(
+        models.Notification.id == notification_id,
+        models.Notification.user_id == current_user.id
+    ).first()
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notificación no encontrada")
+        
+    notification.is_read = True
+    db.commit()
+    db.refresh(notification)
+    return notification
+
+
+@app.put("/api/notifications/read-all")
+def mark_all_notifications_as_read(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db.query(models.Notification).filter(
+        models.Notification.user_id == current_user.id,
+        models.Notification.is_read == False
+    ).update({models.Notification.is_read: True}, synchronize_session=False)
+    db.commit()
+    return {"detail": "Todas las notificaciones marcadas como leídas"}
+
+
+# --- ENDPOINTS NUEVOS: CHAT COACH-CLIENTE ---
+
+@app.get("/api/chat/messages/{contact_id}", response_model=List[schemas.ChatMessageResponse])
+def get_chat_messages(contact_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    is_authorized = False
+    if current_user.role == "coach":
+        is_authorized = True
+    elif current_user.role == "client":
+        if current_user.coach_id == contact_id or db.query(models.User).filter(models.User.id == contact_id, models.User.role == "coach").first() is not None:
+            is_authorized = True
+            
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="No autorizado para este chat")
+        
+    messages = db.query(models.ChatMessage).filter(
+        ((models.ChatMessage.sender_id == current_user.id) & (models.ChatMessage.receiver_id == contact_id)) |
+        ((models.ChatMessage.sender_id == contact_id) & (models.ChatMessage.receiver_id == current_user.id))
+    ).order_by(models.ChatMessage.timestamp.asc()).all()
+    
+    db.query(models.ChatMessage).filter(
+        models.ChatMessage.sender_id == contact_id,
+        models.ChatMessage.receiver_id == current_user.id,
+        models.ChatMessage.is_read == False
+    ).update({models.ChatMessage.is_read: True}, synchronize_session=False)
+    db.commit()
+    
+    return messages
+
+
+@app.post("/api/chat/messages", response_model=schemas.ChatMessageResponse)
+def send_chat_message(payload: schemas.ChatMessageCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    receiver = db.query(models.User).filter(models.User.id == payload.receiver_id).first()
+    if not receiver:
+        raise HTTPException(status_code=404, detail="Destinatario no encontrado")
+        
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    new_message = models.ChatMessage(
+        sender_id=current_user.id,
+        receiver_id=payload.receiver_id,
+        message=payload.message,
+        timestamp=now_str
+    )
+    db.add(new_message)
+    
+    chat_notification = models.Notification(
+        user_id=payload.receiver_id,
+        title=f"Nuevo mensaje de {current_user.name}",
+        message=payload.message[:80] + "..." if len(payload.message) > 80 else payload.message,
+        type="chat",
+        is_read=False,
+        created_at=now_str
+    )
+    db.add(chat_notification)
+    
+    db.commit()
+    db.refresh(new_message)
+    return new_message
+
+
+@app.get("/api/chat/unread-counts", response_model=List[schemas.ChatUnreadCountResponse])
+def get_unread_chat_counts(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    from sqlalchemy import func
+    unread_counts = db.query(
+        models.ChatMessage.sender_id,
+        func.count(models.ChatMessage.id).label("unread_count")
+    ).filter(
+        models.ChatMessage.receiver_id == current_user.id,
+        models.ChatMessage.is_read == False
+    ).group_by(models.ChatMessage.sender_id).all()
+    
+    return [{"sender_id": row[0], "unread_count": row[1]} for row in unread_counts]
+
 
 @app.post("/api/chat")
 def chat_with_ai(payload: schemas.ChatRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):

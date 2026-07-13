@@ -194,6 +194,91 @@ class LiftLogResponse(BaseModel):
         from_attributes = True
 
 
+# --- TDEE schemas ---
+class TDEESaveRequest(BaseModel):
+    tdee: float
+    target_calories: int
+    target_proteins: int
+    target_carbs: int
+    target_fats: int
+    gender: str
+    activity_level: str
+    age: int
+
+
+# --- Daily Nutrition schemas ---
+class DailyNutritionLogBase(BaseModel):
+    calories_consumed: int
+    proteins_consumed: int
+    carbs_consumed: int
+    fats_consumed: int
+    meals_completed: str
+
+class DailyNutritionLogResponse(DailyNutritionLogBase):
+    id: int
+    user_id: int
+    date: str
+
+    class Config:
+        from_attributes = True
+
+
+# --- Workout Feedback schemas ---
+class WorkoutFeedbackCreate(BaseModel):
+    routine_name: str
+    effort_rating: int
+    mood_emoji: str
+    notes: Optional[str] = ""
+    date: Optional[str] = None
+
+class WorkoutFeedbackResponse(BaseModel):
+    id: int
+    user_id: int
+    date: str
+    routine_name: str
+    effort_rating: int
+    mood_emoji: str
+    notes: Optional[str] = ""
+
+    class Config:
+        from_attributes = True
+
+
+# --- Notification schemas ---
+class NotificationResponse(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    message: str
+    type: str
+    is_read: bool
+    created_at: str
+
+    class Config:
+        from_attributes = True
+
+
+# --- Chat Message schemas ---
+class ChatMessageCreate(BaseModel):
+    receiver_id: int
+    message: str
+
+class ChatMessageResponse(BaseModel):
+    id: int
+    sender_id: int
+    receiver_id: int
+    message: str
+    timestamp: str
+    is_read: bool
+
+    class Config:
+        from_attributes = True
+
+class ChatUnreadCountResponse(BaseModel):
+    sender_id: int
+    unread_count: int
+
+
 # --- Full Client Info ---
 class ClientProfileResponse(BaseModel):
     height: float
@@ -201,6 +286,14 @@ class ClientProfileResponse(BaseModel):
     target: str
     joined_date: str
     profile_pic: Optional[str] = ""
+    tdee: Optional[float] = None
+    target_calories: Optional[int] = None
+    target_proteins: Optional[int] = None
+    target_carbs: Optional[int] = None
+    target_fats: Optional[int] = None
+    gender: Optional[str] = None
+    activity_level: Optional[str] = None
+    age: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -219,6 +312,9 @@ class ClientDetailResponse(BaseModel):
     progress_photos: List[ProgressPhotoResponse] = []
     lift_logs: List[LiftLogResponse] = []
     all_habit_logs: List[DailyHabitLogResponse] = []
+    notifications: List[NotificationResponse] = []
+    workout_feedbacks: List[WorkoutFeedbackResponse] = []
+    today_nutrition_log: Optional[DailyNutritionLogResponse] = None
 
     class Config:
         from_attributes = True

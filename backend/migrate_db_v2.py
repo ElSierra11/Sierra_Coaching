@@ -15,6 +15,14 @@ def migrate():
         ("diet_meals", "proteins", "INTEGER DEFAULT 0"),
         ("diet_meals", "carbs", "INTEGER DEFAULT 0"),
         ("diet_meals", "fats", "INTEGER DEFAULT 0"),
+        ("client_profiles", "tdee", "FLOAT DEFAULT NULL"),
+        ("client_profiles", "target_calories", "INTEGER DEFAULT NULL"),
+        ("client_profiles", "target_proteins", "INTEGER DEFAULT NULL"),
+        ("client_profiles", "target_carbs", "INTEGER DEFAULT NULL"),
+        ("client_profiles", "target_fats", "INTEGER DEFAULT NULL"),
+        ("client_profiles", "gender", "VARCHAR(50) DEFAULT NULL"),
+        ("client_profiles", "activity_level", "VARCHAR(100) DEFAULT NULL"),
+        ("client_profiles", "age", "INTEGER DEFAULT NULL"),
     ]
     
     # Connect and perform alterations

@@ -159,7 +159,7 @@ export default function App() {
                   <RoutineTracker client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} />
                 )}
                 {activeTab === 'diet' && (
-                  <DietPlan client={clientData} showToast={showToast} />
+                  <DietPlan client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} />
                 )}
                 {activeTab === 'progress' && (
                   <ProgressTracker client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} />

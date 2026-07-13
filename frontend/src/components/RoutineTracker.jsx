@@ -19,6 +19,46 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
   // Video Modal State
   const [videoModal, setVideoModal] = useState({ isOpen: false, url: '', name: '', fallbackSearch: '' });
 
+  // Workout Feedback State
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [effortRating, setEffortRating] = useState(7);
+  const [moodEmoji, setMoodEmoji] = useState("💪");
+  const [feedbackNotes, setFeedbackNotes] = useState("");
+
+  const getEffortLabel = (val) => {
+    if (val <= 3) return "Muy suave";
+    if (val <= 5) return "Moderado";
+    if (val <= 7) return "Pesado";
+    if (val <= 9) return "Muy pesado";
+    return "Al fallo absoluto";
+  };
+
+  const handleSubmitFeedback = async () => {
+    try {
+      const response = await api.addWorkoutFeedback(client.id, {
+        routineName: currentDayData.routine_name,
+        effortRating,
+        moodEmoji,
+        notes: feedbackNotes
+      });
+
+      // Update client state globally
+      const updatedFeedbacks = [response, ...(client.workout_feedbacks || [])];
+      onUpdateClient({
+        ...client,
+        workout_feedbacks: updatedFeedbacks
+      });
+
+      showToast("¡Reporte de entrenamiento enviado a tu coach con éxito!", "success");
+      setShowFeedbackModal(false);
+      setFeedbackNotes("");
+      setMoodEmoji("💪");
+      setEffortRating(7);
+    } catch (err) {
+      showToast("Error al enviar reporte: " + err.message, "error");
+    }
+  };
+
   const getTechnicalVideo = (exercise) => {
     if (exercise.video_url && exercise.video_url.trim() !== '') {
       return exercise.video_url;
@@ -562,6 +602,107 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
           })
         )}
       </div>
+
+      {/* Botón de Finalizar Entrenamiento */}
+      {currentDayData.exercises && currentDayData.exercises.length > 0 && (
+        <div className="mt-8 flex justify-center border-t border-white/5 pt-6">
+          <button
+            type="button"
+            onClick={() => setShowFeedbackModal(true)}
+            className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-extrabold uppercase py-3 px-8 rounded-xl text-xs tracking-wider shadow-[0_4px_15px_rgba(34,197,94,0.25)] hover:opacity-90 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Check className="w-4 h-4 text-white" />
+            <span>Finalizar Entrenamiento de Hoy</span>
+          </button>
+        </div>
+      )}
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-scale-in">
+          <div className="bg-neutral-900 border border-white/10 rounded-2xl p-6 w-full max-w-md flex flex-col gap-4 relative bg-gymDark-900">
+            <button 
+              type="button"
+              onClick={() => setShowFeedbackModal(false)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-white bg-neutral-800 border border-white/5 p-1.5 rounded-lg transition-all cursor-pointer z-10"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            
+            <div className="pb-2 border-b border-white/5">
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider">¿Cómo te sentiste hoy?</h4>
+              <p className="text-[10px] text-neutral-500 mt-0.5">Reporta tus sensaciones del entrenamiento a tu coach.</p>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              {/* Esfuerzo (RPE) Slider */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-neutral-400 font-bold uppercase flex justify-between">
+                  <span>Nivel de Esfuerzo</span>
+                  <span className="text-gymNeon font-extrabold">{effortRating}/10 ({getEffortLabel(effortRating)})</span>
+                </label>
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="10" 
+                  value={effortRating}
+                  onChange={(e) => setEffortRating(parseInt(e.target.value))}
+                  className="w-full accent-gymNeon h-1 bg-white/5 rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
+
+              {/* Estado de Ánimo (Emojis) */}
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] text-neutral-400 font-bold uppercase">Estado de Ánimo</label>
+                <div className="grid grid-cols-5 gap-2">
+                  {[
+                    { emoji: "💪", label: "Fuerte" },
+                    { emoji: "😊", label: "Bien" },
+                    { emoji: "🥵", label: "Exhausto" },
+                    { emoji: "😴", label: "Cansado" },
+                    { emoji: "🤕", label: "Dolor" }
+                  ].map((item) => (
+                    <button
+                      key={item.emoji}
+                      type="button"
+                      onClick={() => setMoodEmoji(item.emoji)}
+                      className={`py-2 rounded-xl border text-xl flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                        moodEmoji === item.emoji 
+                          ? 'border-gymNeon bg-gymNeon/15 text-white' 
+                          : 'border-white/5 bg-black/20 text-neutral-500 hover:text-white'
+                      }`}
+                    >
+                      <span>{item.emoji}</span>
+                      <span className="text-[8px] font-semibold">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Comentarios / Notas */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-neutral-400 font-bold uppercase">Notas para tu Coach</label>
+                <textarea 
+                  value={feedbackNotes}
+                  onChange={(e) => setFeedbackNotes(e.target.value)}
+                  placeholder="Ej: Sentí un poco de molestia en la rodilla izquierda, pero pude terminar todas las series..."
+                  rows="3"
+                  className="bg-black/30 border border-white/10 rounded-xl p-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-gymNeon transition-all resize-none"
+                />
+              </div>
+            </div>
+
+            <button 
+              type="button"
+              onClick={handleSubmitFeedback}
+              className="bg-gymNeon hover:bg-gymNeon/90 text-black font-extrabold uppercase py-3 rounded-xl text-xs tracking-wider transition-all mt-2 cursor-pointer flex justify-center items-center gap-1.5"
+            >
+              <Check className="w-4 h-4" />
+              <span>Enviar Reporte de Sesión</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Video Guide Modal */}
       {videoModal.isOpen && (
