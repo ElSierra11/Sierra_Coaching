@@ -164,6 +164,13 @@ export const api = {
     });
   },
 
+  aiCalculateMacros: async (meals) => {
+    return request("/coach/ai-calculate-macros", {
+      method: "POST",
+      body: JSON.stringify(meals),
+    });
+  },
+
   getSetting: async (key) => {
     return request(`/settings/${key}`);
   },

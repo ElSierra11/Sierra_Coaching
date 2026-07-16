@@ -352,3 +352,11 @@ class ChatRequest(BaseModel):
     message: str
     history: List[ChatMessage] = []
 
+
+class AICalculateMacrosRequest(BaseModel):
+    desayuno: Optional[str] = ""
+    almuerzo: Optional[str] = ""
+    cena: Optional[str] = ""
+    merienda: Optional[str] = ""
+
+

@@ -980,6 +980,79 @@ def ai_generate_plan(payload: schemas.AIGenerateRequest, db: Session = Depends(g
         print(f"Error llamando a Gemini API ({e}). Usando plan de fallback...")
         return generate_fallback_plan(client, payload.type, payload.day_name, payload.day_number)
 
+
+@app.post("/api/coach/ai-calculate-macros")
+def ai_calculate_macros(payload: schemas.AICalculateMacrosRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_coach)):
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("GEMINI_API_KEY no encontrada. Generando macros de fallback local...")
+        return {
+            "calories": 2000,
+            "proteins": 140,
+            "carbs": 180,
+            "fats": 65
+        }
+        
+    prompt = f"""
+    Eres un nutricionista deportivo certificado de alto nivel.
+    Calcula o estima detalladamente los macronutrientes y calorías totales para las siguientes comidas del día:
+    - Desayuno: {payload.desayuno}
+    - Almuerzo: {payload.almuerzo}
+    - Cena: {payload.cena}
+    - Merienda: {payload.merienda}
+
+    Responde ÚNICAMENTE con un objeto JSON válido con la siguiente estructura (no agregues formato markdown como ```json o ```, solo el texto JSON puro para que pueda ser parseado directamente):
+    {{
+        "calories": 2000,
+        "proteins": 140,
+        "carbs": 180,
+        "fats": 65
+    }}
+    Asegúrate de que los macronutrientes calculados coincidan lógicamente con las calorías totales (Proteínas = 4 kcal/g, Carbohidratos = 4 kcal/g, Grasas = 9 kcal/g). Si alguna comida está vacía, no tiene sentido o dice 'Sin asignar', asume 0 macros para esa comida específica. Sé preciso con porciones comunes.
+    """
+    
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    headers = {"Content-Type": "application/json"}
+    body = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }],
+        "generationConfig": {
+            "responseMimeType": "application/json"
+        }
+    }
+    
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(body).encode("utf-8"),
+            headers=headers,
+            method="POST"
+        )
+        
+        with urllib.request.urlopen(req, timeout=12) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            text_content = res_data["candidates"][0]["content"]["parts"][0]["text"]
+            text_content = text_content.strip()
+            if text_content.startswith("```"):
+                lines = text_content.split("\n")
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                text_content = "\n".join(lines).strip()
+            parsed_json = json.loads(text_content)
+            return parsed_json
+    except Exception as e:
+        print(f"Error llamando a Gemini API para calcular macros ({e}). Usando fallback...")
+        return {
+            "calories": 1800,
+            "proteins": 130,
+            "carbs": 160,
+            "fats": 55
+        }
+
+
 # --- ENDPOINTS NUEVOS: NUTRICIÓN AVANZADA ---
 
 @app.post("/api/clients/{client_id}/tdee", response_model=schemas.ClientProfileResponse)

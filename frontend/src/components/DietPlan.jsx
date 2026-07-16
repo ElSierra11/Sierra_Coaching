@@ -10,7 +10,7 @@ const MacroCircle = ({ percentage, color, label, value, target }) => {
   const strokeDashoffset = circumference - (Math.min(percentage, 100) / 100) * circumference;
 
   return (
-    <div className="bg-black/25 rounded-2xl p-4 border border-white/5 flex flex-col gap-2 items-center text-center relative overflow-hidden flex-1 min-w-[90px]">
+    <div className="bg-black/25 rounded-2xl p-4 border border-white/5 flex flex-col gap-2 items-center text-center relative overflow-hidden flex-1 min-w-0 md:min-w-[90px]">
       <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider">{label}</span>
       <div className="relative w-16 h-16 flex items-center justify-center">
         <svg className="w-full h-full transform -rotate-90">
@@ -585,9 +585,9 @@ export default function DietPlan({ client, onUpdateClient, showToast }) {
         </div>
 
         {/* Circular Progress Rings Grid */}
-        <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between">
+        <div className="grid grid-cols-3 md:flex md:flex-nowrap gap-4">
           {/* CALORIES CARD */}
-          <div className="bg-black/25 rounded-2xl p-4 border border-white/5 flex flex-col justify-between items-center text-center flex-1 min-w-[130px]">
+          <div className="bg-black/25 rounded-2xl p-4 border border-white/5 flex flex-col justify-between items-center text-center col-span-3 md:flex-1 md:min-w-[130px]">
             <span className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider">Calorías Consumidas</span>
             <span className="text-2xl font-black text-white mt-3 mb-2">
               {nutritionLog.calories_consumed} 

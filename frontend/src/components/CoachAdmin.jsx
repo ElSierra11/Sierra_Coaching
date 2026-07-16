@@ -1,7 +1,94 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles } from 'lucide-react';
+import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles, Calculator, Info } from 'lucide-react';
 import ChatWindow from './ChatWindow';
+
+const WeightChart = ({ history, initialWeight }) => {
+  // Combine initial weight (from profile) and history
+  const data = [];
+  if (initialWeight) {
+    data.push({ date: 'Inicio', weight: initialWeight });
+  }
+  (history || []).forEach(w => {
+    data.push({ date: w.date.substring(5), weight: w.weight }); // simplify date to MM-DD
+  });
+
+  if (data.length < 2) {
+    return (
+      <div className="bg-black/25 rounded-xl p-6 border border-white/5 text-center text-neutral-500 text-xs italic">
+        Insuficientes datos para graficar el peso. Registra al menos un peso en el historial del alumno.
+      </div>
+    );
+  }
+
+  const weights = data.map(d => d.weight);
+  const minW = Math.min(...weights) - 2;
+  const maxW = Math.max(...weights) + 2;
+  const rangeW = maxW - minW || 1;
+
+  const width = 500;
+  const height = 150;
+  const padding = 25;
+
+  const points = data.map((d, idx) => {
+    const x = padding + (idx * (width - 2 * padding)) / (data.length - 1);
+    const y = height - padding - ((d.weight - minW) / rangeW) * (height - 2 * padding);
+    return { x, y, ...d };
+  });
+
+  const pathD = `M ${points.map(p => `${p.x} ${p.y}`).join(' L ')}`;
+  const areaD = `${pathD} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
+
+  return (
+    <div className="bg-black/25 rounded-2xl p-4 border border-white/5 flex flex-col gap-2 relative overflow-hidden">
+      <div className="flex justify-between items-center text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
+        <span>Curva de Variación de Peso (kg)</span>
+        <span className="text-gymNeon font-black text-xs">{data[data.length - 1].weight} kg</span>
+      </div>
+      <div className="relative w-full h-[140px] mt-2">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+          <defs>
+            <linearGradient id="coachChartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ff5722" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#ff5722" stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+
+          {/* Grid lines */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+            const y = padding + ratio * (height - 2 * padding);
+            const val = (maxW - ratio * rangeW).toFixed(1);
+            return (
+              <g key={idx}>
+                <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="rgba(255,255,255,0.03)" strokeDasharray="3 3" />
+                <text x={padding - 5} y={y + 3} fill="rgba(255,255,255,0.3)" fontSize="8" textAnchor="end">{val}</text>
+              </g>
+            );
+          })}
+
+          {/* Shaded Area */}
+          <path d={areaD} fill="url(#coachChartGrad)" />
+
+          {/* Line Path */}
+          <path d={pathD} fill="none" stroke="#ff5722" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+
+          {/* Data Points */}
+          {points.map((p, idx) => (
+            <g key={idx} className="group cursor-pointer">
+              <circle cx={p.x} cy={p.y} r="3.5" fill="#111" stroke="#ff5722" strokeWidth="2" />
+              <text x={p.x} y={p.y - 8} fill="#fff" fontSize="8" fontWeight="black" textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                {p.weight}
+              </text>
+              <text x={p.x} y={height - 5} fill="rgba(255,255,255,0.4)" fontSize="7" textAnchor="middle">
+                {p.date}
+              </text>
+            </g>
+          ))}
+        </svg>
+      </div>
+    </div>
+  );
+};
 
 export default function CoachAdmin({ showToast }) {
   const [clients, setClients] = useState([]);
@@ -67,6 +154,42 @@ export default function CoachAdmin({ showToast }) {
       showToast(`Menú del Día ${dayNum} generado. ¡Revisa y guarda!`, "success");
     } catch (e) {
       showToast("Error al generar dieta con IA: " + e.message, "error");
+    } finally {
+      setGeneratingAI(false);
+    }
+  };
+
+  const handleAICalculateMacros = async (dayNum) => {
+    if (generatingAI || !selectedClient) return;
+
+    // Find the specific day's meals from the editDiet state
+    const targetMeal = editDiet.find(m => m.day_number === dayNum);
+    if (!targetMeal) return;
+
+    const hasContent = [targetMeal.desayuno, targetMeal.almuerzo, targetMeal.cena, targetMeal.merienda]
+      .some(content => content && content.trim() !== "" && content !== "Sin asignar");
+
+    if (!hasContent) {
+      showToast("Escribe la descripción de las comidas antes de calcular los macros.", "info");
+      return;
+    }
+
+    setGeneratingAI(true);
+    showToast(`Calculando macros para Día ${dayNum} con IA... Por favor espera.`, "info");
+    try {
+      const data = await api.aiCalculateMacros({
+        desayuno: targetMeal.desayuno || '',
+        almuerzo: targetMeal.almuerzo || '',
+        cena: targetMeal.cena || '',
+        merienda: targetMeal.merienda || ''
+      });
+      handleDietMealChange(dayNum, 'calories', data.calories || 0);
+      handleDietMealChange(dayNum, 'proteins', data.proteins || 0);
+      handleDietMealChange(dayNum, 'carbs', data.carbs || 0);
+      handleDietMealChange(dayNum, 'fats', data.fats || 0);
+      showToast(`Macros calculados con éxito para el Día ${dayNum}.`, "success");
+    } catch (e) {
+      showToast("Error al calcular macros con IA: " + e.message, "error");
     } finally {
       setGeneratingAI(false);
     }
@@ -301,10 +424,34 @@ export default function CoachAdmin({ showToast }) {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="flex flex-col lg:grid lg:grid-cols-4 gap-6">
       
-      {/* 1. LEFT COLUMN: CLIENTS LIST */}
-      <div className="glass-panel p-5 rounded-2xl shadow-lg flex flex-col gap-4 self-start">
+      {/* MOBILE CLIENT SWITCHER (Hidden on lg) */}
+      <div className="lg:hidden glass-panel p-4 rounded-2xl flex flex-col gap-2 shadow-lg">
+        <h3 className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Seleccionar Alumno</h3>
+        {loadingList ? (
+          <div className="text-neutral-500 text-xs italic">Cargando alumnos...</div>
+        ) : (
+          <div className="flex gap-2 items-center overflow-x-auto no-scrollbar pb-1">
+            {clients.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setSelectedClientId(c.id)}
+                className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                  selectedClientId === c.id
+                    ? 'bg-gymNeon text-black border-gymNeon font-extrabold'
+                    : 'bg-white/[0.02] border-white/5 text-neutral-400'
+                }`}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* DESKTOP CLIENTS LIST (Hidden on mobile) */}
+      <div className="hidden lg:flex glass-panel p-5 rounded-2xl shadow-lg flex-col gap-4 self-start">
         <h3 className="text-xs font-bold text-white uppercase tracking-wider">Mis Alumnos</h3>
         
         {loadingList ? (
@@ -538,8 +685,10 @@ export default function CoachAdmin({ showToast }) {
                     {/* Weight and measurements logs */}
                     <div className="glass-panel p-6 rounded-2xl md:col-span-2 flex flex-col gap-4">
                       <h4 className="text-xs font-bold text-white uppercase tracking-wider">Historial Corporal</h4>
-                      <div className="flex flex-col gap-3">
-                        <div className="text-xs font-bold text-neutral-400">Peso Semanal:</div>
+                      <div className="flex flex-col gap-4">
+                        <WeightChart history={selectedClient.weight_history} initialWeight={selectedClient.profile?.initial_weight} />
+                        
+                        <div className="text-xs font-bold text-neutral-400">Pesos Registrados:</div>
                         <div className="flex flex-wrap gap-2">
                           {(selectedClient.weight_history || []).map((w, idx) => (
                             <div key={idx} className="bg-black/30 border border-white/5 px-3 py-2 rounded-lg text-xs">
@@ -732,15 +881,27 @@ export default function CoachAdmin({ showToast }) {
                         <div key={meal.day_number} className="bg-black/20 p-5 rounded-xl border border-white/5 flex flex-col gap-4">
                           <div className="flex justify-between items-center">
                             <span className="text-xs font-extrabold text-gymNeon uppercase tracking-widest">Día {meal.day_number}</span>
-                            <button
-                              type="button"
-                              disabled={generatingAI}
-                              onClick={() => handleAIGenerateDiet(meal.day_number)}
-                              className="bg-gymNeon/10 hover:bg-gymNeon/25 text-gymNeon font-extrabold border border-gymNeon/20 px-2.5 py-1 rounded-[6px] text-[9px] uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1"
-                            >
-                              <Sparkles className="w-2.5 h-2.5 animate-pulse" />
-                              <span>Generar Día con IA</span>
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                disabled={generatingAI}
+                                onClick={() => handleAICalculateMacros(meal.day_number)}
+                                className="bg-white/5 hover:bg-white/10 text-neutral-300 font-extrabold border border-white/10 px-2.5 py-1 rounded-[6px] text-[9px] uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1"
+                                title="Calcula automáticamente las calorías y macros basándose en el texto escrito"
+                              >
+                                <Calculator className="w-2.5 h-2.5" />
+                                <span>Calcular Macros con IA</span>
+                              </button>
+                              <button
+                                type="button"
+                                disabled={generatingAI}
+                                onClick={() => handleAIGenerateDiet(meal.day_number)}
+                                className="bg-gymNeon/10 hover:bg-gymNeon/25 text-gymNeon font-extrabold border border-gymNeon/20 px-2.5 py-1 rounded-[6px] text-[9px] uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1"
+                              >
+                                <Sparkles className="w-2.5 h-2.5 animate-pulse" />
+                                <span>Generar Día con IA</span>
+                              </button>
+                            </div>
                           </div>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
