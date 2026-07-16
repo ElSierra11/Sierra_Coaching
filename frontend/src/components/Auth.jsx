@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../api';
-import { Dumbbell, Apple, TrendingUp, Droplet, MessageCircle, Check, KeyRound, Crown, ArrowRight, Sun, Moon, Activity, Flame, Heart, X, Star, UserCheck, ClipboardList, Smartphone } from 'lucide-react';
+import { Dumbbell, Apple, TrendingUp, Droplet, MessageCircle, Check, KeyRound, Crown, ArrowRight, Sun, Moon, Activity, Flame, Heart, X, Star, UserCheck, ClipboardList, Smartphone, Menu } from 'lucide-react';
 
 export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -17,6 +17,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
 
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,8 +117,52 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
               <MessageCircle className="w-4 h-4 text-green-500" />
               <span>Contacto Coach</span>
             </a>
+
+            {/* Mobile Menu Toggle Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden inline-flex items-center justify-center p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer"
+              title="Menu"
+            >
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
           </div>
         </div>
+        {/* Mobile Menu Panel */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-white/5 bg-gymDark-900/95 backdrop-blur-lg px-6 py-4 flex flex-col gap-4 animate-slide-in">
+            <a 
+              href="#beneficios" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-colors py-2 border-b border-white/5"
+            >
+              Beneficios
+            </a>
+            <a 
+              href="#precios" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-colors py-2 border-b border-white/5"
+            >
+              Precios
+            </a>
+            <button 
+              onClick={() => { setMobileMenuOpen(false); setIsLogin(true); setShowAuthModal(true); }}
+              className="text-sm font-bold uppercase tracking-wider text-gymNeon hover:text-white transition-colors py-2 border-b border-white/5 text-left cursor-pointer"
+            >
+              Acceso Alumnos
+            </button>
+            <a
+              href="https://wa.me/573022114190"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-center gap-1.5 bg-gymNeon text-black font-extrabold uppercase py-3 rounded-xl transition-all text-xs tracking-wider shadow-lg"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Contacto Coach</span>
+            </a>
+          </div>
+        )}
       </header>
 
       {/* Main Grid: Hero section & visual coach display */}
@@ -150,20 +195,20 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
         </div>
 
         {/* Right Column: Visual display of coach with interactive floaters */}
-        <div className="lg:col-span-5 relative flex justify-center items-center min-h-[420px]">
+        <div className="lg:col-span-5 relative flex justify-center items-end min-h-[380px] sm:min-h-[460px] mt-6 lg:mt-0">
           {/* Deep radial orange glow backdrop */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[380px] h-[380px] rounded-full bg-gymNeon/25 blur-[80px]"></div>
+            <div className="w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] rounded-full bg-gymNeon/25 blur-[80px]"></div>
           </div>
           {/* Subtle rim light ring */}
-          <div className="absolute w-[340px] h-[340px] rounded-full border-2 border-gymNeon/20 pointer-events-none"></div>
+          <div className="absolute w-[240px] h-[240px] sm:w-[340px] sm:h-[340px] rounded-full border-2 border-gymNeon/20 pointer-events-none"></div>
           
           {/* Coach Photo Container */}
           <div className="relative z-10 flex items-end justify-center">
             <img
               src="/coach.png"
               alt="Sierra Coaching - Alejandro Sierra"
-              className="w-auto max-w-[340px] h-[420px] object-cover object-top relative z-10 drop-shadow-[0_20px_40px_rgba(255,87,34,0.5)] filter brightness-105 contrast-105 saturate-110"
+              className="w-auto max-w-[260px] sm:max-w-[340px] h-[340px] sm:h-[420px] object-cover object-top relative z-10 filter brightness-105 contrast-105 saturate-110"
               style={{ 
                 filter: 'drop-shadow(0 0 30px rgba(255, 87, 34, 0.6)) drop-shadow(0 20px 40px rgba(0,0,0,0.8)) brightness(1.08) contrast(1.05) saturate(1.1)'
               }}
@@ -172,39 +217,39 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
               }}
             />
             {/* Ground shadow */}
-            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-6 bg-gymNeon/20 rounded-full blur-xl pointer-events-none z-0"></div>
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-36 sm:w-48 h-4 bg-gymNeon/20 rounded-full blur-xl pointer-events-none z-0"></div>
           </div>
 
           {/* Floating Widget 1: Calories */}
-          <div className="absolute -top-4 -left-4 sm:left-4 bg-gymDark-900/90 border border-white/10 backdrop-blur-md rounded-xl p-3 flex items-center gap-3 z-20 shadow-lg transition-colors duration-300">
-            <div className="bg-gymNeon/10 text-gymNeon p-2 rounded-lg">
-              <Activity className="w-5 h-5" />
+          <div className="absolute top-2 left-2 sm:left-4 bg-gymDark-900/90 border border-white/10 backdrop-blur-md rounded-xl p-2.5 flex items-center gap-2.5 z-20 shadow-lg transition-colors duration-300">
+            <div className="bg-gymNeon/10 text-gymNeon p-1.5 rounded-lg">
+              <Activity className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[9px] text-neutral-400 font-bold uppercase block">Calorías Quemadas</span>
-              <span className="text-xs font-black text-white">220 kcal</span>
+              <span className="text-[8px] text-neutral-400 font-bold uppercase block">Calorías Quemadas</span>
+              <span className="text-[11px] font-black text-white">220 kcal</span>
             </div>
           </div>
 
           {/* Floating Widget 2: Fat burning */}
-          <div className="absolute top-1/2 -translate-y-1/2 -right-4 sm:-right-8 bg-gymDark-900/90 border border-white/10 backdrop-blur-md rounded-xl p-3 flex items-center gap-3 z-20 shadow-lg transition-colors duration-300">
-            <div className="bg-red-500/10 text-red-500 p-2 rounded-lg">
-              <Flame className="w-5 h-5" />
+          <div className="absolute top-1/2 -translate-y-1/2 right-2 sm:-right-8 bg-gymDark-900/90 border border-white/10 backdrop-blur-md rounded-xl p-2.5 flex items-center gap-2.5 z-20 shadow-lg transition-colors duration-300">
+            <div className="bg-red-500/10 text-red-500 p-1.5 rounded-lg">
+              <Flame className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[9px] text-neutral-400 font-bold uppercase block">Quema de Grasa</span>
-              <span className="text-xs font-black text-white">57%</span>
+              <span className="text-[8px] text-neutral-400 font-bold uppercase block">Quema de Grasa</span>
+              <span className="text-[11px] font-black text-white">57%</span>
             </div>
           </div>
 
           {/* Floating Widget 3: Heart Rate */}
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-gymDark-900/90 border border-white/10 backdrop-blur-md rounded-xl p-3 flex items-center gap-3 z-20 shadow-lg transition-colors duration-300">
-            <div className="bg-gymNeon/10 text-gymNeon p-2 rounded-lg">
-              <Heart className="w-4 h-4 text-red-500 animate-pulse" />
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-gymDark-900/90 border border-white/10 backdrop-blur-md rounded-xl p-2.5 flex items-center gap-2.5 z-20 shadow-lg transition-colors duration-300">
+            <div className="bg-gymNeon/10 text-gymNeon p-1.5 rounded-lg">
+              <Heart className="w-3.5 h-3.5 text-red-500 animate-pulse" />
             </div>
             <div>
-              <span className="text-[9px] text-neutral-400 font-bold uppercase block">Ritmo Cardíaco</span>
-              <span className="text-xs font-black text-white">130 lpm</span>
+              <span className="text-[8px] text-neutral-400 font-bold uppercase block">Ritmo Cardíaco</span>
+              <span className="text-[11px] font-black text-white">130 lpm</span>
             </div>
           </div>
         </div>
