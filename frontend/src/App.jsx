@@ -9,6 +9,7 @@ import ProgressTracker from './components/ProgressTracker';
 import CoachAdmin from './components/CoachAdmin';
 import { LayoutDashboard, Dumbbell, Apple, TrendingUp, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 import InstallPrompt from './components/InstallPrompt';
+import SkeletonLoader from './components/SkeletonLoader';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -120,13 +121,13 @@ export default function App() {
         // Client View
         <div>
           {loading && !clientData ? (
-            <div className="glass-panel p-16 text-center text-neutral-400 text-sm rounded-2xl">
-              Cargando tus planes y avances...
+            <div className="max-w-7xl mx-auto px-6">
+              <SkeletonLoader type={activeTab} />
             </div>
           ) : clientData ? (
             <div>
-              {/* Tab Navigation — fixed bottom bar on mobile, inline on md+ */}
-              <nav className="fixed bottom-0 left-0 right-0 z-40 md:static md:mb-8 flex justify-around md:justify-center bg-gymDark-900/95 md:bg-gymDark-900 border-t md:border border-white/10 md:border-white/5 p-1 md:p-1.5 md:rounded-2xl md:max-w-3xl md:mx-auto backdrop-blur-md gap-1">
+              {/* Tab Navigation — floating iOS-style tab bar on mobile, inline on md+ */}
+              <nav className="fixed bottom-4 left-4 right-4 z-40 md:static md:mb-8 flex justify-around md:justify-center bg-gymDark-900/85 md:bg-gymDark-900 border border-white/10 md:border-white/5 p-1.5 md:p-1.5 rounded-2xl md:max-w-3xl md:mx-auto backdrop-blur-md gap-1 shadow-2xl">
                 {[
                   { id: 'dashboard', label: 'Inicio', icon: LayoutDashboard },
                   { id: 'routine',   label: 'Rutina',  icon: Dumbbell },

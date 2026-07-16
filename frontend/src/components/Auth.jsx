@@ -2,6 +2,335 @@ import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../api';
 import { Dumbbell, Apple, TrendingUp, Droplet, MessageCircle, Check, KeyRound, Crown, ArrowRight, Sun, Moon, Activity, Flame, Heart, X, Star, UserCheck, ClipboardList, Smartphone, Menu } from 'lucide-react';
 
+const BeforeAfterSlider = () => {
+  const [sliderPosition, setSliderPosition] = useState(50);
+  const containerRef = useRef(null);
+
+  const handleMove = (clientX) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const position = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPosition(position);
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length > 0) {
+      handleMove(e.touches[0].clientX);
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (e.buttons === 1) { // Left click held
+      handleMove(e.clientX);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-4 items-center w-full">
+      <div className="text-center">
+        <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Caso de Éxito Principal</span>
+        <h3 className="text-lg font-black uppercase text-white mt-1">El Cambio del Coach</h3>
+        <p className="text-neutral-500 text-xs mt-1">Arrastra el botón azul para ver el cambio de antes a después.</p>
+      </div>
+
+      <div 
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        onTouchMove={handleTouchMove}
+        className="relative w-full max-w-[340px] h-[400px] rounded-2xl overflow-hidden shadow-2xl border border-white/10 select-none cursor-ew-resize"
+      >
+        {/* AFTER (Current) */}
+        <img 
+          src="/coach.png" 
+          alt="Después" 
+          className="absolute inset-0 w-full h-full object-cover object-top pointer-events-none"
+        />
+        
+        {/* BEFORE */}
+        <div 
+          className="absolute inset-0 w-full h-full overflow-hidden" 
+          style={{ width: `${sliderPosition}%` }}
+        >
+          <img 
+            src="/before_coach.jpg" 
+            alt="Antes" 
+            className="absolute inset-0 w-[340px] h-[400px] object-cover object-top max-w-none pointer-events-none"
+            style={{ width: '340px', height: '400px' }}
+          />
+        </div>
+
+        {/* Separator bar */}
+        <div 
+          className="absolute top-0 bottom-0 w-1 bg-gymNeon cursor-ew-resize"
+          style={{ left: `${sliderPosition}%` }}
+        >
+          <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-gymNeon text-black flex items-center justify-center font-black shadow-lg text-sm border border-black">
+            ↔
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const FreeCalorieCalculator = () => {
+  const [gender, setGender] = useState('male');
+  const [weight, setWeight] = useState(70);
+  const [height, setHeight] = useState(170);
+  const [age, setAge] = useState(25);
+  const [activity, setActivity] = useState(1.375); // moderate
+  const [goal, setGoal] = useState('perder');
+  const [result, setResult] = useState(null);
+
+  const calculate = (e) => {
+    e.preventDefault();
+    let bmr = 0;
+    if (gender === 'male') {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+    const tdee = Math.round(bmr * activity);
+    let targetCal = tdee;
+    if (goal === 'perder') targetCal -= 400;
+    if (goal === 'ganar') targetCal += 400;
+
+    const prot = Math.round(weight * 2.0);
+    const fat = Math.round(weight * 0.8);
+    const remaining = targetCal - (prot * 4) - (fat * 9);
+    const carb = Math.max(0, Math.round(remaining / 4));
+
+    setResult({
+      calories: targetCal,
+      proteins: prot,
+      carbs: carb,
+      fats: fat
+    });
+  };
+
+  return (
+    <div className="glass-panel p-6 rounded-3xl border border-white/5 bg-white/[0.01] flex flex-col gap-5 w-full">
+      <div className="text-center">
+        <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Calculadora Nutricional</span>
+        <h3 className="text-lg font-black uppercase text-white mt-1">Estima tus Requerimientos</h3>
+        <p className="text-neutral-500 text-xs mt-1">Ingresa tus datos y descubre tus macros sugeridos.</p>
+      </div>
+
+      <form onSubmit={calculate} className="grid grid-cols-2 gap-4 text-left">
+        <div className="flex flex-col gap-1.5 col-span-2">
+          <label className="text-[10px] text-neutral-400 font-bold uppercase">Género</label>
+          <div className="flex gap-2 bg-black/40 rounded-xl p-1 border border-white/5">
+            <button
+              type="button"
+              onClick={() => setGender('male')}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                gender === 'male' ? 'bg-gymNeon text-black' : 'text-neutral-400'
+              }`}
+            >
+              Masculino
+            </button>
+            <button
+              type="button"
+              onClick={() => setGender('female')}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                gender === 'female' ? 'bg-gymNeon text-black' : 'text-neutral-400'
+              }`}
+            >
+              Femenino
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] text-neutral-400 font-bold uppercase">Peso (kg)</label>
+          <input 
+            type="number" 
+            value={weight} 
+            onChange={(e) => setWeight(Number(e.target.value))}
+            className="bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] text-neutral-400 font-bold uppercase">Estatura (cm)</label>
+          <input 
+            type="number" 
+            value={height} 
+            onChange={(e) => setHeight(Number(e.target.value))}
+            className="bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] text-neutral-400 font-bold uppercase">Edad (años)</label>
+          <input 
+            type="number" 
+            value={age} 
+            onChange={(e) => setAge(Number(e.target.value))}
+            className="bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] text-neutral-400 font-bold uppercase">Objetivo</label>
+          <select 
+            value={goal} 
+            onChange={(e) => setGoal(e.target.value)}
+            className="bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none h-full"
+          >
+            <option value="perder">Definición</option>
+            <option value="mantener">Mantenimiento</option>
+            <option value="ganar">Volumen</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1 col-span-2">
+          <label className="text-[10px] text-neutral-400 font-bold uppercase">Nivel de Actividad</label>
+          <select 
+            value={activity} 
+            onChange={(e) => setActivity(Number(e.target.value))}
+            className="bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+          >
+            <option value="1.2">Poco o ningún ejercicio</option>
+            <option value="1.375">Ligero (1-3 días/sem)</option>
+            <option value="1.55">Moderado (3-5 días/sem)</option>
+            <option value="1.725">Fuerte (6-7 días/sem)</option>
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          className="col-span-2 bg-gymNeon text-black font-extrabold uppercase py-3 rounded-xl tracking-wider text-xs shadow-lg mt-2 cursor-pointer"
+        >
+          Calcular Requerimientos
+        </button>
+      </form>
+
+      {result && (
+        <div className="bg-black/40 rounded-2xl p-4 border border-white/5 flex flex-col gap-3 text-center animate-scale-in">
+          <div>
+            <span className="text-[9px] text-neutral-500 font-bold uppercase">Calorías Sugeridas</span>
+            <div className="text-xl font-black text-white mt-0.5">{result.calories} kcal/día</div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-white/5 rounded-xl p-2.5">
+              <span className="text-[8px] text-neutral-400 font-bold uppercase block">Proteínas</span>
+              <span className="text-xs font-black text-white">{result.proteins}g</span>
+            </div>
+            <div className="bg-white/5 rounded-xl p-2.5">
+              <span className="text-[8px] text-neutral-400 font-bold uppercase block">Carbos</span>
+              <span className="text-xs font-black text-white">{result.carbs}g</span>
+            </div>
+            <div className="bg-white/5 rounded-xl p-2.5">
+              <span className="text-[8px] text-neutral-400 font-bold uppercase block">Grasas</span>
+              <span className="text-xs font-black text-white">{result.fats}g</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FAQAccordion = () => {
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  const faqs = [
+    {
+      q: "¿Necesito ir al gimnasio o puedo entrenar en casa?",
+      a: "Tus rutinas se diseñan a tu medida. Si entrenas en casa, planificaremos usando mancuernas, bandas o peso corporal. Si tienes acceso a gimnasio, maximizaremos el uso de máquinas."
+    },
+    {
+      q: "¿Cómo funciona el soporte de WhatsApp?",
+      a: "Tendrás chat directo conmigo para resolver dudas de técnica (puedes mandarme videos de tus series), dolores o ajustes en la dieta en cualquier momento del día."
+    },
+    {
+      q: "¿Qué pasa si tengo una lesión?",
+      a: "Haremos una adaptación completa de los ejercicios para evitar dolor y rehabilitar la zona. Tu salud y seguridad van primero."
+    },
+    {
+      q: "¿Los planes de comida incluyen alimentos costosos o difíciles?",
+      a: "Para nada. Trabajo con comida real y accesible: huevos, pollo, arroz, avena, papas, verduras y frutas comunes. Adaptaremos el menú a tus gustos y presupuesto."
+    }
+  ];
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <div className="text-center">
+        <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Preguntas Frecuentes</span>
+        <h2 className="text-2xl font-black uppercase text-white mt-1">Dudas Comunes</h2>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {faqs.map((faq, idx) => {
+          const isOpen = activeIndex === idx;
+          return (
+            <div 
+              key={idx} 
+              className="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300"
+            >
+              <button
+                type="button"
+                onClick={() => setActiveIndex(isOpen ? null : idx)}
+                className="w-full text-left p-5 flex justify-between items-center text-sm font-bold text-white uppercase tracking-wide bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-pointer"
+              >
+                <span>{faq.q}</span>
+                <span className="text-gymNeon text-lg">{isOpen ? '−' : '+'}</span>
+              </button>
+              
+              <div 
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                  isOpen ? 'max-h-40 border-t border-white/5' : 'max-h-0'
+                }`}
+              >
+                <p className="p-5 text-xs text-neutral-400 leading-relaxed bg-black/10">
+                  {faq.a}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const InstagramFeed = () => {
+  const posts = [
+    { url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400', likes: '1.2K', comments: '84' },
+    { url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400', likes: '2.5K', comments: '142' },
+    { url: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=400', likes: '986', comments: '53' },
+    { url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400', likes: '3.1K', comments: '210' }
+  ];
+
+  return (
+    <div className="flex flex-col gap-4 w-full text-center">
+      <div className="mb-4">
+        <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Comunidad</span>
+        <h2 className="text-2xl font-black uppercase text-white mt-1">Sigue el Progreso</h2>
+        <p className="text-neutral-500 text-xs mt-1">Instagram: <a href="https://instagram.com" target="_blank" className="text-gymNeon hover:underline">@Sierra_Coaching</a></p>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {posts.map((post, idx) => (
+          <div key={idx} className="relative rounded-2xl overflow-hidden aspect-square border border-white/5 group shadow-lg cursor-pointer">
+            <img src={post.url} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" alt="Instagram Post" />
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-4 transition-all duration-300">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-white">
+                <span>❤️</span> <span>{post.likes}</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-white">
+                <span>💬</span> <span>{post.comments}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
@@ -89,7 +418,9 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
           </div>
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-neutral-400">
             <a href="#beneficios" className="hover:text-white transition-colors">Beneficios</a>
+            <a href="#calcs" className="hover:text-white transition-colors">Calculadora</a>
             <a href="#precios" className="hover:text-white transition-colors">Precios</a>
+            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
             <button 
               onClick={() => { setIsLogin(true); setShowAuthModal(true); }}
               className="text-gymNeon hover:text-white transition-colors uppercase cursor-pointer"
@@ -139,11 +470,25 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
               Beneficios
             </a>
             <a 
+              href="#calcs" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-colors py-2 border-b border-white/5"
+            >
+              Calculadora
+            </a>
+            <a 
               href="#precios" 
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-colors py-2 border-b border-white/5"
             >
               Precios
+            </a>
+            <a 
+              href="#faq" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-colors py-2 border-b border-white/5"
+            >
+              FAQ
             </a>
             <button 
               onClick={() => { setMobileMenuOpen(false); setIsLogin(true); setShowAuthModal(true); }}
@@ -254,6 +599,12 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
           </div>
         </div>
       </main>
+
+      {/* Visual transformation slider and free calorie calculator grid */}
+      <section className="max-w-7xl mx-auto w-full px-6 py-12 border-t border-white/5 pt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start" id="calcs">
+        <BeforeAfterSlider />
+        <FreeCalorieCalculator />
+      </section>
 
       {/* Pricing Card Section */}
       <section className="max-w-7xl mx-auto w-full px-6 py-6" id="precios">
@@ -395,6 +746,16 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* FAQs Section */}
+      <section className="max-w-4xl mx-auto w-full px-6 py-12 border-t border-white/5 pt-16" id="faq">
+        <FAQAccordion />
+      </section>
+
+      {/* Instagram Feed Section */}
+      <section className="max-w-7xl mx-auto w-full px-6 py-12 border-t border-white/5 pt-16">
+        <InstagramFeed />
       </section>
 
       {/* Auth Modal Overlay */}
