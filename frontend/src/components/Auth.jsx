@@ -906,74 +906,59 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 border-t border-white/5 w-full" id="planes">
-        <div className="text-center mb-10">
-          <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Sin letra pequeña</span>
-          <h2 className="text-2xl font-black uppercase text-white mt-1">Elige tu Plan</h2>
-          <p className="text-neutral-400 text-xs mt-2">Pago mensual. Cancela cuando quieras. Sin contratos.</p>
+      {/* Pricing Section — Single All-Inclusive Plan */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-12 border-t border-white/5 w-full" id="planes">
+        <div className="text-center mb-8">
+          <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Transparencia Total</span>
+          <h2 className="text-2xl sm:text-3xl font-black uppercase text-white mt-1">Plan Todo Incluido</h2>
+          <p className="text-neutral-400 text-xs sm:text-sm mt-2">Todo el poder de la plataforma y el coaching por una sola tarifa mensual.</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-          {[
-            {
-              name: 'Esencial',
-              price: '50K',
-              period: 'COP / mes',
-              color: 'border-white/10',
-              badge: null,
-              features: ['Rutina de entrenamiento personalizada', 'Actualización mensual de rutina', 'Seguimiento de pesos y medidas', 'Acceso a la app Sierra Coaching'],
-              cta: 'Empezar Ahora',
-            },
-            {
-              name: 'Premium',
-              price: '80K',
-              period: 'COP / mes',
-              color: 'border-gymNeon/50',
-              badge: 'Más popular',
-              features: ['Todo lo del plan Esencial', 'Plan de alimentación semanal', 'Seguimiento de progreso fotográfico', 'Chat directo con el coach', 'Copiloto IA integrado'],
-              cta: 'Empezar Premium',
-            },
-            {
-              name: 'Elite',
-              price: '120K',
-              period: 'COP / mes',
-              color: 'border-amber-500/40',
-              badge: 'Resultados rápidos',
-              features: ['Todo lo del plan Premium', 'Rutina actualizada semanalmente', 'Llamada de seguimiento mensual', 'Análisis de macros personalizado', 'Prioridad en respuesta del coach'],
-              cta: 'Empezar Elite',
-            },
-          ].map(plan => (
-            <div key={plan.name} className={`glass-panel p-6 rounded-2xl border ${plan.color} flex flex-col gap-5 relative transition-all hover:scale-[1.02] duration-300`}>
-              {plan.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gymNeon text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">{plan.badge}</div>
-              )}
-              <div>
-                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{plan.name}</p>
-                <div className="flex items-end gap-1 mt-1">
-                  <span className="text-4xl font-black text-white">{plan.price}</span>
-                  <span className="text-xs text-neutral-500 mb-1">{plan.period}</span>
-                </div>
-              </div>
-              <ul className="flex flex-col gap-2.5">
-                {plan.features.map(f => (
-                  <li key={f} className="flex items-start gap-2 text-xs text-neutral-300">
-                    <Check className="w-3.5 h-3.5 text-gymNeon flex-shrink-0 mt-0.5" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <button
-                onClick={() => { setIsLogin(false); setShowAuthModal(true); }}
-                className={`mt-auto py-3 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider cursor-pointer transition-all ${
-                  plan.badge === 'Más popular'
-                    ? 'bg-gymNeon text-black hover:bg-white'
-                    : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-                }`}
-              >
-                {plan.cta}
-              </button>
+
+        <div className="glass-panel p-6 sm:p-10 rounded-3xl border-2 border-gymNeon/40 bg-neutral-900/90 relative shadow-[0_0_50px_rgba(255,87,34,0.15)] flex flex-col md:flex-row items-center justify-between gap-8 backdrop-blur-xl">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:left-10 md:translate-x-0 bg-gymNeon text-black text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-lg">
+            Plan Único Sierra Coaching
+          </div>
+
+          <div className="flex-1 text-left w-full mt-2 md:mt-0">
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-5xl font-black text-white">50K</span>
+              <span className="text-sm font-bold text-neutral-400">COP / mes</span>
             </div>
-          ))}
+
+            <p className="text-xs text-neutral-300 mb-6 leading-relaxed">
+              Accede a absolutamente todas las funcionalidades de la aplicación sin restricciones ni cobros adicionales:
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                'Rutinas de entrenamiento personalizadas',
+                'Plan de alimentación adaptado a tu meta',
+                'Seguimiento de peso y medidas corporales',
+                'Historial de progreso fotográfico',
+                'Control de racha de hábitos diarios',
+                'Chat directo con el Coach Alejandro',
+                'Copiloto e Inteligencia Artificial (IA) 24/7',
+                'Acceso completo a la App Web & PWA',
+              ].map(f => (
+                <div key={f} className="flex items-center gap-2.5 text-xs text-neutral-200">
+                  <div className="w-5 h-5 rounded-full bg-gymNeon/15 border border-gymNeon/30 flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3 text-gymNeon" />
+                  </div>
+                  <span>{f}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="w-full md:w-auto shrink-0 flex flex-col items-center gap-3">
+            <button
+              onClick={() => { setIsLogin(false); setShowAuthModal(true); }}
+              className="w-full md:w-auto py-4 px-8 rounded-2xl bg-gymNeon text-black font-black uppercase text-xs tracking-widest shadow-[0_0_25px_rgba(255,87,34,0.4)] hover:bg-white hover:shadow-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer text-center whitespace-nowrap"
+            >
+              Unirme por $50.000 COP →
+            </button>
+            <span className="text-[10px] text-neutral-500 font-medium">Pago mensual • Sin permanencia</span>
+          </div>
         </div>
       </section>
 
