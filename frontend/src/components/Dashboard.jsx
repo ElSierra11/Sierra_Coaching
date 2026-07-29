@@ -3,7 +3,7 @@ import { api } from '../api';
 import {
   Droplet, Moon, Flame, Ban, CheckCircle, AlertTriangle,
   Clock, Trophy, XCircle, Zap, Calendar, TrendingUp, BarChart2,
-  TrendingDown, Dumbbell, Sparkles, Send, MessageSquare, X, Edit3
+  TrendingDown, Dumbbell, Sparkles, Send, MessageSquare, X, Edit3, Camera, User
 } from 'lucide-react';
 
 // --- Streak Counter Widget ---
@@ -409,6 +409,36 @@ export default function Dashboard({ client, onUpdateClient, showToast, weeklyCha
     }
   };
 
+  const [isUploadingPic, setIsUploadingPic] = useState(false);
+  const [profilePic, setProfilePic] = useState(profile.profile_pic || '');
+
+  const handleProfilePicChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showToast && showToast("La imagen debe ser menor a 5MB", "error");
+      return;
+    }
+    setIsUploadingPic(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      try {
+        const base64Data = reader.result;
+        const res = await api.uploadProfilePic(client.id, base64Data);
+        setProfilePic(res.profile_pic);
+        if (onUpdateClient) {
+          onUpdateClient({ ...client, profile: { ...profile, profile_pic: res.profile_pic } });
+        }
+        showToast && showToast("¡Foto de perfil actualizada!", "success");
+      } catch (err) {
+        showToast && showToast("Error al subir foto: " + err.message, "error");
+      } finally {
+        setIsUploadingPic(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleWaterClick = (change) => {
     const newCups = Math.max(0, dailyLog.water_cups + change);
     handleHabitChange('water_cups', newCups);
@@ -435,8 +465,28 @@ export default function Dashboard({ client, onUpdateClient, showToast, weeklyCha
       
       {/* 1. Client Stats Row */}
       <section className="glass-panel border-l-4 border-gymNeon p-6 rounded-2xl shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Mi Perfil Físico</h3>
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            {/* Profile Avatar with Upload Button */}
+            <div className="relative group">
+              <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gymNeon bg-neutral-900 flex items-center justify-center shadow-lg">
+                {profilePic ? (
+                  <img src={profilePic} alt={client.name} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-7 h-7 text-neutral-400" />
+                )}
+              </div>
+              <label className="absolute -bottom-1 -right-1 bg-gymNeon text-black p-1.5 rounded-full cursor-pointer hover:scale-110 transition-all shadow-md">
+                <Camera className="w-3 h-3" />
+                <input type="file" accept="image/*" onChange={handleProfilePicChange} className="hidden" disabled={isUploadingPic} />
+              </label>
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold text-white">{client.name}</h3>
+              <span className="text-[10px] text-gymNeon font-bold uppercase tracking-wider">Alumno Sierra Coaching</span>
+            </div>
+          </div>
+
           <button
             onClick={() => {
               setEditHeight(profile.height || 1.67);

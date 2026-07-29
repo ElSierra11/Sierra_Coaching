@@ -1,6 +1,7 @@
 import datetime
 import os
 import json
+import secrets
 import urllib.request
 from fastapi import FastAPI, Depends, HTTPException, status, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +13,7 @@ from database import engine, Base, get_db, SessionLocal
 import models
 import schemas
 import bcrypt
-from email_service import send_registration_alert_email
+from email_service import send_registration_alert_email, send_password_reset_email
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -376,6 +377,12 @@ def register(payload: schemas.UserRegister, background_tasks: BackgroundTasks, d
             detail="Este correo ya está registrado y activo. Inicia sesión con tu contraseña."
         )
 
+    # Validate password strength
+    if len(payload.password) < 8:
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 8 caracteres.")
+    if not any(c.isdigit() for c in payload.password):
+        raise HTTPException(status_code=400, detail="La contraseña debe contener al menos un número.")
+
     # Find coach to link to
     coach = db.query(models.User).filter(models.User.role == "coach").first()
     coach_id = coach.id if coach else None
@@ -450,6 +457,65 @@ def register(payload: schemas.UserRegister, background_tasks: BackgroundTasks, d
 
     token = create_access_token({"user_id": new_user.id, "email": new_user.email, "role": new_user.role})
     return {"token": token, "user": new_user}
+
+
+# --- Coach Approval Endpoints ---
+
+@app.post("/api/auth/forgot-password")
+def forgot_password(payload: schemas.ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Send password reset link to user's email."""
+    user = db.query(models.User).filter(models.User.email == payload.email).first()
+    # Always return success to avoid email enumeration
+    if user:
+        token = secrets.token_urlsafe(32)
+        expires_at = (datetime.datetime.now() + datetime.timedelta(hours=1)).isoformat()
+        reset_record = models.PasswordResetToken(
+            user_id=user.id,
+            token=token,
+            expires_at=expires_at,
+            used=False
+        )
+        db.add(reset_record)
+        db.commit()
+        background_tasks.add_task(send_password_reset_email, user.email, user.name, token)
+    return {"message": "Si el correo existe, recibirás un enlace de recuperación en breve."}
+
+
+@app.post("/api/auth/reset-password")
+def reset_password(payload: schemas.ResetPasswordRequest, db: Session = Depends(get_db)):
+    """Reset password using valid token."""
+    record = db.query(models.PasswordResetToken).filter(
+        models.PasswordResetToken.token == payload.token,
+        models.PasswordResetToken.used == False
+    ).first()
+    if not record:
+        raise HTTPException(status_code=400, detail="Token inválido o ya usado.")
+    if datetime.datetime.now() > datetime.datetime.fromisoformat(record.expires_at):
+        raise HTTPException(status_code=400, detail="El enlace de recuperación ha expirado. Solicita uno nuevo.")
+
+    if len(payload.new_password) < 8:
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 8 caracteres.")
+    if not any(c.isdigit() for c in payload.new_password):
+        raise HTTPException(status_code=400, detail="La contraseña debe contener al menos un número.")
+
+    user = db.query(models.User).filter(models.User.id == record.user_id).first()
+    user.hashed_password = get_password_hash(payload.new_password)
+    record.used = True
+    db.commit()
+    return {"message": "Contraseña actualizada con éxito. Ya puedes iniciar sesión."}
+
+
+@app.post("/api/clients/{client_id}/profile-pic")
+def upload_profile_pic(client_id: int, payload: schemas.ProfilePicRequest, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    """Update profile picture (accepts base64 data URI or URL)."""
+    if current_user.id != client_id and current_user.role != "coach":
+        raise HTTPException(status_code=403, detail="No autorizado")
+    profile = db.query(models.ClientProfile).filter(models.ClientProfile.user_id == client_id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Perfil no encontrado")
+    profile.profile_pic = payload.pic_data
+    db.commit()
+    return {"message": "Foto actualizada con éxito", "profile_pic": profile.profile_pic}
 
 
 # --- Coach Approval Endpoints ---

@@ -67,6 +67,27 @@ export const api = {
     });
   },
 
+  forgotPassword: async (email) => {
+    return request("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  resetPassword: async (token, new_password) => {
+    return request("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ token, new_password }),
+    });
+  },
+
+  uploadProfilePic: async (clientId, picData) => {
+    return request(`/clients/${clientId}/profile-pic`, {
+      method: "POST",
+      body: JSON.stringify({ pic_data: picData }),
+    });
+  },
+
   // Coach Actions
   getClients: async () => {
     return request("/clients");

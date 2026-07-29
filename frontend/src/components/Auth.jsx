@@ -390,9 +390,45 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
   const [target, setTarget] = useState('Tonificar y reducir porcentaje de grasa');
 
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
+
+  // Password strength checker
+  const getPasswordStrength = (pw) => {
+    if (!pw) return { score: 0, label: '', color: '' };
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (pw.length >= 12) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^a-zA-Z0-9]/.test(pw)) score++;
+    const levels = [
+      { label: 'Muy débil', color: 'bg-red-500' },
+      { label: 'Débil', color: 'bg-orange-500' },
+      { label: 'Regular', color: 'bg-yellow-400' },
+      { label: 'Buena', color: 'bg-lime-400' },
+      { label: 'Fuerte', color: 'bg-gymNeon' },
+    ];
+    return { score, ...levels[score] };
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    try {
+      await api.forgotPassword(forgotEmail);
+      setForgotSuccess(true);
+    } catch {
+      setForgotSuccess(true); // Always show success to avoid email enumeration
+    } finally {
+      setForgotLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -850,9 +886,9 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {[
-            { name: 'Denilson R.', result: '-2.5 kg en 1 mes', text: '"La app me ayuda a registrar todo. Ya no tengo excusa para no saber cuánto levanto o qué como."', stars: 5 },
-            { name: 'Alumno A.', result: 'Ganó músculo visiblemente', text: '"La rutina está bien estructurada y el seguimiento de medidas me motiva a ver el cambio real en mi cuerpo."', stars: 5 },
-            { name: 'Alumno B.', result: 'Mejoró disciplina de hábitos', text: '"Lo que más me gusta es el tracker de hábitos. Me hace consciente de mi agua y mi sueño cada día."', stars: 5 },
+            { name: 'Denilson R.', result: '-2.5 kg en 1 mes', text: '"La app me ayuda a registrar todo. Ya no tengo excusa para no saber cuánto levanto o qué como. El seguimiento es brutal."', stars: 5 },
+            { name: 'Juan C.', result: '+4 kg músculo en 2 meses', text: '"Antes entrenaba sin orden. Con la rutina de Alejandro entendí qué es la sobrecarga progresiva de verdad. Ya veo la diferencia en el espejo."', stars: 5 },
+            { name: 'Andrés M.', result: 'Bajó 8% grasa corporal', text: '"El plan de alimentación está adaptado a lo que como normalmente. No es una dieta imposible. Llevo 3 meses y sigo motivado."', stars: 5 },
           ].map(({ name, result, text, stars }) => (
             <div key={name} className="glass-panel p-6 rounded-2xl flex flex-col gap-4 hover:border-gymNeon/20 transition-all">
               <div className="flex gap-1">
@@ -865,6 +901,77 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
                 <div className="text-xs font-extrabold text-white">{name}</div>
                 <div className="text-[10px] text-gymNeon font-bold mt-0.5">{result}</div>
               </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 border-t border-white/5 w-full" id="planes">
+        <div className="text-center mb-10">
+          <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Sin letra pequeña</span>
+          <h2 className="text-2xl font-black uppercase text-white mt-1">Elige tu Plan</h2>
+          <p className="text-neutral-400 text-xs mt-2">Pago mensual. Cancela cuando quieras. Sin contratos.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+          {[
+            {
+              name: 'Esencial',
+              price: '50K',
+              period: 'COP / mes',
+              color: 'border-white/10',
+              badge: null,
+              features: ['Rutina de entrenamiento personalizada', 'Actualización mensual de rutina', 'Seguimiento de pesos y medidas', 'Acceso a la app Sierra Coaching'],
+              cta: 'Empezar Ahora',
+            },
+            {
+              name: 'Premium',
+              price: '80K',
+              period: 'COP / mes',
+              color: 'border-gymNeon/50',
+              badge: 'Más popular',
+              features: ['Todo lo del plan Esencial', 'Plan de alimentación semanal', 'Seguimiento de progreso fotográfico', 'Chat directo con el coach', 'Copiloto IA integrado'],
+              cta: 'Empezar Premium',
+            },
+            {
+              name: 'Elite',
+              price: '120K',
+              period: 'COP / mes',
+              color: 'border-amber-500/40',
+              badge: 'Resultados rápidos',
+              features: ['Todo lo del plan Premium', 'Rutina actualizada semanalmente', 'Llamada de seguimiento mensual', 'Análisis de macros personalizado', 'Prioridad en respuesta del coach'],
+              cta: 'Empezar Elite',
+            },
+          ].map(plan => (
+            <div key={plan.name} className={`glass-panel p-6 rounded-2xl border ${plan.color} flex flex-col gap-5 relative transition-all hover:scale-[1.02] duration-300`}>
+              {plan.badge && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gymNeon text-black text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">{plan.badge}</div>
+              )}
+              <div>
+                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{plan.name}</p>
+                <div className="flex items-end gap-1 mt-1">
+                  <span className="text-4xl font-black text-white">{plan.price}</span>
+                  <span className="text-xs text-neutral-500 mb-1">{plan.period}</span>
+                </div>
+              </div>
+              <ul className="flex flex-col gap-2.5">
+                {plan.features.map(f => (
+                  <li key={f} className="flex items-start gap-2 text-xs text-neutral-300">
+                    <Check className="w-3.5 h-3.5 text-gymNeon flex-shrink-0 mt-0.5" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => { setIsLogin(false); setShowAuthModal(true); }}
+                className={`mt-auto py-3 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider cursor-pointer transition-all ${
+                  plan.badge === 'Más popular'
+                    ? 'bg-gymNeon text-black hover:bg-white'
+                    : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                }`}
+              >
+                {plan.cta}
+              </button>
             </div>
           ))}
         </div>
@@ -995,7 +1102,36 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+
+                {/* Password strength indicator — only show when typing */}
+                {!isLogin && password.length > 0 && (() => {
+                  const strength = getPasswordStrength(password);
+                  return (
+                    <div className="flex flex-col gap-1">
+                      <div className="flex gap-1">
+                        {[0,1,2,3].map(i => (
+                          <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < strength.score ? strength.color : 'bg-white/10'}`} />
+                        ))}
+                      </div>
+                      {strength.label && (
+                        <p className="text-[10px] text-neutral-500">{strength.label} — {strength.score < 3 ? 'añade números o símbolos' : '¡Contraseña segura!'}</p>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* Forgot password — only on login */}
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={() => { setShowForgotModal(true); setForgotSuccess(false); setForgotEmail(''); }}
+                    className="text-[10px] text-gymNeon/70 hover:text-gymNeon transition-colors text-right self-end cursor-pointer"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                )}
               </div>
+
 
               {/* Registration specific fields */}
               {!isLogin && (
@@ -1069,6 +1205,51 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
 
 
 
+          </div>
+        </div>
+      )}
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setShowForgotModal(false)}>
+          <div className="bg-[#17171e] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-bold uppercase tracking-widest text-sm">Recuperar Contraseña</h3>
+              <button onClick={() => setShowForgotModal(false)} className="text-neutral-500 hover:text-white transition-colors cursor-pointer"><X className="w-4 h-4"/></button>
+            </div>
+
+            {forgotSuccess ? (
+              <div className="text-center py-4">
+                <div className="w-14 h-14 rounded-full bg-gymNeon/10 border border-gymNeon/30 flex items-center justify-center mx-auto mb-3">
+                  <Check className="w-7 h-7 text-gymNeon" />
+                </div>
+                <p className="text-white font-bold text-sm mb-1">¡Correo enviado!</p>
+                <p className="text-neutral-400 text-xs">Si el correo existe, recibirás un enlace de recuperación en tu bandeja de entrada.</p>
+                <button onClick={() => setShowForgotModal(false)} className="mt-4 bg-gymNeon text-black font-bold text-xs uppercase py-2.5 px-6 rounded-lg w-full cursor-pointer">Cerrar</button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPassword} className="flex flex-col gap-4">
+                <p className="text-neutral-400 text-xs">Escribe tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Correo Electrónico</label>
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={e => setForgotEmail(e.target.value)}
+                    placeholder="tucorreo@gmail.com"
+                    className="bg-black/40 border border-white/10 rounded-lg text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-neutral-600"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={forgotLoading}
+                  className="bg-gymNeon text-black font-extrabold uppercase py-2.5 text-xs rounded-lg tracking-wider disabled:opacity-60 cursor-pointer"
+                >
+                  {forgotLoading ? 'Enviando...' : 'Enviar enlace de recuperación'}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}

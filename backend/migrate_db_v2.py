@@ -52,6 +52,23 @@ def migrate():
         except Exception:
             pass
 
+        # Create password_reset_tokens table if not exists
+        try:
+            connection.execute(text("""
+                CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    token VARCHAR(255) UNIQUE NOT NULL,
+                    expires_at VARCHAR(50) NOT NULL,
+                    used BOOLEAN DEFAULT FALSE
+                )
+            """))
+            connection.commit()
+            print("Tabla 'password_reset_tokens' verificada/creada con éxito.")
+        except Exception as e:
+            connection.rollback()
+            print(f"Info tabla password_reset_tokens: {e}")
+
     print("Migración de base de datos finalizada.")
 
 if __name__ == "__main__":

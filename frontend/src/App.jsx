@@ -11,6 +11,7 @@ import { LayoutDashboard, Dumbbell, Apple, TrendingUp, CheckCircle, AlertCircle,
 import InstallPrompt from './components/InstallPrompt';
 import SkeletonLoader from './components/SkeletonLoader';
 import PendingApproval from './components/PendingApproval';
+import SplashScreen from './components/SplashScreen';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -51,9 +52,10 @@ class ErrorBoundary extends React.Component {
 export default function App() {
   const [user, setUser] = useState(null);
   const [clientData, setClientData] = useState(null);
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' | 'routine' | 'diet' | 'progress'
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [showSplash, setShowSplash] = useState(true);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('gym_theme') || 'dark';
   });
@@ -140,6 +142,10 @@ export default function App() {
       fetchClientDetails(user.id);
     }
   };
+
+  if (showSplash) {
+    return <SplashScreen onDone={() => setShowSplash(false)} />;
+  }
 
   if (!user) {
     return <Auth onLogin={handleLogin} showToast={showToast} theme={theme} toggleTheme={toggleTheme} />;
