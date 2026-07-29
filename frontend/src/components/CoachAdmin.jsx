@@ -425,7 +425,7 @@ export default function CoachAdmin({ showToast }) {
     <style>body{font-family:Arial,sans-serif;max-width:700px;margin:30px auto;color:#111;font-size:13px;}h1{color:#ff5722;font-size:22px;border-bottom:3px solid #ff5722;padding-bottom:8px;}h2{color:#333;font-size:15px;margin-top:20px;border-left:4px solid #ff5722;padding-left:10px;}table{width:100%;border-collapse:collapse;margin-top:10px;}th{background:#ff5722;color:white;padding:8px;text-align:left;font-size:11px;}td{padding:7px;border-bottom:1px solid #eee;font-size:12px;}.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:bold;background:#ff5722;color:white;}.delta-neg{color:green;font-weight:bold;}.delta-pos{color:red;font-weight:bold;}.footer{margin-top:40px;font-size:10px;color:#aaa;border-top:1px solid #eee;padding-top:10px;}</style></head><body>
     <h1>Reporte de Progreso - Sierra Coaching</h1>
     <p><strong>Alumno:</strong> ${c.name} &nbsp;|&nbsp; <strong>Email:</strong> ${c.email}</p>
-    <p><strong>Objetivo:</strong> ${profile.target || 'N/A'} &nbsp;|&nbsp; <strong>Estatura:</strong> ${profile.height || 'N/A'} m</p>
+    <p><strong>Objetivo:</strong> ${profile.target || 'N/A'} &nbsp;|&nbsp; <strong>Estatura:</strong> ${profile.height ? Number(profile.height).toFixed(2) : 'N/A'} m</p>
     <p><strong>Peso Inicial:</strong> ${firstW} kg &nbsp;|&nbsp; <strong>Peso Actual:</strong> <span class="badge">${latestW} kg</span> &nbsp;|&nbsp; <strong>Variacion:</strong> <span class="${weightDelta <= 0 ? 'delta-neg' : 'delta-pos'}">${weightDelta > 0 ? '+' : ''}${weightDelta} kg</span></p>
     <h2>Historial de Peso</h2>
     <table><tr><th>Fecha</th><th>Peso (kg)</th><th>Variacion</th></tr>`;
@@ -714,7 +714,7 @@ export default function CoachAdmin({ showToast }) {
                         </div>
                         <div className="bg-black/25 p-4 rounded-xl border border-white/5">
                           <div className="text-[10px] text-neutral-500 font-bold uppercase">Estatura</div>
-                          <div className="text-white text-sm font-bold mt-1">{selectedClient.profile?.height} m</div>
+                          <div className="text-white text-sm font-bold mt-1">{selectedClient.profile?.height ? Number(selectedClient.profile.height).toFixed(2) : '1.70'} m</div>
                         </div>
                         <div className="bg-black/25 p-4 rounded-xl border border-white/5">
                           <div className="text-[10px] text-neutral-500 font-bold uppercase">Peso de Partida</div>

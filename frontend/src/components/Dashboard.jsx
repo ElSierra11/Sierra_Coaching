@@ -459,7 +459,7 @@ export default function Dashboard({ client, onUpdateClient, showToast, weeklyCha
           </div>
           <div className="flex flex-col gap-1 bg-black/20 p-3.5 rounded-xl border border-white/5">
             <span className="text-neutral-500 text-[10px] font-bold uppercase tracking-wider">Estatura</span>
-            <span className="text-white text-sm font-bold">{profile.height || 1.67} m</span>
+            <span className="text-white text-sm font-bold">{Number(profile.height || 1.67).toFixed(2)} m</span>
           </div>
           <div className="flex flex-col gap-1 bg-black/20 p-3.5 rounded-xl border border-white/5">
             <span className="text-neutral-500 text-[10px] font-bold uppercase tracking-wider">Peso Inicial</span>

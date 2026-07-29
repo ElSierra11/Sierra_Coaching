@@ -1164,7 +1164,10 @@ def update_client_profile(
         db.add(profile)
     else:
         if payload.height is not None:
-            profile.height = payload.height
+            h = float(payload.height)
+            if h > 3.0:
+                h = h / 100.0
+            profile.height = round(h, 2)
         if payload.initial_weight is not None:
             profile.initial_weight = payload.initial_weight
         if payload.target is not None:
