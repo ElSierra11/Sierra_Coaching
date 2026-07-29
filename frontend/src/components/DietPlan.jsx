@@ -270,6 +270,46 @@ export default function DietPlan({ client, onUpdateClient, showToast }) {
     }
   };
 
+  const handleManualLogSubmit = async (e) => {
+    e.preventDefault();
+    const addCal = parseInt(manualCal) || 0;
+    const addProt = parseInt(manualProt) || 0;
+    const addCarb = parseInt(manualCarb) || 0;
+    const addFat = parseInt(manualFat) || 0;
+
+    if (addCal === 0 && addProt === 0 && addCarb === 0 && addFat === 0) {
+      showToast && showToast("Ingresa al menos un valor de macronutriente", "info");
+      return;
+    }
+
+    const newLog = {
+      calories_consumed: (nutritionLog.calories_consumed || 0) + addCal,
+      proteins_consumed: (nutritionLog.proteins_consumed || 0) + addProt,
+      carbs_consumed: (nutritionLog.carbs_consumed || 0) + addCarb,
+      fats_consumed: (nutritionLog.fats_consumed || 0) + addFat,
+      meals_completed: JSON.stringify(completedMeals)
+    };
+
+    try {
+      const saved = await api.updateTodayNutrition(client.id, newLog);
+      setNutritionLog(saved);
+      if (onUpdateClient) {
+        onUpdateClient({
+          ...client,
+          today_nutrition_log: saved
+        });
+      }
+      showToast && showToast("¡Consumo manual registrado correctamente!", "success");
+      setShowManualLog(false);
+      setManualCal('');
+      setManualProt('');
+      setManualCarb('');
+      setManualFat('');
+    } catch (err) {
+      showToast && showToast("Error al guardar consumo: " + err.message, "error");
+    }
+  };
+
   // Reset daily macros back to zero
   const handleResetDaily = async () => {
     if (!window.confirm("¿Seguro que deseas reiniciar tu consumo de macros de hoy a cero?")) return;
@@ -301,47 +341,7 @@ export default function DietPlan({ client, onUpdateClient, showToast }) {
     }
   };
 
-  // Submit manual macros log
-  const handleManualLogSubmit = async (e) => {
-    e.preventDefault();
-    const cal = parseInt(manualCal) || 0;
-    const prot = parseInt(manualProt) || 0;
-    const carb = parseInt(manualCarb) || 0;
-    const fat = parseInt(manualFat) || 0;
 
-    if (!cal && !prot && !carb && !fat) {
-      showToast("Por favor, ingresa al menos un valor.", "info");
-      return;
-    }
-
-    const newLog = {
-      ...nutritionLog,
-      calories_consumed: nutritionLog.calories_consumed + cal,
-      proteins_consumed: nutritionLog.proteins_consumed + prot,
-      carbs_consumed: nutritionLog.carbs_consumed + carb,
-      fats_consumed: nutritionLog.fats_consumed + fat
-    };
-
-    setNutritionLog(newLog);
-    setShowManualLog(false);
-    setManualCal('');
-    setManualProt('');
-    setManualCarb('');
-    setManualFat('');
-
-    try {
-      const saved = await api.updateTodayNutrition(client.id, newLog);
-      if (onUpdateClient) {
-        onUpdateClient({
-          ...client,
-          today_nutrition_log: saved
-        });
-      }
-      showToast("¡Macros registrados manualmente!", "success");
-    } catch (err) {
-      showToast("Error al guardar macros: " + err.message, "error");
-    }
-  };
 
   // Save TDEE objectives to Profile
   const handleSaveTDEE = async () => {
