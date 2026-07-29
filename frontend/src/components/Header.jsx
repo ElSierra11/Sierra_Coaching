@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, LogOut, Sun, Moon, Bell, BellRing, Check, MessageSquare, X, Loader2 } from 'lucide-react';
 import { api } from '../api';
 import ChatWindow from './ChatWindow';
+import LogoInteractive from './LogoInteractive';
 
 const InstagramIcon = ({ className = "w-4 h-4" }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
@@ -102,19 +103,7 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
 
       {/* Profile info left side */}
       <div className="flex items-center gap-5 relative z-10">
-        <div className="relative flex-shrink-0 group">
-          <img 
-            src="/sierra_logo.jpg" 
-            alt="Sierra Coaching - Official Logo" 
-            className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-gymNeon shadow-[0_0_20px_rgba(255,87,34,0.4)] group-hover:scale-105 transition-all duration-300" 
-            onError={(e) => {
-              e.target.src = "/coach.png";
-            }}
-          />
-          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-gymNeon text-black font-black text-[9px] tracking-widest uppercase px-2.5 py-0.5 rounded-full shadow-lg border border-black">
-            OFFICIAL
-          </div>
-        </div>
+        <LogoInteractive size="lg" />
         
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2 mt-0.5">

@@ -1,49 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Share, X, ArrowUpRight } from 'lucide-react';
+import { Download, X, Smartphone, Check, Sparkles, Share, PlusSquare, ArrowUpRight } from 'lucide-react';
+import LogoInteractive from './LogoInteractive';
 
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
   useEffect(() => {
-    // 1. Detect if already installed (standalone mode)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
-      || window.navigator.standalone 
-      || document.referrer.includes('android-app://');
-    
-    setIsInstalled(isStandalone);
+    // Check if app is already running in standalone mode (installed PWA)
+    const isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    setIsStandalone(isStandaloneApp);
 
-    // 2. Detect iOS
+    // Detect iOS
     const userAgent = window.navigator.userAgent.toLowerCase();
-    const ios = /iphone|ipad|ipod/.test(userAgent) && !/fdsb/.test(userAgent);
-    setIsIOS(ios);
+    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isIosDevice);
 
-    // 3. Listen to beforeinstallprompt (Android / Chrome)
+    // Check if user dismissed prompt previously
+    const dismissedTime = localStorage.getItem('pwa_prompt_dismissed');
+    const isDismissedRecently = dismissedTime && (Date.now() - parseInt(dismissedTime, 10)) < 86400000; // 24h
+
+    // Handle standard PWA prompt for Android/Chrome
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      
-      // Only show if the user hasn't dismissed it in this session/localstorage
-      const isDismissed = localStorage.getItem('gym_install_dismissed');
-      if (!isDismissed && !isStandalone) {
+      if (!isStandaloneApp && !isDismissedRecently) {
         setShowPrompt(true);
       }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // For iOS: since there is no event, show prompt after a short delay if not installed/dismissed
-    if (ios && !isStandalone) {
-      const isDismissed = localStorage.getItem('gym_install_dismissed');
-      if (!isDismissed) {
-        const timer = setTimeout(() => {
-          setShowPrompt(true);
-        }, 3000); // show after 3 seconds
-        return () => clearTimeout(timer);
-      }
+    // Show prompt for iOS if not installed and not dismissed
+    if (isIosDevice && !isStandaloneApp && !isDismissedRecently) {
+      const timer = setTimeout(() => setShowPrompt(true), 3000);
+      return () => clearTimeout(timer);
     }
 
     return () => {
@@ -52,31 +46,24 @@ export default function InstallPrompt() {
   }, []);
 
   const handleInstallClick = async () => {
-    if (isIOS) {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setShowPrompt(false);
+      }
+      setDeferredPrompt(null);
+    } else if (isIOS) {
       setShowIOSInstructions(true);
-      return;
     }
-
-    if (!deferredPrompt) return;
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
-    
-    // Clear prompt event
-    setDeferredPrompt(null);
-    setShowPrompt(false);
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    setShowIOSInstructions(false);
-    // Persist dismiss so we don't prompt on every reload
-    localStorage.setItem('gym_install_dismissed', 'true');
+    localStorage.setItem('pwa_prompt_dismissed', Date.now().toString());
   };
 
-  // If already installed or shouldn't show prompt, render nothing
-  if (isInstalled || !showPrompt) return null;
+  if (isStandalone || !showPrompt) return null;
 
   return (
     <div className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-96 z-50 animate-scale-in">
@@ -90,16 +77,7 @@ export default function InstallPrompt() {
         </button>
 
         <div className="flex gap-4 items-center">
-          <div className="relative flex-shrink-0">
-            <img 
-              src="/sierra_logo.jpg" 
-              alt="Sierra Coaching Logo" 
-              className="w-14 h-14 rounded-full object-cover border-2 border-gymNeon shadow-[0_0_15px_rgba(255,87,34,0.5)]" 
-            />
-            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gymNeon text-black font-black text-[8px] px-2 py-0.5 rounded-full shadow tracking-wider uppercase border border-black">
-              PWA
-            </span>
-          </div>
+          <LogoInteractive size="md" showBadge={true} />
           
           <div className="flex flex-col gap-1 pr-6">
             <div className="flex items-center gap-1.5 text-gymNeon text-[10px] font-black uppercase tracking-widest">

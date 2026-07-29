@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../api';
 import { Dumbbell, Apple, TrendingUp, Droplet, MessageCircle, Check, KeyRound, Crown, ArrowRight, Sun, Moon, Activity, Flame, Heart, X, Star, UserCheck, ClipboardList, Smartphone, Menu } from 'lucide-react';
+import LogoInteractive from './LogoInteractive';
 
 const InstagramIcon = ({ className = "w-4 h-4" }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
@@ -316,11 +317,7 @@ const InstagramFeed = () => {
     <div className="flex flex-col gap-6 w-full text-center items-center">
       <div className="flex flex-col items-center gap-2">
         <div className="flex items-center gap-3">
-          <img 
-            src="/sierra_logo.jpg" 
-            alt="Coach Instagram Profile" 
-            className="w-12 h-12 rounded-full border-2 border-gymNeon object-cover shadow-[0_0_15px_rgba(255,87,34,0.5)]" 
-          />
+          <LogoInteractive size="sm" showBadge={false} />
           <div className="text-left">
             <h3 className="text-base font-black text-white flex items-center gap-1.5">
               <span>Alejandro Sierra</span>
@@ -461,11 +458,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       <header className="border-b border-white/5 bg-gymDark-900/50 backdrop-blur-md sticky top-0 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <img 
-              src="/sierra_logo.jpg" 
-              alt="Sierra Coaching Logo" 
-              className="w-9 h-9 rounded-full border-2 border-gymNeon object-cover shadow-[0_0_12px_rgba(255,87,34,0.5)]" 
-            />
+            <LogoInteractive size="sm" showBadge={false} />
             <span className="text-sm font-black tracking-widest uppercase text-white">SIERRA COACHING</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-neutral-400">
@@ -897,11 +890,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
 
             {/* Form Header */}
             <div className="text-center mb-6 flex flex-col items-center">
-              <img 
-                src="/sierra_logo.jpg" 
-                alt="Sierra Coaching Official Logo" 
-                className="w-14 h-14 rounded-full border-2 border-gymNeon object-cover shadow-[0_0_15px_rgba(255,87,34,0.5)] mb-2"
-              />
+              <LogoInteractive size="md" showBadge={false} className="mb-2" />
               <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Sierra Coaching App</span>
               <h2 className="text-2xl font-extrabold uppercase text-white mt-0.5">
                 {isLogin ? 'Ingresar a la App' : 'Crea tu Cuenta'}

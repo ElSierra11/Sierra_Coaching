@@ -1,9 +1,13 @@
-const CACHE_NAME = "sierra-coaching-cache-v2";
+const CACHE_NAME = "sierra-coaching-cache-v3";
 const urlsToCache = [
   "/",
   "/index.html",
-  "/favicon.svg",
-  "/logo-192.png"
+  "/favicon.png",
+  "/favicon.ico",
+  "/logo-192.png",
+  "/logo-512.png",
+  "/apple-touch-icon.png",
+  "/sierra_logo.jpg"
 ];
 
 self.addEventListener("install", (event) => {
@@ -14,6 +18,12 @@ self.addEventListener("install", (event) => {
       });
     }).then(() => self.skipWaiting())
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("activate", (event) => {
