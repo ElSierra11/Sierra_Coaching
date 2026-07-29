@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../api';
-import { Dumbbell, Apple, TrendingUp, Droplet, MessageCircle, Check, KeyRound, Crown, ArrowRight, Sun, Moon, Activity, Flame, Heart, X, Star, UserCheck, ClipboardList, Smartphone, Menu } from 'lucide-react';
+import { Dumbbell, Apple, TrendingUp, Droplet, MessageCircle, Check, KeyRound, Crown, ArrowRight, Sun, Moon, Activity, Flame, Heart, X, Star, UserCheck, ClipboardList, Smartphone, Menu, Eye, EyeOff } from 'lucide-react';
 import LogoInteractive from './LogoInteractive';
 
 const InstagramIcon = ({ className = "w-4 h-4" }) => (
@@ -392,6 +392,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -562,10 +563,10 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
           <div className="inline-flex items-center gap-2 bg-gymNeon/10 text-gymNeon border border-gymNeon/30 rounded-full px-4 py-1.5 text-xs font-bold tracking-widest uppercase self-start">
             <Crown className="w-3.5 h-3.5" /> Asesoría Online Premium
           </div>
-          <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight leading-tight text-white">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-tight text-white">
             BIENVENIDO A LA<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-gymNeon via-orange-400 to-amber-500">
-              CONSTRUCCIÓN DE TU CUERPO
+              CONSTRUCCIÓN<br className="sm:hidden" /> DE TU CUERPO
             </span>
           </h1>
           <p className="text-neutral-400 text-sm sm:text-base leading-relaxed max-w-xl transition-colors duration-300">
@@ -976,14 +977,24 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Contraseña</label>
-                <input 
-                  type="password" 
-                  placeholder="••••••••" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  className="bg-black/40 border border-white/10 rounded-lg text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-neutral-600"
-                  required 
-                />
+                <div className="relative">
+                  <input 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    className="w-full bg-black/40 border border-white/10 rounded-lg text-white px-4 py-2.5 pr-11 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-neutral-600"
+                    required 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-gymNeon transition-colors cursor-pointer"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               {/* Registration specific fields */}
