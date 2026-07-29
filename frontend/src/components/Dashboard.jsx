@@ -396,7 +396,12 @@ export default function Dashboard({ client, onUpdateClient, showToast, weeklyCha
       });
       showToast && showToast("¡Perfil físico actualizado correctamente!", "success");
       setShowEditProfileModal(false);
-      onUpdateClient && onUpdateClient();
+      if (onUpdateClient) {
+        onUpdateClient({
+          ...client,
+          profile: updatedProf
+        });
+      }
     } catch (error) {
       showToast && showToast(error.message || "Error al actualizar perfil", "error");
     } finally {

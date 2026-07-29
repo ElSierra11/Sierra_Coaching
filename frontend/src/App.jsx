@@ -99,7 +99,11 @@ export default function App() {
 
   // Callback passed to children to update the client details state locally when changes are saved
   const handleUpdateClient = (updatedData) => {
-    setClientData(updatedData);
+    if (updatedData && typeof updatedData === 'object') {
+      setClientData(updatedData);
+    } else if (user && user.id) {
+      fetchClientDetails(user.id);
+    }
   };
 
   if (!user) {
