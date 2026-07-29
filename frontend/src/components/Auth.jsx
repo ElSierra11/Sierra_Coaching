@@ -2,6 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../api';
 import { Dumbbell, Apple, TrendingUp, Droplet, MessageCircle, Check, KeyRound, Crown, ArrowRight, Sun, Moon, Activity, Flame, Heart, X, Star, UserCheck, ClipboardList, Smartphone, Menu } from 'lucide-react';
 
+const InstagramIcon = ({ className = "w-4 h-4" }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+  </svg>
+);
+
 const BeforeAfterSlider = () => {
   const [sliderPosition, setSliderPosition] = useState(50);
   const containerRef = useRef(null);
@@ -298,33 +304,75 @@ const FAQAccordion = () => {
 
 const InstagramFeed = () => {
   const posts = [
-    { url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400', likes: '1.2K', comments: '84' },
-    { url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400', likes: '2.5K', comments: '142' },
-    { url: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=400', likes: '986', comments: '53' },
-    { url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400', likes: '3.1K', comments: '210' }
+    { url: '/transformation.jpg', title: 'MI TRANSFORMACIÓN', likes: '1.8K', comments: '124' },
+    { url: '/app_banner.jpg', title: 'TODO EN TU APP', likes: '2.4K', comments: '189' },
+    { url: '/sierra_logo.jpg', title: 'SIERRA COACHING', likes: '3.1K', comments: '240' },
+    { url: '/coach.png', title: 'RESULTADOS REALES', likes: '1.5K', comments: '95' }
   ];
 
+  const instagramUrl = "https://www.instagram.com/sierrafitn_";
+
   return (
-    <div className="flex flex-col gap-4 w-full text-center">
-      <div className="mb-4">
-        <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Comunidad</span>
-        <h2 className="text-2xl font-black uppercase text-white mt-1">Sigue el Progreso</h2>
-        <p className="text-neutral-500 text-xs mt-1">Instagram: <a href="https://instagram.com" target="_blank" className="text-gymNeon hover:underline">@Sierra_Coaching</a></p>
+    <div className="flex flex-col gap-6 w-full text-center items-center">
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex items-center gap-3">
+          <img 
+            src="/sierra_logo.jpg" 
+            alt="Coach Instagram Profile" 
+            className="w-12 h-12 rounded-full border-2 border-gymNeon object-cover shadow-[0_0_15px_rgba(255,87,34,0.5)]" 
+          />
+          <div className="text-left">
+            <h3 className="text-base font-black text-white flex items-center gap-1.5">
+              <span>Alejandro Sierra</span>
+              <span className="text-blue-400 text-xs" title="Verificado">✓</span>
+            </h3>
+            <span className="text-xs text-neutral-400 font-bold">@sierrafitn_</span>
+          </div>
+        </div>
+
+        <span className="text-[10px] font-black text-gymNeon uppercase tracking-widest mt-2 bg-gymNeon/10 border border-gymNeon/30 px-3 py-1 rounded-full">
+          Comunidad & Resultados
+        </span>
+        <h2 className="text-3xl font-black uppercase text-white mt-1">
+          SIGUE EL PROGRESO EN INSTAGRAM
+        </h2>
+        <p className="text-neutral-400 text-xs max-w-md">
+          Transformaciones reales. No excusas. Rutinas y nutrición inteligente.
+        </p>
+
+        <a 
+          href={instagramUrl} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="mt-2 inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 text-white font-extrabold uppercase py-2.5 px-6 rounded-xl text-xs tracking-wider shadow-lg hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+        >
+          <InstagramIcon className="w-4 h-4" />
+          <span>Ver Perfil en Instagram (@sierrafitn_)</span>
+        </a>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-5xl">
         {posts.map((post, idx) => (
-          <div key={idx} className="relative rounded-2xl overflow-hidden aspect-square border border-white/5 group shadow-lg cursor-pointer">
-            <img src={post.url} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" alt="Instagram Post" />
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-4 transition-all duration-300">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-                <span>❤️</span> <span>{post.likes}</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs font-bold text-white">
-                <span>💬</span> <span>{post.comments}</span>
+          <a
+            key={idx}
+            href={instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative rounded-2xl overflow-hidden aspect-square border border-white/10 group shadow-xl bg-black cursor-pointer"
+          >
+            <img 
+              src={post.url} 
+              className="w-full h-full object-cover object-top group-hover:scale-105 transition-all duration-500 filter brightness-95 group-hover:brightness-100" 
+              alt={post.title} 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 flex flex-col justify-end p-3 transition-all duration-300">
+              <span className="text-[10px] font-black text-gymNeon uppercase tracking-wider text-left">{post.title}</span>
+              <div className="flex items-center justify-between text-xs font-bold text-white mt-1">
+                <span className="flex items-center gap-1 text-[11px]">❤️ {post.likes}</span>
+                <span className="flex items-center gap-1 text-[11px]">💬 {post.comments}</span>
               </div>
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </div>
