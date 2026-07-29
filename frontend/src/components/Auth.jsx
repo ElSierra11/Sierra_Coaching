@@ -451,6 +451,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
           setLoading(false);
           return;
         }
+        localStorage.setItem('gym_auth_token', token);
         sessionStorage.setItem('gym_auth_token', token);
         if (showToast) {
           showToast(`¡Bienvenido de nuevo, ${user.name}!`, "success");
@@ -466,6 +467,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
 
         const res = await api.register(name, email, password, height, initialWeight, target);
         const { token, user } = res;
+        localStorage.setItem('gym_auth_token', token);
         sessionStorage.setItem('gym_auth_token', token);
         if (showToast) {
           showToast("¡Registro recibido con éxito! En espera de aprobación por el Coach Alejandro.", "info");

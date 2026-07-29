@@ -84,10 +84,23 @@ export default function App() {
   const [weeklyChallenge, setWeeklyChallenge] = useState("");
 
   useEffect(() => {
-    const cachedUser = sessionStorage.getItem('gym_auth_user');
+    const cachedUser = localStorage.getItem('gym_auth_user') || sessionStorage.getItem('gym_auth_user');
     if (cachedUser) {
-      const parsed = JSON.parse(cachedUser);
-      setUser(parsed);
+      try {
+        const parsed = JSON.parse(cachedUser);
+        setUser(parsed);
+      } catch (e) {}
+    }
+
+    // Verify token with backend in background to keep user data fresh
+    const token = localStorage.getItem('gym_auth_token') || sessionStorage.getItem('gym_auth_token');
+    if (token) {
+      api.getMe().then(me => {
+        if (me && me.id) {
+          setUser(me);
+          localStorage.setItem('gym_auth_user', JSON.stringify(me));
+        }
+      }).catch(() => {});
     }
   }, []);
 
@@ -124,12 +137,15 @@ export default function App() {
 
   const handleLogin = (authenticatedUser) => {
     setUser(authenticatedUser);
+    localStorage.setItem('gym_auth_user', JSON.stringify(authenticatedUser));
     sessionStorage.setItem('gym_auth_user', JSON.stringify(authenticatedUser));
   };
 
   const handleLogout = () => {
     setUser(null);
     setClientData(null);
+    localStorage.removeItem('gym_auth_user');
+    localStorage.removeItem('gym_auth_token');
     sessionStorage.removeItem('gym_auth_user');
     sessionStorage.removeItem('gym_auth_token');
   };

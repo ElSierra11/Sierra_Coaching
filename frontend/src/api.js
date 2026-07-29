@@ -3,7 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL || (_isLocalhost ? 'http://localhos
 
 async function request(path, options = {}, retries = 2) {
   const url = `${API_URL}${path}`;
-  const token = sessionStorage.getItem("gym_auth_token");
+  const token = localStorage.getItem("gym_auth_token") || sessionStorage.getItem("gym_auth_token");
   const headers = {
     "Content-Type": "application/json",
     ...options.headers,

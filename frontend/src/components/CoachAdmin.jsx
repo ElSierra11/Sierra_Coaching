@@ -1386,7 +1386,7 @@ export default function CoachAdmin({ showToast }) {
                     <ChatWindow 
                       contactId={selectedClient.id}
                       contactName={selectedClient.name}
-                      currentUserId={JSON.parse(sessionStorage.getItem('gym_auth_user') || '{}').id || 1}
+                      currentUserId={JSON.parse(localStorage.getItem('gym_auth_user') || sessionStorage.getItem('gym_auth_user') || '{}').id || 1}
                       showToast={showToast}
                     />
                   </div>
