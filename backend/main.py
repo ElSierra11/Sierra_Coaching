@@ -33,6 +33,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+@app.get("/api/health")
+def health_check():
+    return {"status": "ok", "service": "Sierra Coaching API", "timestamp": datetime.datetime.now().isoformat()}
+
 # Password hashing configuration using bcrypt directly
 def get_password_hash(password: str) -> str:
     pwd_bytes = password.encode('utf-8')

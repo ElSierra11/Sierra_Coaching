@@ -1,7 +1,7 @@
 const _isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 const API_URL = import.meta.env.VITE_API_URL || (_isLocalhost ? 'http://localhost:8000/api' : 'https://sierra-coaching.onrender.com/api');
 
-async function request(path, options = {}) {
+async function request(path, options = {}, retries = 2) {
   const url = `${API_URL}${path}`;
   const token = sessionStorage.getItem("gym_auth_token");
   const headers = {
@@ -13,38 +13,70 @@ async function request(path, options = {}) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  if (!response.ok) {
-    let errorMessage = "Ocurrió un error en el servidor.";
-    try {
-      const errorData = await response.json();
-      if (errorData.detail) {
-        if (Array.isArray(errorData.detail)) {
-          // Format FastAPI validation errors nicely
-          errorMessage = errorData.detail
-            .map(err => {
-              const locStr = err.loc ? err.loc.join('.') : 'error';
-              return `${locStr}: ${err.msg}`;
-            })
-            .join('\n');
-        } else {
-          errorMessage = errorData.detail;
+    if (!response.ok) {
+      let errorMessage = "Ocurrió un error en el servidor.";
+      try {
+        const errorData = await response.json();
+        if (errorData.detail) {
+          if (Array.isArray(errorData.detail)) {
+            errorMessage = errorData.detail
+              .map(err => {
+                const locStr = err.loc ? err.loc.join('.') : 'error';
+                return `${locStr}: ${err.msg}`;
+              })
+              .join('\n');
+          } else {
+            errorMessage = errorData.detail;
+          }
         }
+      } catch (e) {
+        // JSON parsing failed
       }
-    } catch (e) {
-      // JSON parsing failed, use fallback
+      throw new Error(errorMessage);
     }
-    throw new Error(errorMessage);
-  }
 
-  return response.json();
+    return response.json();
+  } catch (err) {
+    // If it's a network error (like Failed to fetch when server is sleeping/waking up)
+    const isNetworkError = err.message === 'Failed to fetch' || err.name === 'TypeError' || err.message?.includes('fetch');
+
+    if (isNetworkError && retries > 0) {
+      // Wait 1.2s and retry automatically
+      await new Promise(res => setTimeout(res, 1200));
+      return request(path, options, retries - 1);
+    }
+
+    if (isNetworkError) {
+      throw new Error("El servidor se está iniciando en la nube. Por favor intenta presionar el botón de nuevo en 5 segundos.");
+    }
+
+    throw err;
+  }
+}
+
+// Background warmup request when page loads
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    fetch(`${API_URL}/health`).catch(() => {});
+  }, 1000);
 }
 
 export const api = {
+  pingHealth: async () => {
+    try {
+      return await fetch(`${API_URL}/health`).then(r => r.json());
+    } catch {
+      return null;
+    }
+  },
+
+
   // Authentication
   login: async (email, password) => {
     return request("/auth/login", {

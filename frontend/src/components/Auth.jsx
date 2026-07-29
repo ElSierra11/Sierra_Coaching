@@ -399,6 +399,11 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
 
+  // Ping backend on mount to wake up Render free tier from sleep immediately
+  useEffect(() => {
+    api.pingHealth();
+  }, []);
+
   // Password strength checker
   const getPasswordStrength = (pw) => {
     if (!pw) return { score: 0, label: '', color: '' };
