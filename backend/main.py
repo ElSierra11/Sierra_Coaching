@@ -2,7 +2,7 @@ import datetime
 import os
 import json
 import urllib.request
-from fastapi import FastAPI, Depends, HTTPException, status, Header
+from fastapi import FastAPI, Depends, HTTPException, status, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -12,6 +12,7 @@ from database import engine, Base, get_db, SessionLocal
 import models
 import schemas
 import bcrypt
+from email_service import send_registration_alert_email
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -106,11 +107,16 @@ def seed_data(db: Session):
             name="Alejandro Sierra Rincones",
             email="alejosierra656@gmail.com",
             hashed_password=hashed_pw,
-            role="coach"
+            role="coach",
+            is_approved=True
         )
         db.add(coach)
         db.commit()
         db.refresh(coach)
+    else:
+        if not coach.is_approved:
+            coach.is_approved = True
+            db.commit()
 
     challenge = db.query(models.SystemSetting).filter(models.SystemSetting.key == "weekly_challenge").first()
     if not challenge:
@@ -126,7 +132,8 @@ def seed_data(db: Session):
             email="denilson@gym.com",
             hashed_password=hashed_client_pw,
             role="client",
-            coach_id=coach.id
+            coach_id=coach.id,
+            is_approved=True
         )
         db.add(client)
         db.commit()
@@ -147,111 +154,128 @@ def seed_data(db: Session):
         diet_data = [
             ("3 huevos + 3 claras, 50g de avena, Fruta: 1 banana", "180g pechuga de pollo, 1 taza arroz blanco, Ensalada de zanahoria, tomate, lechuga y cebolla", "180g salmón o atún, Brócoli, 150g taza papa cocida", "Yogur griego natural + fresas"),
             ("2 huevos + 3 claras, 2 arepas integrales pequeñas, 1/4 aguacate", "170g carne magra, 250g taza papa cocida, Ensalada + aguacate pequeño", "180g pollo, Espinaca salteada, 1/2 taza arroz", "Yogur griego + nueces (pequeña porción)"),
-            ("200g yogurt griego + 30g avena, Fresas", "180g pescado, 1 taza arroz, Ensalada con aceite de oliva", "180g carne magra, Verduras mixtas, 150g papa", "Manzana + 2 cucharadas de mantequilla de maní"),
-            ("3 huevos + 3 claras, 2 tajadas pan integral, 1 manzana", "180g pollo, 250g papa, brócoli y zanahoria", "180g atún, Ensalada grande, 1/2 taza arroz", "Batido: 200g yogurt griego, 1 banano, 30g avena, canela"),
-            ("Omelette (3 huevos + verduras), 50g avena, Arándanos", "170g carne, 1 taza arroz, Ensalada de zanahoria, tomate, lechuga y cebolla", "180g pollo, Verduras salteadas, 1/2 taza arroz", "200g yogurt griego"),
-            ("3 huevos, arepa integral, aguacate", "180g pescado, 250g yuca, Ensalada + aguacate pequeño", "150g carne magra, Verduras, 150g papa", "1 banano"),
-            ("3 huevos + 60g de avena, 1 naranja", "Pollo 180 g, Arroz o papa, Ensaladas verdes", "Moderado (proteína magra y verduras)", "30g avena")
+            ("3 huevos revueltos, 2 rebanadas pan integral, Té/Café sin azúcar", "180g pescado blanco, 1 taza quinoa, Ensalada verde mixta", "180g pechuga de pavo, Verduras al vapor, 150g camote", "Batido de proteína + 1 manzana"),
+            ("Omelette 3 huevos y espinaca, 1/2 taza avena con agua", "180g pollo a la plancha, 1 taza arroz integral, Ensalada fresca", "170g carne magra, Coliflor y zanahoria, 1/2 plátano cocido", "Frutos secos (30g) + Té verde"),
+            ("3 huevos, 1 tortilla integral, 1/4 aguacate", "180g pechuga de pollo, 150g yuca cocida, Ensalada de pepino y tomate", "180g atún al agua, Ensalada grande con aceite de oliva", "Yogur griego + 1/2 taza arándanos"),
+            ("Panqueques de avena y clara (3), 1 cucharada mantequilla maní", "180g carne vacuna magra, 1 taza arroz, Ensalada mixta", "180g pollo, Brócoli y salteado de verduras", "Batido de proteína en agua"),
+            ("3 huevos cocidos, 2 tostadas integrales, Fruta fresca", "180g pescado, 200g papa al horno, Ensalada verde", "180g pechuga de pollo, Ensalada verde grande", "1 banana + 10 almendras")
         ]
-        
-        for idx, (des, alm, cen, mer) in enumerate(diet_data):
+
+        for idx, (des, alm, cen, mer) in enumerate(diet_data, start=1):
             db.add(models.DietMeal(
                 user_id=client.id,
-                day_number=idx + 1,
+                day_number=idx,
                 desayuno=des,
                 almuerzo=alm,
                 cena=cen,
                 merienda=mer
             ))
 
-        # Create Denilson's routine
-        routine_data = {
-            "Lunes": ("Pecho, Hombro y Tríceps", [
-                ("Press inclinado con mancuernas", 4, "8-10", ""),
-                ("Press inclinado en máquina", 3, "8-10", "controlando siempre el movimiento"),
-                ("Press plano máquina", 3, "8-10", "repes"),
-                ("Aperturas en polea", 3, "10", "llegando al fallo (bajar el doble de tiempo en la negativa)"),
-                ("Press militar", 3, "8-10", ""),
-                ("Elevaciones laterales mancuernas", 4, "10", "haciendo dropset en la última serie"),
-                ("Hombro posterior en máquina", 3, "10", "")
-            ]),
-            "Martes": ("Espalda y Bíceps", [
-                ("Jalón al pecho", 4, "8-10", ""),
-                ("Jalón cerrado", 3, "8-10", ""),
-                ("Remo gironda", 3, "8-10", ""),
-                ("Pull over con V", 4, "8-10", "llegando al fallo"),
-                ("Curls de bíceps sentado", 4, "8-10", ""),
-                ("Curl martillo", 3, "8-10", ""),
-                ("Curl predicador", 3, "8-10", "")
-            ]),
-            "Miercoles": ("Pierna Completa", [
-                ("Sentadilla smith", 4, "8-10", ""),
-                ("Prensa", 3, "8-10", ""),
-                ("Curl femoral sentado", 3, "8-10", ""),
-                ("Extensión cuádriceps", 4, "8-10", "2 descensos y dos series pesadas"),
-                ("Pantorrilla", 3, "15", ""),
-                ("Abdomen plancha", 3, "1 min", "")
-            ]),
-            "Jueves": ("Pecho y Espalda", [
-                ("Press inclinado en smith", 4, "8-10", ""),
-                ("Press inclinado en máquina", 3, "8-10", ""),
-                ("Press plano en smith", 3, "8-10", ""),
-                ("Peck deck", 3, "8-10", "llegando al fallo"),
-                ("Jalón al pecho máquina", 4, "8-10", ""),
-                ("Dominadas asistidas", 3, "8-10", ""),
-                ("Remo en máquina", 4, "8", "llegando al fallo")
-            ]),
-            "Viernes": ("Hombro, Tríceps y Bíceps", [
-                ("Hip thrust", 4, "10", ""),
-                ("Peso muerto sumo", 3, "8-10", ""),
-                ("Step ups", 3, "10", "en cada pierna, controlando el movimiento"),
-                ("Abducciones", 3, "15-20", "(abiertas y cerradas)"),
-                ("Frog pumps", 3, "20", "controlando el movimiento"),
-                ("Plancha abdominal / Abdomen bicicleta", 3, "10", "")
-            ])
+        # Create Routine Exercises & Routine Days
+        exercises_list = [
+            ("Press inclinado con mancuernas", "Pecho", "4 series x 10-12 repeticiones. Mantener control en el descenso."),
+            ("Press inclinado en máquina", "Pecho", "3 series x 10 repeticiones. Enfocarse en la contracción peak."),
+            ("Cruce de poleas bajas", "Pecho", "4 series x 12-15 repeticiones."),
+            ("Pec Deck / Aperturas en máquina", "Pecho", "3 series x 12 repeticiones."),
+            ("Fondos en paralelas con peso", "Pecho / Tríceps", "3 series al fallo."),
+            ("Jalón al pecho agarre neutro", "Espalda", "4 series x 10 repeticiones. Deprimir escápulas."),
+            ("Remo con barra T", "Espalda", "4 series x 8-10 repeticiones. Mantener torso a 45 grados."),
+            ("Remo unilateral con mancuerna", "Espalda", "3 series x 12 repeticiones por lado."),
+            ("Pullover en polea alta con cuerda", "Espalda", "3 series x 15 repeticiones."),
+            ("Sentadilla libre con barra", "Pierna", "4 series x 8 repeticiones. Romper el paralelo."),
+            ("Prensa de piernas 45°", "Pierna", "4 series x 10-12 repeticiones. Pies a ancho de hombros."),
+            ("Extensión de cuádriceps", "Pierna", "3 series x 15 repeticiones con pausa de 1 seg arriba."),
+            ("Curl femoral sentado", "Pierna", "4 series x 12 repeticiones."),
+            ("Zancadas caminando con mancuernas", "Pierna", "3 series x 12 pasos por pierna."),
+            ("Elevación de talones en máquina de pie", "Pantorrilla", "4 series x 15-20 repeticiones."),
+            ("Press militar con mancuernas", "Hombro", "4 series x 10 repeticiones."),
+            ("Elevaciones laterales con polea baja", "Hombro", "4 series x 12-15 repeticiones por lado."),
+            ("Pájaro en máquina (Deltoides posterior)", "Hombro", "4 series x 15 repeticiones."),
+            ("Curl de bíceps con barra Z en banco Scott", "Bíceps", "3 series x 10 repeticiones."),
+            ("Curl martillo con cuerda en polea", "Bíceps", "3 series x 12 repeticiones."),
+            ("Extensión de tríceps en polea alta con cuerda", "Tríceps", "4 series x 12 repeticiones."),
+            ("Press francés con barra Z en banco plano", "Tríceps", "3 series x 10 repeticiones.")
+        ]
+
+        exercise_map = {}
+        for name, category, notes in exercises_list:
+            ex = models.Exercise(name=name, category=category, default_notes=notes)
+            db.add(ex)
+            db.flush()
+            exercise_map[name] = ex.id
+
+        routine_plan = {
+            "Lunes": [
+                ("Press inclinado con mancuernas", 4, "10-12"),
+                ("Press inclinado en máquina", 3, "10"),
+                ("Cruce de poleas bajas", 4, "12-15"),
+                ("Extensión de tríceps en polea alta con cuerda", 4, "12"),
+                ("Press francés con barra Z en banco plano", 3, "10")
+            ],
+            "Martes": [
+                ("Jalón al pecho agarre neutro", 4, "10"),
+                ("Remo con barra T", 4, "8-10"),
+                ("Remo unilateral con mancuerna", 3, "12"),
+                ("Curl de bíceps con barra Z en banco Scott", 3, "10"),
+                ("Curl martillo con cuerda en polea", 3, "12")
+            ],
+            "Miercoles": [
+                ("Sentadilla libre con barra", 4, "8"),
+                ("Prensa de piernas 45°", 4, "10-12"),
+                ("Extensión de cuádriceps", 3, "15"),
+                ("Curl femoral sentado", 4, "12"),
+                ("Elevación de talones en máquina de pie", 4, "15-20")
+            ],
+            "Jueves": [
+                ("Press militar con mancuernas", 4, "10"),
+                ("Elevaciones laterales con polea baja", 4, "12-15"),
+                ("Pájaro en máquina (Deltoides posterior)", 4, "15"),
+                ("Fondos en paralelas con peso", 3, "Fallo")
+            ],
+            "Viernes": [
+                ("Pec Deck / Aperturas en máquina", 3, "12"),
+                ("Pullover en polea alta con cuerda", 3, "15"),
+                ("Zancadas caminando con mancuernas", 3, "12 por pierna"),
+                ("Curl martillo con cuerda en polea", 3, "12")
+            ]
         }
 
-        exercise_map = {} # Maps exercise name to created DB Exercise model for logging
-        for day, (r_name, exercises) in routine_data.items():
-            r_day = models.RoutineDay(user_id=client.id, day_name=day, routine_name=r_name)
-            db.add(r_day)
-            db.commit()
-            db.refresh(r_day)
+        for day_name, ex_items in routine_plan.items():
+            rday = models.RoutineDay(user_id=client.id, day_name=day_name, routine_name=f"Rutina de {day_name}")
+            db.add(rday)
+            db.flush()
 
-            for order, (e_name, sets, reps, notes) in enumerate(exercises):
-                ex = models.Exercise(
-                    routine_day_id=r_day.id,
-                    name=e_name,
-                    sets=sets,
-                    reps=reps,
-                    notes=notes,
-                    order=order
-                )
-                db.add(ex)
-                db.commit()
-                db.refresh(ex)
-                exercise_map[e_name] = ex.id
+            for order, (ex_name, sets, reps) in enumerate(ex_items, start=1):
+                ex_id = exercise_map[ex_name]
+                db.add(models.RoutineExercise(
+                    routine_day_id=rday.id,
+                    exercise_id=ex_id,
+                    order_index=order,
+                    target_sets=sets,
+                    target_reps=reps
+                ))
 
-        # Seed weight logs
-        weight_history = [
-            ("2026-06-08", 83.0),
-            ("2026-06-15", 82.4),
-            ("2026-06-22", 81.9),
-            ("2026-06-29", 81.2),
-            ("2026-07-06", 80.5)
+        # Seed initial weight log
+        weight_logs_data = [
+            ("2026-06-01", 83.0),
+            ("2026-06-08", 82.2),
+            ("2026-06-15", 81.5),
+            ("2026-06-22", 80.8),
+            ("2026-06-29", 80.1),
+            ("2026-07-06", 79.4)
         ]
-        for dt, wt in weight_history:
-            db.add(models.WeightLog(user_id=client.id, date=dt, weight=wt))
+        for date_str, w_val in weight_logs_data:
+            db.add(models.WeightLog(user_id=client.id, date=date_str, weight=w_val))
 
-        # Seed measurements
+        # Seed measurement logs
         measurements = [
-            ("2026-06-08", 92, 104, 61),
+            ("2026-06-01", 94.0, 105.0, 62.0),
+            ("2026-06-15", 92.0, 104.0, 61.0),
             ("2026-06-22", 90.5, 103, 60),
             ("2026-07-06", 88.0, 101.5, 59.2)
         ]
         for dt, ws, hp, th in measurements:
             db.add(models.MeasurementLog(user_id=client.id, date=dt, waist=ws, hip=hp, thigh=th))
-
 
         # Seed habits for today
         db.add(models.DailyHabitLog(
@@ -263,7 +287,7 @@ def seed_data(db: Session):
             alcohol_avoided=True
         ))
 
-        # Seed lift logs for e1 (Press inclinado con mancuernas) and e2 (Press inclinado en maquina)
+        # Seed lift logs for e1 and e2
         e1_id = exercise_map["Press inclinado con mancuernas"]
         e2_id = exercise_map["Press inclinado en máquina"]
 
@@ -273,7 +297,7 @@ def seed_data(db: Session):
         for s_idx, reps, wt in [(1, 10, 30), (2, 9, 35), (3, 8, 35)]:
             db.add(models.LiftLog(user_id=client.id, exercise_id=e2_id, week_number=1, date="2026-06-08", set_number=s_idx, weight=wt, reps=reps))
 
-        # Week 2 (Logró 10 repes en todos en e1! Activará sobrecarga progresiva en Semana 3)
+        # Week 2
         for s_idx, reps, wt in [(1, 10, 22), (2, 10, 22), (3, 10, 22), (4, 10, 22)]:
             db.add(models.LiftLog(user_id=client.id, exercise_id=e1_id, week_number=2, date="2026-06-15", set_number=s_idx, weight=wt, reps=reps))
         for s_idx, reps, wt in [(1, 10, 35), (2, 10, 35), (3, 9, 35)]:
@@ -285,6 +309,9 @@ def seed_data(db: Session):
 
         db.commit()
     else:
+        if not client.is_approved:
+            client.is_approved = True
+            db.commit()
         # Ensure profile exists for existing user to avoid NoneType errors
         profile = db.query(models.ClientProfile).filter(models.ClientProfile.user_id == client.id).first()
         if not profile:
@@ -331,8 +358,13 @@ def login(payload: schemas.UserLogin, db: Session = Depends(get_db)):
     return {"token": token, "user": user}
 
 
+@app.get("/api/auth/me", response_model=schemas.UserResponse)
+def get_current_user_info(current_user: models.User = Depends(get_current_user)):
+    return current_user
+
+
 @app.post("/api/auth/register", response_model=schemas.LoginResponse)
-def register(payload: schemas.UserRegister, db: Session = Depends(get_db)):
+def register(payload: schemas.UserRegister, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     # Check if user already exists
     user = db.query(models.User).filter(models.User.email == payload.email).first()
     if user:
@@ -345,14 +377,15 @@ def register(payload: schemas.UserRegister, db: Session = Depends(get_db)):
     coach = db.query(models.User).filter(models.User.role == "coach").first()
     coach_id = coach.id if coach else None
 
-    # Create User
+    # Create User (clients require coach approval by default)
     hashed_pw = get_password_hash(payload.password)
     new_user = models.User(
         name=payload.name,
         email=payload.email,
         hashed_password=hashed_pw,
         role="client",
-        coach_id=coach_id
+        coach_id=coach_id,
+        is_approved=False
     )
     db.add(new_user)
     db.commit()
@@ -396,9 +429,78 @@ def register(payload: schemas.UserRegister, db: Session = Depends(get_db)):
         weight=payload.initial_weight
     ))
 
+    # Generate internal notification for Coach
+    if coach:
+        notif = models.Notification(
+            user_id=coach.id,
+            title="🔔 Solicitud de Registro",
+            message=f"{new_user.name} ({new_user.email}) ha solicitado acceso. Revisa la pestaña 'Pendientes' para aprobar su cuenta.",
+            created_at=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            is_read=False
+        )
+        db.add(notif)
+
     db.commit()
+
+    # Trigger email alert to Coach
+    background_tasks.add_task(send_registration_alert_email, new_user.name, new_user.email, payload.target)
+
     token = create_access_token({"user_id": new_user.id, "email": new_user.email, "role": new_user.role})
     return {"token": token, "user": new_user}
+
+
+# --- Coach Approval Endpoints ---
+
+@app.get("/api/coach/pending-clients", response_model=List[schemas.PendingClientResponse])
+def get_pending_clients(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_coach)):
+    pending_users = db.query(models.User).filter(models.User.role == "client", models.User.is_approved == False).all()
+    result = []
+    for u in pending_users:
+        profile = u.profile
+        result.append({
+            "id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "target": profile.target if profile else "Sin meta especificada",
+            "height": profile.height if profile else 0,
+            "initial_weight": profile.initial_weight if profile else 0,
+            "joined_date": profile.joined_date if profile else "",
+            "is_approved": False
+        })
+    return result
+
+
+@app.post("/api/coach/clients/{client_id}/approve")
+def approve_client(client_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_coach)):
+    client = db.query(models.User).filter(models.User.id == client_id, models.User.role == "client").first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+
+    client.is_approved = True
+    
+    # Notify client
+    notif = models.Notification(
+        user_id=client.id,
+        title="🎉 ¡Acceso Aprobado!",
+        message="Tu acceso a la app Sierra Coaching ha sido activado por el Coach Alejandro. ¡Bienvenido!",
+        created_at=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        is_read=False
+    )
+    db.add(notif)
+    db.commit()
+    db.refresh(client)
+    return {"message": "Cliente aprobado con éxito", "is_approved": True}
+
+
+@app.delete("/api/coach/clients/{client_id}/reject")
+def reject_client(client_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_coach)):
+    client = db.query(models.User).filter(models.User.id == client_id, models.User.role == "client").first()
+    if not client:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+
+    db.delete(client)
+    db.commit()
+    return {"message": "Solicitud rechazada y eliminada correctamente"}
 
 
 

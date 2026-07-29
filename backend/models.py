@@ -11,6 +11,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(String, nullable=False) # "coach" | "client"
     coach_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    is_approved = Column(Boolean, default=False, nullable=False)
 
     # Relationships
     profile = relationship("ClientProfile", uselist=False, back_populates="user", cascade="all, delete-orphan")

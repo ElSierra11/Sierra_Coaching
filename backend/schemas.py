@@ -20,6 +20,7 @@ class UserResponse(BaseModel):
     name: str
     role: str
     coach_id: Optional[int] = None
+    is_approved: bool = True
 
     class Config:
         from_attributes = True
@@ -28,6 +29,20 @@ class UserResponse(BaseModel):
 class LoginResponse(BaseModel):
     token: str
     user: UserResponse
+
+
+class PendingClientResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    target: str
+    height: float
+    initial_weight: float
+    joined_date: str
+    is_approved: bool = False
+
+    class Config:
+        from_attributes = True
 
 
 

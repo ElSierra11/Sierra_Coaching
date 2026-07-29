@@ -10,6 +10,7 @@ import CoachAdmin from './components/CoachAdmin';
 import { LayoutDashboard, Dumbbell, Apple, TrendingUp, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 import InstallPrompt from './components/InstallPrompt';
 import SkeletonLoader from './components/SkeletonLoader';
+import PendingApproval from './components/PendingApproval';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -88,9 +89,9 @@ export default function App() {
     }
   }, []);
 
-  // Fetch client details if logged in as client
+  // Fetch client details if logged in as client and approved
   useEffect(() => {
-    if (user) {
+    if (user && user.is_approved !== false) {
       fetchWeeklyChallenge();
       if (user.role === 'client') {
         fetchClientDetails(user.id);
@@ -114,7 +115,6 @@ export default function App() {
       setClientData(data);
     } catch (err) {
       console.error("Error fetching client details:", err);
-      alert("Error al sincronizar con el servidor: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -132,7 +132,6 @@ export default function App() {
     sessionStorage.removeItem('gym_auth_token');
   };
 
-
   // Callback passed to children to update the client details state locally when changes are saved
   const handleUpdateClient = (updatedData) => {
     if (updatedData && typeof updatedData === 'object') {
@@ -144,6 +143,11 @@ export default function App() {
 
   if (!user) {
     return <Auth onLogin={handleLogin} showToast={showToast} theme={theme} toggleTheme={toggleTheme} />;
+  }
+
+  // Check if client requires coach approval
+  if (user.role === 'client' && user.is_approved === false) {
+    return <PendingApproval user={user} onLogout={handleLogout} onApproved={(approvedUser) => handleLogin(approvedUser)} />;
   }
 
 

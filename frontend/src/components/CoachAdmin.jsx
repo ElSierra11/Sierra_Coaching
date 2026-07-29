@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles, Calculator, Info, Edit3, X } from 'lucide-react';
+import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles, Calculator, Info, Edit3, X, UserCheck, UserX, Clock, ShieldAlert, MessageCircle, RefreshCw } from 'lucide-react';
 import ChatWindow from './ChatWindow';
 
 const WeightChart = ({ history, initialWeight }) => {
@@ -97,7 +97,9 @@ export default function CoachAdmin({ showToast }) {
   const [allClientsDetail, setAllClientsDetail] = useState([]);
   const [loadingAllClients, setLoadingAllClients] = useState(false);
   
-  const [adminTab, setAdminTab] = useState('summary'); // 'overview' | 'summary' | 'routine' | 'diet'
+  const [adminTab, setAdminTab] = useState('summary'); // 'overview' | 'summary' | 'pending' | 'routine' | 'diet' ...
+  const [pendingClients, setPendingClients] = useState([]);
+  const [loadingPending, setLoadingPending] = useState(false);
   const [loadingList, setLoadingList] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
@@ -199,7 +201,42 @@ export default function CoachAdmin({ showToast }) {
   useEffect(() => {
     fetchClients();
     fetchChallenge();
+    fetchPendingClients();
   }, []);
+
+  const fetchPendingClients = async () => {
+    setLoadingPending(true);
+    try {
+      const data = await api.getPendingClients();
+      setPendingClients(data);
+    } catch (e) {
+      console.error("Error fetching pending clients:", e);
+    } finally {
+      setLoadingPending(false);
+    }
+  };
+
+  const handleApproveClient = async (clientId, clientName) => {
+    try {
+      await api.approveClient(clientId);
+      showToast(`¡Acceso de ${clientName} aprobado con éxito!`, "success");
+      fetchPendingClients();
+      fetchClients();
+    } catch (err) {
+      showToast("Error al aprobar cliente: " + err.message, "error");
+    }
+  };
+
+  const handleRejectClient = async (clientId, clientName) => {
+    if (!window.confirm(`¿Estás seguro de rechazar y eliminar el registro de ${clientName}?`)) return;
+    try {
+      await api.rejectClient(clientId);
+      showToast(`Solicitud de ${clientName} eliminada.`, "info");
+      fetchPendingClients();
+    } catch (err) {
+      showToast("Error al rechazar solicitud: " + err.message, "error");
+    }
+  };
 
   const fetchChallenge = async () => {
     try {
@@ -523,6 +560,20 @@ export default function CoachAdmin({ showToast }) {
                 <div className="overflow-x-auto w-full no-scrollbar pb-1">
                   <div className="flex bg-neutral-900 border border-white/5 rounded-xl p-1 gap-1 min-w-max">
                     <button
+                      onClick={() => setAdminTab('pending')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 relative ${
+                        adminTab === 'pending' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>Pendientes</span>
+                      {pendingClients.length > 0 && (
+                        <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
+                          {pendingClients.length}
+                        </span>
+                      )}
+                    </button>
+                    <button
                       onClick={() => setAdminTab('overview')}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
                         adminTab === 'overview' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
@@ -598,6 +649,103 @@ export default function CoachAdmin({ showToast }) {
               </div>
             ) : (
               <>
+                {/* VIEW PENDING: PENDING APPROVAL CLIENTS */}
+                {adminTab === 'pending' && (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-amber-400" />
+                        <h4 className="text-sm font-bold text-white uppercase tracking-wider">Solicitudes de Registro Pendientes</h4>
+                      </div>
+                      <button
+                        onClick={fetchPendingClients}
+                        className="text-xs font-bold text-neutral-400 hover:text-white flex items-center gap-1.5 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 transition-all cursor-pointer"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${loadingPending ? 'animate-spin' : ''}`} />
+                        <span>Actualizar</span>
+                      </button>
+                    </div>
+
+                    {loadingPending ? (
+                      <div className="glass-panel p-12 text-center text-neutral-500 text-xs rounded-2xl">
+                        Cargando solicitudes pendientes...
+                      </div>
+                    ) : pendingClients.length === 0 ? (
+                      <div className="glass-panel p-12 text-center text-neutral-400 text-xs rounded-2xl flex flex-col items-center gap-2 bg-neutral-900/50 border border-white/10">
+                        <CheckCircle2 className="w-8 h-8 text-green-400 mb-1" />
+                        <span className="font-extrabold text-sm text-white">¡No hay solicitudes pendientes!</span>
+                        <p className="text-neutral-500 max-w-sm">Todos los clientes registrados han sido procesados. Cuando un nuevo usuario se registre en la app, aparecerá en este panel.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {pendingClients.map(p => (
+                          <div 
+                            key={p.id}
+                            className="glass-panel p-5 rounded-2xl bg-gradient-to-b from-neutral-900 to-black border-2 border-amber-500/30 flex flex-col justify-between gap-4 shadow-xl"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-sm">
+                                  {p.name.charAt(0)}
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
+                                    <span>{p.name}</span>
+                                  </h4>
+                                  <p className="text-xs text-neutral-400 font-medium">{p.email}</p>
+                                </div>
+                              </div>
+                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                                <Clock className="w-3 h-3 animate-spin" />
+                                <span>Pendiente</span>
+                              </span>
+                            </div>
+
+                            <div className="bg-black/50 p-3 rounded-xl border border-white/5 grid grid-cols-2 gap-2 text-xs">
+                              <div>
+                                <span className="text-[10px] text-neutral-500 uppercase font-bold block">Objetivo</span>
+                                <span className="text-white font-medium text-xs truncate block">{p.target || 'No especificado'}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-neutral-500 uppercase font-bold block">Registrado</span>
+                                <span className="text-white font-medium text-xs block">{p.joined_date || 'Recientemente'}</span>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2 pt-1">
+                              <button
+                                onClick={() => handleApproveClient(p.id, p.name)}
+                                className="flex-1 py-2.5 px-3 rounded-xl bg-gymNeon text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 hover:brightness-110 active:scale-98 transition-all cursor-pointer shadow-lg"
+                              >
+                                <UserCheck className="w-4 h-4" />
+                                <span>Aprobar Acceso</span>
+                              </button>
+
+                              <button
+                                onClick={() => handleRejectClient(p.id, p.name)}
+                                className="py-2.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-bold text-xs uppercase flex items-center justify-center gap-1 transition-all cursor-pointer"
+                                title="Rechazar y eliminar registro"
+                              >
+                                <UserX className="w-4 h-4" />
+                              </button>
+
+                              <a
+                                href={`https://wa.me/573022114190?text=Hola%20${encodeURIComponent(p.name)},%20veo%20tu%20registro%20en%20Sierra%20Coaching%20(${encodeURIComponent(p.email)}).`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="py-2.5 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-bold text-xs flex items-center justify-center transition-all"
+                                title="Verificar por WhatsApp"
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* VIEW 0: OVERVIEW TAB */}
                 {adminTab === 'overview' && (
                   <div className="flex flex-col gap-4">

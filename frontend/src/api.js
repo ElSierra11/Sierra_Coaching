@@ -308,5 +308,26 @@ export const api = {
   getUnreadChatCounts: async () => {
     return request("/chat/unread-counts");
   },
+
+  // Auth & Approval Actions
+  getMe: async () => {
+    return request("/auth/me");
+  },
+
+  getPendingClients: async () => {
+    return request("/coach/pending-clients");
+  },
+
+  approveClient: async (clientId) => {
+    return request(`/coach/clients/${clientId}/approve`, {
+      method: "POST",
+    });
+  },
+
+  rejectClient: async (clientId) => {
+    return request(`/coach/clients/${clientId}/reject`, {
+      method: "DELETE",
+    });
+  },
 };
 
