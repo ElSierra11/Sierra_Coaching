@@ -123,8 +123,8 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
             </a>
           </div>
           <h1 className="text-xl md:text-2xl font-black tracking-tight text-white mt-1">Alejandro Sierra Rincones</h1>
-          <p className="text-neutral-400 text-xs italic leading-relaxed max-w-lg font-medium">
-            "No soy entrenador certificado, pero sí soy prueba viviente de que la constancia funciona. Te voy a enseñar lo que a mí me funcionó."
+          <p className="text-gymNeon/90 text-xs font-extrabold tracking-wider uppercase mt-0.5">
+            Asesoría de Alto Rendimiento • Entrenamiento & Nutrición Personalizada
           </p>
         </div>
       </div>

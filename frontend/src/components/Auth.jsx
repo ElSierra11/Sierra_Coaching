@@ -612,8 +612,8 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
               CONSTRUCCIÓN<br className="sm:hidden" /> DE TU CUERPO
             </span>
           </h1>
-          <p className="text-neutral-400 text-xs sm:text-sm md:text-base leading-relaxed max-w-xl transition-colors duration-300">
-            No soy entrenador certificado, pero soy prueba viviente del impacto de un sistema estructurado. Accede a rutinas planificadas, menús de alimentación personalizados y monitorea tu sobrecarga progresiva día a día en una sola app.
+          <p className="text-neutral-300 text-xs sm:text-sm md:text-base leading-relaxed max-w-xl transition-colors duration-300 font-medium">
+            Transforma tu cuerpo con un sistema de entrenamiento estructurado, menús de alimentación personalizados y monitoreo diario de sobrecarga progresiva en una sola aplicación.
           </p>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <button

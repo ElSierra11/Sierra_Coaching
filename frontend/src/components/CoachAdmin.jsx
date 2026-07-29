@@ -549,14 +549,14 @@ export default function CoachAdmin({ showToast }) {
         {selectedClient ? (
           <>
             {/* Top Workspace Header */}
-            <div className="glass-panel p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/[0.01]">
-              <div>
+            <div className="glass-panel p-5 rounded-2xl flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/[0.01] overflow-hidden w-full">
+              <div className="shrink-0">
                 <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Ficha del Alumno</span>
                 <h2 className="text-lg font-extrabold text-white">{selectedClient.name}</h2>
               </div>
               
               {/* Workspace tabs switcher */}
-              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full xl:w-auto overflow-hidden">
                 <div className="overflow-x-auto w-full no-scrollbar pb-1">
                   <div className="flex bg-neutral-900 border border-white/5 rounded-xl p-1 gap-1 min-w-max">
                     <button

@@ -146,65 +146,38 @@ export default function LogoInteractive({
               <p className="text-xs text-neutral-400 font-medium">Entrenamiento • Nutrición • Disciplina</p>
             </div>
 
-            {/* Content Body */}
+            {/* Content Body — Quick Contact Links */}
             <div className="flex flex-col gap-4">
-              {/* PWA Icon & Cache Refresh Box */}
-              <div className="p-4 rounded-2xl bg-neutral-950/80 border border-white/10 flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Smartphone className="w-5 h-5 text-gymNeon" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-neutral-200">Icono PWA & Caché</span>
-                  </div>
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">
-                    Sincronizado
-                  </span>
-                </div>
-                
-                <p className="text-xs text-neutral-400 leading-relaxed">
-                  Si estás usando la App instalada (PWA) o el navegador y deseas que el nuevo logo oficial se refleje en la pantalla de inicio o ícono, haz clic abajo para recargar datos frescos.
-                </p>
-
-                <button
-                  onClick={handleForceUpdatePwa}
-                  disabled={isUpdating}
-                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-gymNeon to-orange-600 text-black font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg hover:brightness-110 active:scale-98 transition-all cursor-pointer disabled:opacity-50"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isUpdating ? 'animate-spin' : ''}`} />
-                  <span>{isUpdating ? updateStatus : "Actualizar Logo & Forzar Caché PWA"}</span>
-                </button>
-              </div>
-
-              {/* Quick Contact Links */}
               <div className="grid grid-cols-2 gap-3">
                 <a
                   href="https://wa.me/573022114190?text=Hola%20Alejandro,%20vengo%20de%20la%20App"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 flex flex-col items-center gap-1.5 transition-all text-center group"
+                  className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 flex flex-col items-center justify-center gap-2 transition-all text-center group cursor-pointer"
                 >
-                  <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  <span className="text-[11px] font-black uppercase">WhatsApp</span>
-                  <span className="text-[9px] text-neutral-400">Contacto Directo</span>
+                  <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform text-emerald-400" />
+                  <span className="text-xs font-black uppercase tracking-wider">WhatsApp</span>
+                  <span className="text-[10px] text-neutral-400 font-medium">Contacto Directo</span>
                 </a>
 
                 <a
                   href="https://www.instagram.com/sierrafitn_"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3 rounded-2xl bg-pink-500/10 border border-pink-500/30 hover:bg-pink-500/20 text-pink-400 flex flex-col items-center gap-1.5 transition-all text-center group"
+                  className="p-4 rounded-2xl bg-pink-500/10 border border-pink-500/30 hover:bg-pink-500/20 text-pink-400 flex flex-col items-center justify-center gap-2 transition-all text-center group cursor-pointer"
                 >
-                  <InstagramIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  <span className="text-[11px] font-black uppercase">Instagram</span>
-                  <span className="text-[9px] text-neutral-400">@sierrafitn_</span>
+                  <InstagramIcon className="w-6 h-6 group-hover:scale-110 transition-transform text-pink-400" />
+                  <span className="text-xs font-black uppercase tracking-wider">Instagram</span>
+                  <span className="text-[10px] text-neutral-400 font-medium">@sierrafitn_</span>
                 </a>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="mt-5 text-center">
+            <div className="mt-6 text-center">
               <button 
                 onClick={() => setIsOpen(false)}
-                className="text-xs font-bold text-neutral-400 hover:text-white underline cursor-pointer"
+                className="text-xs font-bold text-neutral-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer"
               >
                 Cerrar
               </button>
