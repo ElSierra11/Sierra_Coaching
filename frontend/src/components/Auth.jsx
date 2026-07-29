@@ -426,7 +426,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
         const { token, user } = res;
         sessionStorage.setItem('gym_auth_token', token);
         if (showToast) {
-          showToast("¡Cuenta creada exitosamente! Bienvenido al equipo.", "success");
+          showToast("¡Registro recibido con éxito! En espera de aprobación por el Coach Alejandro.", "info");
         }
         onLogin(user);
       }

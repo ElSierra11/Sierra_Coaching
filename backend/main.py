@@ -506,8 +506,8 @@ def reject_client(client_id: int, db: Session = Depends(get_db), current_user: m
 
 @app.get("/api/clients", response_model=List[schemas.UserResponse])
 def get_clients(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_coach)):
-    # Simple list of clients
-    return db.query(models.User).filter(models.User.role == "client").all()
+    # Return only approved clients
+    return db.query(models.User).filter(models.User.role == "client", models.User.is_approved == True).all()
 
 
 @app.get("/api/clients/{client_id}", response_model=schemas.ClientDetailResponse)
