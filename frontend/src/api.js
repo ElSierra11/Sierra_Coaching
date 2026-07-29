@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const _isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const API_URL = import.meta.env.VITE_API_URL || (_isLocalhost ? 'http://localhost:8000/api' : 'https://sierra-coaching.onrender.com/api');
 
 async function request(path, options = {}) {
   const url = `${API_URL}${path}`;

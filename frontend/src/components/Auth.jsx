@@ -557,31 +557,31 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       </header>
 
       {/* Main Grid: Hero section & visual coach display */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-12 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-10 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center overflow-hidden">
         {/* Left Column: Headline and Call-to-actions */}
-        <div className="lg:col-span-7 flex flex-col gap-6 justify-center">
-          <div className="inline-flex items-center gap-2 bg-gymNeon/10 text-gymNeon border border-gymNeon/30 rounded-full px-4 py-1.5 text-xs font-bold tracking-widest uppercase self-start">
-            <Crown className="w-3.5 h-3.5" /> Asesoría Online Premium
+        <div className="lg:col-span-7 flex flex-col gap-5 justify-center">
+          <div className="inline-flex items-center gap-2 bg-gymNeon/10 text-gymNeon border border-gymNeon/30 rounded-full px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase self-start">
+            <Crown className="w-3 h-3" /> Asesoría Online Premium
           </div>
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-tight text-white">
+          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-tight text-white break-words">
             BIENVENIDO A LA<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-gymNeon via-orange-400 to-amber-500">
               CONSTRUCCIÓN<br className="sm:hidden" /> DE TU CUERPO
             </span>
           </h1>
-          <p className="text-neutral-400 text-sm sm:text-base leading-relaxed max-w-xl transition-colors duration-300">
+          <p className="text-neutral-400 text-xs sm:text-sm md:text-base leading-relaxed max-w-xl transition-colors duration-300">
             No soy entrenador certificado, pero soy prueba viviente del impacto de un sistema estructurado. Accede a rutinas planificadas, menús de alimentación personalizados y monitorea tu sobrecarga progresiva día a día en una sola app.
           </p>
-          <div className="flex items-center gap-4 mt-2">
+          <div className="flex items-center gap-3 mt-1 flex-wrap">
             <button
               onClick={() => { setIsLogin(false); setShowAuthModal(true); }}
-              className="bg-gymNeon text-black font-extrabold uppercase py-3.5 px-8 rounded-xl tracking-wider text-xs shadow-[0_4px_14px_rgba(255,87,34,0.3)] hover:bg-white hover:shadow-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
+              className="bg-gymNeon text-black font-extrabold uppercase py-3 px-6 rounded-xl tracking-wider text-xs shadow-[0_4px_14px_rgba(255,87,34,0.3)] hover:bg-white hover:shadow-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
             >
               Comenzar Ahora →
             </button>
             <button
               onClick={() => { setIsLogin(true); setShowAuthModal(true); }}
-              className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-extrabold uppercase py-3.5 px-6 rounded-xl tracking-wider text-xs transition-all cursor-pointer"
+              className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-extrabold uppercase py-3 px-5 rounded-xl tracking-wider text-xs transition-all cursor-pointer"
             >
               Ver Planes
             </button>
