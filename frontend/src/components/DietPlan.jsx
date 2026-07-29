@@ -79,6 +79,7 @@ export default function DietPlan({ client, onUpdateClient, showToast }) {
   const [manualCal, setManualCal] = useState('');
   const [manualProt, setManualProt] = useState('');
   const [manualCarb, setManualCarb] = useState('');
+  const [manualFat, setManualFat] = useState('');
   // AI Meal Text log modal states
   const [showAILogModal, setShowAILogModal] = useState(false);
   const [mealText, setMealText] = useState('');

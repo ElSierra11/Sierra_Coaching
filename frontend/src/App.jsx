@@ -11,6 +11,42 @@ import { LayoutDashboard, Dumbbell, Apple, TrendingUp, CheckCircle, AlertCircle,
 import InstallPrompt from './components/InstallPrompt';
 import SkeletonLoader from './components/SkeletonLoader';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="glass-panel p-8 text-center flex flex-col items-center justify-center gap-4 rounded-2xl border border-red-500/20 max-w-lg mx-auto my-8">
+          <div className="bg-red-500/10 p-3 rounded-full text-red-400">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h3 className="text-sm font-bold text-white">Algo salió mal al cargar esta sección</h3>
+          <p className="text-xs text-neutral-400">{this.state.error?.toString()}</p>
+          <button
+            onClick={() => this.setState({ hasError: false, error: null })}
+            className="px-4 py-2 bg-gymNeon text-black font-extrabold text-xs rounded-xl uppercase tracking-wider cursor-pointer"
+          >
+            Reintentar
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [clientData, setClientData] = useState(null);
@@ -157,18 +193,20 @@ export default function App() {
               {/* Tab Content Panels — add bottom padding on mobile for fixed nav bar */}
 
               <main className="pb-20 md:pb-0">
-                {activeTab === 'dashboard' && (
-                  <Dashboard client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} weeklyChallenge={weeklyChallenge} />
-                )}
-                {activeTab === 'routine' && (
-                  <RoutineTracker client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} />
-                )}
-                {activeTab === 'diet' && (
-                  <DietPlan client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} />
-                )}
-                {activeTab === 'progress' && (
-                  <ProgressTracker client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} />
-                )}
+                <ErrorBoundary key={activeTab}>
+                  {activeTab === 'dashboard' && (
+                    <Dashboard client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} weeklyChallenge={weeklyChallenge} />
+                  )}
+                  {activeTab === 'routine' && (
+                    <RoutineTracker client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} />
+                  )}
+                  {activeTab === 'diet' && (
+                    <DietPlan client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} />
+                  )}
+                  {activeTab === 'progress' && (
+                    <ProgressTracker client={clientData} onUpdateClient={handleUpdateClient} showToast={showToast} />
+                  )}
+                </ErrorBoundary>
               </main>
 
             </div>
