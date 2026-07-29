@@ -9,6 +9,7 @@ def migrate():
     # Columns to check and add
     # Format: (table, column, type_and_default)
     migrations = [
+        ("users", "is_approved", "BOOLEAN DEFAULT TRUE"),
         ("exercises", "video_url", "VARCHAR(255) DEFAULT ''"),
         ("lift_logs", "rpe", "INTEGER DEFAULT 0"),
         ("diet_meals", "calories", "INTEGER DEFAULT 0"),
@@ -44,7 +45,13 @@ def migrate():
                 except Exception as e:
                     connection.rollback()
                     print(f"Error al añadir la columna '{column}' a '{table}': {e}")
-                    
+        
+        try:
+            connection.execute(text("UPDATE users SET is_approved = TRUE WHERE is_approved IS NULL"))
+            connection.commit()
+        except Exception:
+            pass
+
     print("Migración de base de datos finalizada.")
 
 if __name__ == "__main__":
