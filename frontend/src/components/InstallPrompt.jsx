@@ -79,56 +79,76 @@ export default function InstallPrompt() {
   if (isInstalled || !showPrompt) return null;
 
   return (
-    <div className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-96 z-50 animate-slide-in">
-      <div className="glass-panel-neon p-5 rounded-2xl relative flex flex-col gap-4 bg-gymDark-900/95 border-gymNeon border shadow-2xl backdrop-blur-lg">
+    <div className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-96 z-50 animate-scale-in">
+      <div className="glass-panel p-5 rounded-3xl relative flex flex-col gap-4 bg-gradient-to-b from-neutral-900/95 via-neutral-900/98 to-black/95 border-2 border-gymNeon/40 shadow-[0_0_30px_rgba(255,87,34,0.3)] backdrop-blur-xl">
         {/* Close Button */}
         <button 
           onClick={handleDismiss}
-          className="absolute top-3.5 right-3.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+          className="absolute top-3.5 right-3.5 text-neutral-400 hover:text-white bg-white/5 p-1 rounded-full border border-white/10 transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
 
-        <div className="flex gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gymNeon/10 border border-gymNeon/25 flex items-center justify-center text-gymNeon flex-shrink-0">
-            <Download className="w-6 h-6 animate-pulse" />
+        <div className="flex gap-4 items-center">
+          <div className="relative flex-shrink-0">
+            <img 
+              src="/sierra_logo.jpg" 
+              alt="Sierra Coaching Logo" 
+              className="w-14 h-14 rounded-full object-cover border-2 border-gymNeon shadow-[0_0_15px_rgba(255,87,34,0.5)]" 
+            />
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-gymNeon text-black font-black text-[8px] px-2 py-0.5 rounded-full shadow tracking-wider uppercase border border-black">
+              PWA
+            </span>
           </div>
+          
           <div className="flex flex-col gap-1 pr-6">
-            <h4 className="text-sm font-extrabold tracking-tight text-white">Instalar Sierra Coaching</h4>
-            <p className="text-neutral-400 text-xs leading-relaxed">
-              Instala la aplicación en tu pantalla de inicio para un acceso rápido y mejor rendimiento.
+            <div className="flex items-center gap-1.5 text-gymNeon text-[10px] font-black uppercase tracking-widest">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-ping"></span>
+              <span>Instalación Gratuita</span>
+            </div>
+            <h4 className="text-sm font-black tracking-tight text-white">Sierra Coaching App</h4>
+            <p className="text-neutral-400 text-xs leading-relaxed font-medium">
+              Agrégala a tu pantalla de inicio para un acceso instantáneo como App nativa.
             </p>
           </div>
+        </div>
+
+        {/* Feature badges */}
+        <div className="flex gap-2">
+          <span className="text-[10px] font-bold bg-white/5 border border-white/10 text-neutral-300 px-2.5 py-1 rounded-lg">⚡ Ultrarrápida</span>
+          <span className="text-[10px] font-bold bg-white/5 border border-white/10 text-neutral-300 px-2.5 py-1 rounded-lg">📲 Sin Tiendas</span>
+          <span className="text-[10px] font-bold bg-gymNeon/10 border border-gymNeon/30 text-gymNeon px-2.5 py-1 rounded-lg">🔥 100% Gratis</span>
         </div>
 
         <div className="flex gap-2.5">
           <button 
             onClick={handleInstallClick}
-            className="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-premium text-white font-extrabold uppercase py-2.5 px-4 rounded-xl text-xs tracking-wider shadow-lg hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+            className="flex-1 inline-flex items-center justify-center gap-2 bg-gymNeon text-black font-black uppercase py-3 px-4 rounded-xl text-xs tracking-wider shadow-[0_4px_14px_rgba(255,87,34,0.35)] hover:opacity-90 active:scale-95 transition-all cursor-pointer"
           >
-            <span>Instalar Ahora</span>
+            <Download className="w-4 h-4" />
+            <span>Instalar en Pantalla</span>
           </button>
           <button 
             onClick={handleDismiss}
-            className="px-4 py-2.5 rounded-xl border border-white/10 text-neutral-400 hover:text-white hover:bg-white/5 text-xs font-bold transition-all cursor-pointer"
+            className="px-3 py-3 rounded-xl border border-white/10 text-neutral-400 hover:text-white hover:bg-white/5 text-xs font-bold transition-all cursor-pointer"
           >
-            Más tarde
+            Ahora no
           </button>
         </div>
 
         {/* iOS Specific Instructions Modal/Section */}
         {showIOSInstructions && (
-          <div className="mt-3 p-3.5 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-2.5 text-xs text-neutral-300">
+          <div className="mt-2 p-3.5 rounded-xl bg-black/40 border border-gymNeon/30 flex flex-col gap-2.5 text-xs text-neutral-300 animate-slide-in">
             <div className="flex items-start gap-2">
               <Share className="w-4 h-4 text-gymNeon flex-shrink-0 mt-0.5" />
               <span>
-                1. Toca el botón de <strong>Compartir</strong> en la barra inferior de Safari.
+                1. Toca el botón <strong>Compartir</strong> en la barra inferior de tu navegador (Safari).
               </span>
             </div>
             <div className="flex items-start gap-2">
               <ArrowUpRight className="w-4 h-4 text-gymNeon flex-shrink-0 mt-0.5" />
               <span>
-                2. Desplázate hacia abajo y selecciona <strong>"Agregar a la pantalla de inicio"</strong>.
+                2. Selecciona <strong>"Agregar a la pantalla de inicio"</strong>.
               </span>
             </div>
           </div>
