@@ -189,6 +189,25 @@ export const api = {
     });
   },
 
+  updateClientProfile: async (clientId, profileData) => {
+    return request(`/clients/${clientId}/profile`, {
+      method: "PUT",
+      body: JSON.stringify({
+        height: profileData.height ? parseFloat(profileData.height) : undefined,
+        initial_weight: profileData.initial_weight ? parseFloat(profileData.initial_weight) : undefined,
+        target: profileData.target || undefined,
+        name: profileData.name || undefined,
+      }),
+    });
+  },
+
+  parseMealText: async (text) => {
+    return request("/nutrition/parse-meal", {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    });
+  },
+
   chatWithAI: async (message, history = []) => {
     return request("/chat", {
       method: "POST",

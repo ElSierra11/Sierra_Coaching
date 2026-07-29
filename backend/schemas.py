@@ -360,3 +360,23 @@ class AICalculateMacrosRequest(BaseModel):
     merienda: Optional[str] = ""
 
 
+class ClientProfileUpdate(BaseModel):
+    height: Optional[float] = None
+    initial_weight: Optional[float] = None
+    target: Optional[str] = None
+    name: Optional[str] = None
+
+
+class ParseMealRequest(BaseModel):
+    text: str
+
+
+class ParseMealResponse(BaseModel):
+    calories: int
+    proteins: int
+    carbs: int
+    fats: int
+    summary: str
+
+
+

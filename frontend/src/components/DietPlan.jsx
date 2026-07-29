@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lightbulb, Check, Calculator, ShoppingCart, Plus, RefreshCw, X, HelpCircle } from 'lucide-react';
+import { Lightbulb, Check, Calculator, ShoppingCart, Plus, RefreshCw, X, HelpCircle, Sparkles } from 'lucide-react';
 import { api } from '../api';
 
 const MacroCircle = ({ percentage, color, label, value, target }) => {
@@ -79,7 +79,52 @@ export default function DietPlan({ client, onUpdateClient, showToast }) {
   const [manualCal, setManualCal] = useState('');
   const [manualProt, setManualProt] = useState('');
   const [manualCarb, setManualCarb] = useState('');
-  const [manualFat, setManualFat] = useState('');
+  // AI Meal Text log modal states
+  const [showAILogModal, setShowAILogModal] = useState(false);
+  const [mealText, setMealText] = useState('');
+  const [isAnalyzingMeal, setIsAnalyzingMeal] = useState(false);
+  const [parsedMealResult, setParsedMealResult] = useState(null);
+
+  const handleAnalyzeMeal = async (e) => {
+    e.preventDefault();
+    if (!mealText.trim()) return;
+    setIsAnalyzingMeal(true);
+    try {
+      const res = await api.parseMealText(mealText);
+      setParsedMealResult(res);
+      showToast && showToast("¡Comida analizada correctamente!", "success");
+    } catch (err) {
+      showToast && showToast("Error al analizar la comida: " + err.message, "error");
+    } finally {
+      setIsAnalyzingMeal(false);
+    }
+  };
+
+  const handleApplyParsedMeal = async () => {
+    if (!parsedMealResult) return;
+    const newCal = (nutritionLog.calories_consumed || 0) + parsedMealResult.calories;
+    const newProt = (nutritionLog.proteins_consumed || 0) + parsedMealResult.proteins;
+    const newCarb = (nutritionLog.carbs_consumed || 0) + parsedMealResult.carbs;
+    const newFat = (nutritionLog.fats_consumed || 0) + parsedMealResult.fats;
+
+    try {
+      const updated = await api.updateTodayNutrition(client.id, {
+        calories_consumed: newCal,
+        proteins_consumed: newProt,
+        carbs_consumed: newCarb,
+        fats_consumed: newFat,
+        meals_completed: JSON.stringify(completedMeals)
+      });
+      setNutritionLog(updated);
+      showToast && showToast(`¡Se añadieron ${parsedMealResult.calories} kcal a tu diario!`, "success");
+      setShowAILogModal(false);
+      setMealText('');
+      setParsedMealResult(null);
+      onUpdateClient && onUpdateClient();
+    } catch (err) {
+      showToast && showToast("Error al actualizar diario nutricional: " + err.message, "error");
+    }
+  };
 
   const diet = client.diet || [];
   const currentDayDiet = diet.find(d => d.day_number === activeDay) || {
@@ -559,7 +604,14 @@ export default function DietPlan({ client, onUpdateClient, showToast }) {
             <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Progreso de Hoy</span>
             <h4 className="text-sm font-bold text-white mt-0.5">Semáforo de Macronutrientes Diario</h4>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => setShowAILogModal(true)}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-gradient-to-r from-orange-500/20 via-gymNeon/20 to-orange-500/20 border border-gymNeon/40 text-gymNeon hover:bg-gymNeon/30 transition-all text-[10px] font-extrabold cursor-pointer shadow-md"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
+              <span>Escribir lo que comí (IA)</span>
+            </button>
             <button
               onClick={() => setShowManualLog(true)}
               className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 py-1.5 px-2.5 rounded-lg border border-white/10 text-neutral-300 hover:text-white hover:bg-white/5 transition-all text-[10px] font-semibold cursor-pointer"
@@ -823,6 +875,101 @@ export default function DietPlan({ client, onUpdateClient, showToast }) {
             >
               Listo, Cerrar
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Registrar Comida por Texto / IA */}
+      {showAILogModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-neutral-900 border border-white/10 rounded-3xl p-6 w-full max-w-lg flex flex-col gap-4 animate-scale-in relative shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+            <button
+              onClick={() => {
+                setShowAILogModal(false);
+                setParsedMealResult(null);
+              }}
+              className="absolute top-4 right-4 text-neutral-500 hover:text-white bg-white/5 border border-white/10 p-1.5 rounded-xl cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div>
+              <div className="flex items-center gap-1.5 text-gymNeon text-[10px] font-extrabold uppercase tracking-widest">
+                <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
+                <span>Calculadora Nutricional de Texto (IA)</span>
+              </div>
+              <h3 className="text-lg font-bold text-white mt-0.5">Escribe lo que comiste</h3>
+              <p className="text-xs text-neutral-400 mt-1">
+                Digita en tus palabras los alimentos o platos consumidos y la IA calculará automáticamente las calorías y macronutrientes.
+              </p>
+            </div>
+
+            <form onSubmit={handleAnalyzeMeal} className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Descripción de tu comida</label>
+                <textarea
+                  rows="3"
+                  value={mealText}
+                  onChange={(e) => setMealText(e.target.value)}
+                  placeholder="Ej: 200g de pechuga de pollo asada con 1 taza de arroz blanco y ensalada verde con 1 cucharada de aceite de oliva"
+                  className="bg-black/40 border border-white/10 rounded-xl p-3.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-gymNeon resize-none"
+                  required
+                ></textarea>
+                <span className="text-[9px] text-neutral-500 font-medium">Ejemplo: "3 huevos fritos con 2 rebanadas de pan integral y 1 taza de café con leche"</span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isAnalyzingMeal}
+                className="bg-gradient-to-r from-orange-500 to-gymNeon text-black font-extrabold uppercase py-3 rounded-xl text-xs tracking-wider hover:opacity-90 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg"
+              >
+                {isAnalyzingMeal ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Analizando con IA...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    <span>Calcular Calorías y Macros</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* AI Result Card */}
+            {parsedMealResult && (
+              <div className="bg-black/30 border border-gymNeon/30 rounded-2xl p-4 flex flex-col gap-3 mt-1 animate-fade-in">
+                <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase">Resultado del Análisis</span>
+                  <span className="text-xs font-black text-gymNeon">{parsedMealResult.calories} kcal estimadas</span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                    <span className="text-[9px] text-neutral-400 font-bold block uppercase">Proteínas</span>
+                    <span className="text-xs font-black text-white">{parsedMealResult.proteins}g</span>
+                  </div>
+                  <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                    <span className="text-[9px] text-neutral-400 font-bold block uppercase">Carbos</span>
+                    <span className="text-xs font-black text-white">{parsedMealResult.carbs}g</span>
+                  </div>
+                  <div className="bg-white/5 p-2 rounded-xl border border-white/5">
+                    <span className="text-[9px] text-neutral-400 font-bold block uppercase">Grasas</span>
+                    <span className="text-xs font-black text-white">{parsedMealResult.fats}g</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 mt-1">
+                  <button
+                    onClick={handleApplyParsedMeal}
+                    className="flex-1 bg-gymNeon text-black font-extrabold uppercase py-2.5 rounded-xl text-xs tracking-wider hover:opacity-90 transition-all cursor-pointer"
+                  >
+                    Sumar a mi Día de Hoy
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

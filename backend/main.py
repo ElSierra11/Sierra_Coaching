@@ -1135,6 +1135,117 @@ def update_today_nutrition(client_id: int, payload: schemas.DailyNutritionLogBas
     return log
 
 
+@app.put("/api/clients/{client_id}/profile", response_model=schemas.ClientProfileResponse)
+def update_client_profile(
+    client_id: int,
+    payload: schemas.ClientProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if current_user.role != "coach" and current_user.id != client_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acceso denegado")
+        
+    client = db.query(models.User).filter(models.User.id == client_id).first()
+    if not client:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
+        
+    if payload.name:
+        client.name = payload.name
+        
+    profile = db.query(models.ClientProfile).filter(models.ClientProfile.user_id == client_id).first()
+    if not profile:
+        profile = models.ClientProfile(
+            user_id=client_id,
+            height=payload.height or 1.70,
+            initial_weight=payload.initial_weight or 70.0,
+            target=payload.target or "Tonificar",
+            joined_date=datetime.date.today().strftime("%Y-%m-%d")
+        )
+        db.add(profile)
+    else:
+        if payload.height is not None:
+            profile.height = payload.height
+        if payload.initial_weight is not None:
+            profile.initial_weight = payload.initial_weight
+        if payload.target is not None:
+            profile.target = payload.target
+            
+    db.commit()
+    db.refresh(profile)
+    return profile
+
+
+@app.post("/api/nutrition/parse-meal", response_model=schemas.ParseMealResponse)
+def parse_meal_with_ai(
+    payload: schemas.ParseMealRequest,
+    current_user: models.User = Depends(get_current_user)
+):
+    text = payload.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Escribe la descripción de tu comida")
+        
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+            headers = {"Content-Type": "application/json"}
+            system_prompt = (
+                "Eres un nutricionista experto de Sierra Coaching. Analiza el texto proporcionado por el usuario con los alimentos consumidos y calcula "
+                "el total estimado de calorías (kcal), proteínas (g), carbohidratos (g) y grasas (g). "
+                "Devuelve ÚNICAMENTE un JSON válido con este formato exacto sin markdown ni explicaciones adicionales:\n"
+                '{"calories": 450, "proteins": 35, "carbs": 40, "fats": 12, "summary": "Pechuga de pollo con arroz y ensalada"}'
+            )
+            body = {
+                "contents": [
+                    {"role": "user", "parts": [{"text": system_prompt + "\n\nTexto del usuario: " + text}]}
+                ]
+            }
+            req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
+            with urllib.request.urlopen(req, timeout=10) as response:
+                res_data = json.loads(response.read().decode("utf-8"))
+                raw_response = res_data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                cleaned = raw_response.replace("```json", "").replace("```", "").strip()
+                parsed = json.loads(cleaned)
+                return schemas.ParseMealResponse(
+                    calories=int(parsed.get("calories", 350)),
+                    proteins=int(parsed.get("proteins", 25)),
+                    carbs=int(parsed.get("carbs", 35)),
+                    fats=int(parsed.get("fats", 10)),
+                    summary=str(parsed.get("summary", text))
+                )
+        except Exception as e:
+            print(f"Error parse-meal Gemini: {e}")
+
+    # Fallback heuristic parser
+    low_text = text.lower()
+    cal = 350
+    prot = 25
+    carb = 35
+    fat = 10
+    
+    if any(k in low_text for k in ["pollo", "carne", "pescado", "atún", "salmon", "salmón", "res"]):
+        prot += 15
+        cal += 100
+    if any(k in low_text for k in ["huevo", "huevos", "clara", "claras"]):
+        prot += 12
+        fat += 8
+        cal += 130
+    if any(k in low_text for k in ["arroz", "papa", "patata", "avena", "pan", "pasta", "arepa"]):
+        carb += 25
+        cal += 140
+    if any(k in low_text for k in ["aguacate", "palta", "queso", "aceite", "nueces", "mantequilla"]):
+        fat += 10
+        cal += 110
+
+    return schemas.ParseMealResponse(
+        calories=cal,
+        proteins=prot,
+        carbs=carb,
+        fats=fat,
+        summary=text
+    )
+
+
 # --- ENDPOINTS NUEVOS: DIARIO DE ENTRENAMIENTO ---
 
 @app.post("/api/clients/{client_id}/workout-feedback", response_model=schemas.WorkoutFeedbackResponse)

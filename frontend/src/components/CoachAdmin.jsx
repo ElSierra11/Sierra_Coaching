@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles, Calculator, Info } from 'lucide-react';
+import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles, Calculator, Info, Edit3, X } from 'lucide-react';
 import ChatWindow from './ChatWindow';
 
 const WeightChart = ({ history, initialWeight }) => {
@@ -235,6 +235,36 @@ export default function CoachAdmin({ showToast }) {
       console.error(err);
     } finally {
       setLoadingList(false);
+    }
+  };
+
+  // Profile edit states for CoachAdmin
+  const [showEditClientModal, setShowEditClientModal] = useState(false);
+  const [editClientHeight, setEditClientHeight] = useState('');
+  const [editClientWeight, setEditClientWeight] = useState('');
+  const [editClientTarget, setEditClientTarget] = useState('');
+  const [editClientName, setEditClientName] = useState('');
+  const [savingClientProfile, setSavingClientProfile] = useState(false);
+
+  const handleSaveClientProfile = async (e) => {
+    e.preventDefault();
+    if (!selectedClient) return;
+    setSavingClientProfile(true);
+    try {
+      await api.updateClientProfile(selectedClient.id, {
+        height: parseFloat(editClientHeight),
+        initial_weight: parseFloat(editClientWeight),
+        target: editClientTarget,
+        name: editClientName
+      });
+      showToast("Datos del alumno actualizados correctamente", "success");
+      setShowEditClientModal(false);
+      fetchClientDetail(selectedClient.id);
+      fetchClients();
+    } catch (err) {
+      showToast(err.message || "Error al actualizar alumno", "error");
+    } finally {
+      setSavingClientProfile(false);
     }
   };
 
@@ -661,7 +691,22 @@ export default function CoachAdmin({ showToast }) {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* General physical metrics */}
                     <div className="glass-panel p-6 rounded-2xl md:col-span-3 flex flex-col gap-4">
-                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">Métricas de Progreso</h4>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">Métricas de Progreso</h4>
+                        <button
+                          onClick={() => {
+                            setEditClientHeight(selectedClient.profile?.height || 1.70);
+                            setEditClientTarget(selectedClient.profile?.target || "Tonificar");
+                            setEditClientWeight(selectedClient.profile?.initial_weight || 70);
+                            setEditClientName(selectedClient.name || "");
+                            setShowEditClientModal(true);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5 text-gymNeon" />
+                          <span>Editar Datos Alumno</span>
+                        </button>
+                      </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="bg-black/25 p-4 rounded-xl border border-white/5">
                           <div className="text-[10px] text-neutral-500 font-bold uppercase">Objetivo</div>
@@ -681,6 +726,100 @@ export default function CoachAdmin({ showToast }) {
                         </div>
                       </div>
                     </div>
+
+                    {/* Edit Client Profile Modal for Coach */}
+                    {showEditClientModal && (
+                      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <div className="bg-neutral-900 border border-white/10 rounded-3xl p-6 w-full max-w-md flex flex-col gap-4 animate-scale-in relative shadow-2xl">
+                          <button
+                            onClick={() => setShowEditClientModal(false)}
+                            className="absolute top-4 right-4 text-neutral-500 hover:text-white bg-white/5 border border-white/10 p-1.5 rounded-xl cursor-pointer"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+
+                          <div>
+                            <span className="text-[10px] font-extrabold text-gymNeon uppercase tracking-widest">Administración de Alumno</span>
+                            <h3 className="text-lg font-bold text-white mt-0.5">Editar Perfil del Alumno</h3>
+                            <p className="text-xs text-neutral-400 mt-1">Corrige la estatura, objetivo o peso inicial del alumno.</p>
+                          </div>
+
+                          <form onSubmit={handleSaveClientProfile} className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Nombre del Alumno</label>
+                              <input
+                                type="text"
+                                value={editClientName}
+                                onChange={(e) => setEditClientName(e.target.value)}
+                                placeholder="Nombre completo"
+                                required
+                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gymNeon"
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Estatura (metros)</label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0.5"
+                                max="2.5"
+                                value={editClientHeight}
+                                onChange={(e) => setEditClientHeight(e.target.value)}
+                                placeholder="Ej. 1.70"
+                                required
+                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gymNeon"
+                              />
+                              <span className="text-[9px] text-neutral-500">Ejemplo: 1.67 ó 1.70 m</span>
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Peso de Partida (kg)</label>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="20"
+                                max="300"
+                                value={editClientWeight}
+                                onChange={(e) => setEditClientWeight(e.target.value)}
+                                placeholder="Ej. 70"
+                                required
+                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gymNeon"
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Objetivo Principal</label>
+                              <input
+                                type="text"
+                                value={editClientTarget}
+                                onChange={(e) => setEditClientTarget(e.target.value)}
+                                placeholder="Objetivo"
+                                required
+                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gymNeon"
+                              />
+                            </div>
+
+                            <div className="flex justify-end gap-2 mt-2">
+                              <button
+                                type="button"
+                                onClick={() => setShowEditClientModal(false)}
+                                className="px-4 py-2.5 rounded-xl border border-white/10 text-neutral-400 hover:text-white text-xs font-bold cursor-pointer"
+                              >
+                                Cancelar
+                              </button>
+                              <button
+                                type="submit"
+                                disabled={savingClientProfile}
+                                className="px-5 py-2.5 bg-gymNeon text-black rounded-xl text-xs font-black uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer"
+                              >
+                                {savingClientProfile ? "Guardando..." : "Guardar Cambios"}
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Weight and measurements logs */}
                     <div className="glass-panel p-6 rounded-2xl md:col-span-2 flex flex-col gap-4">

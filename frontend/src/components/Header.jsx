@@ -53,6 +53,27 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
     }
   };
 
+  const handleEnablePushNotifications = async () => {
+    if (!("Notification" in window)) {
+      alert("Tu navegador o dispositivo no soporta notificaciones de escritorio.");
+      return;
+    }
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm === "granted") {
+        new Notification("Sierra Coaching App 🏋️", {
+          body: "¡Recordatorios de entrenamiento e hidratación activados correctamente!",
+          icon: "/coach.png"
+        });
+        localStorage.setItem("gym_push_enabled", "true");
+      } else {
+        alert("Permiso de notificaciones denegado en tu navegador.");
+      }
+    } catch (e) {
+      console.error("Error al solicitar permisos de notificación:", e);
+    }
+  };
+
   const handleMarkAllAsRead = async () => {
     try {
       await api.markAllNotificationsAsRead();
@@ -167,6 +188,20 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
                         Marcar todo leído
                       </button>
                     )}
+                  </div>
+                  
+                  {/* Push Notification permission activator */}
+                  <div className="bg-gymNeon/10 border border-gymNeon/30 p-2.5 rounded-xl flex items-center justify-between gap-2">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-white">Recordatorios de Entreno</span>
+                      <span className="text-[8px] text-neutral-400">Recibir avisos en tu pantalla</span>
+                    </div>
+                    <button
+                      onClick={handleEnablePushNotifications}
+                      className="px-2.5 py-1 bg-gymNeon text-black font-extrabold text-[9px] rounded-lg uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer"
+                    >
+                      Activar
+                    </button>
                   </div>
                   <div className="max-h-60 overflow-y-auto flex flex-col gap-2 no-scrollbar">
                     {notifications.length === 0 ? (

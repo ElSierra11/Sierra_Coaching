@@ -3,7 +3,7 @@ import { api } from '../api';
 import {
   Droplet, Moon, Flame, Ban, CheckCircle, AlertTriangle,
   Clock, Trophy, XCircle, Zap, Calendar, TrendingUp, BarChart2,
-  TrendingDown, Dumbbell, Sparkles, Send, MessageSquare, X
+  TrendingDown, Dumbbell, Sparkles, Send, MessageSquare, X, Edit3
 } from 'lucide-react';
 
 // --- Streak Counter Widget ---
@@ -378,6 +378,32 @@ export default function Dashboard({ client, onUpdateClient, showToast, weeklyCha
     }
   };
 
+  // Profile edit states
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [editHeight, setEditHeight] = useState(profile.height || 1.67);
+  const [editTarget, setEditTarget] = useState(profile.target || "Tonificar");
+  const [editInitialWeight, setEditInitialWeight] = useState(profile.initial_weight || 70);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setIsSavingProfile(true);
+    try {
+      const updatedProf = await api.updateClientProfile(client.id, {
+        height: parseFloat(editHeight),
+        initial_weight: parseFloat(editInitialWeight),
+        target: editTarget
+      });
+      showToast && showToast("¡Perfil físico actualizado correctamente!", "success");
+      setShowEditProfileModal(false);
+      onUpdateClient && onUpdateClient();
+    } catch (error) {
+      showToast && showToast(error.message || "Error al actualizar perfil", "error");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
   const handleWaterClick = (change) => {
     const newCups = Math.max(0, dailyLog.water_cups + change);
     handleHabitChange('water_cups', newCups);
@@ -404,7 +430,21 @@ export default function Dashboard({ client, onUpdateClient, showToast, weeklyCha
       
       {/* 1. Client Stats Row */}
       <section className="glass-panel border-l-4 border-gymNeon p-6 rounded-2xl shadow-lg">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Mi Perfil Físico</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Mi Perfil Físico</h3>
+          <button
+            onClick={() => {
+              setEditHeight(profile.height || 1.67);
+              setEditTarget(profile.target || "Tonificar");
+              setEditInitialWeight(profile.initial_weight || 70);
+              setShowEditProfileModal(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white rounded-xl text-xs font-semibold transition-all cursor-pointer"
+          >
+            <Edit3 className="w-3.5 h-3.5 text-gymNeon" />
+            <span>Editar Perfil</span>
+          </button>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex flex-col gap-1 bg-black/20 p-3.5 rounded-xl border border-white/5">
             <span className="text-neutral-500 text-[10px] font-bold uppercase tracking-wider">Objetivo</span>
@@ -428,6 +468,88 @@ export default function Dashboard({ client, onUpdateClient, showToast, weeklyCha
           </div>
         </div>
       </section>
+
+      {/* Edit Profile Modal */}
+      {showEditProfileModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-neutral-900 border border-white/10 rounded-3xl p-6 w-full max-w-md flex flex-col gap-4 animate-scale-in relative shadow-2xl">
+            <button
+              onClick={() => setShowEditProfileModal(false)}
+              className="absolute top-4 right-4 text-neutral-500 hover:text-white bg-white/5 border border-white/10 p-1.5 rounded-xl cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div>
+              <span className="text-[10px] font-extrabold text-gymNeon uppercase tracking-widest">Actualizar Datos</span>
+              <h3 className="text-lg font-bold text-white mt-0.5">Editar Perfil Físico</h3>
+              <p className="text-xs text-neutral-400 mt-1">Si registraste mal tu estatura u objetivo, puedes corregirlo aquí.</p>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Estatura (metros)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.5"
+                  max="2.5"
+                  value={editHeight}
+                  onChange={(e) => setEditHeight(e.target.value)}
+                  placeholder="Ej. 1.70"
+                  required
+                  className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gymNeon"
+                />
+                <span className="text-[9px] text-neutral-500">Ejemplo: 1.70 para un metro con setenta centímetros</span>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Peso Inicial (kg)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="20"
+                  max="300"
+                  value={editInitialWeight}
+                  onChange={(e) => setEditInitialWeight(e.target.value)}
+                  placeholder="Ej. 70.5"
+                  required
+                  className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gymNeon"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Objetivo Personal</label>
+                <input
+                  type="text"
+                  value={editTarget}
+                  onChange={(e) => setEditTarget(e.target.value)}
+                  placeholder="Ej. Mantener Peso y ganancia muscular"
+                  required
+                  className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gymNeon"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditProfileModal(false)}
+                  className="px-4 py-2.5 rounded-xl border border-white/10 text-neutral-400 hover:text-white text-xs font-bold cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingProfile}
+                  className="px-5 py-2.5 bg-gymNeon text-black rounded-xl text-xs font-black uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer"
+                >
+                  {isSavingProfile ? "Guardando..." : "Guardar Cambios"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* 2. Streak + Weekly Recap + Consistency heatmaps Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
