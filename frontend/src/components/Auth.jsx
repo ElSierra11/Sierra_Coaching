@@ -412,8 +412,12 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       {/* Top Navbar */}
       <header className="border-b border-white/5 bg-gymDark-900/50 backdrop-blur-md sticky top-0 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Crown className="w-5 h-5 text-gymNeon" />
+          <div className="flex items-center gap-3">
+            <img 
+              src="/sierra_logo.jpg" 
+              alt="Sierra Coaching Logo" 
+              className="w-9 h-9 rounded-full border-2 border-gymNeon object-cover shadow-[0_0_12px_rgba(255,87,34,0.5)]" 
+            />
             <span className="text-sm font-black tracking-widest uppercase text-white">SIERRA COACHING</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-neutral-400">
@@ -635,6 +639,79 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
         </div>
       </section>
 
+      {/* Transformation & Proof Section */}
+      <section className="max-w-7xl mx-auto px-6 py-12 w-full border-t border-white/5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-6 flex flex-col gap-4">
+            <span className="text-[10px] font-black text-gymNeon uppercase tracking-widest bg-gymNeon/10 border border-gymNeon/30 px-3 py-1 rounded-full self-start">
+              Prueba Real & Disciplina
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black uppercase text-white tracking-tight leading-tight">
+              MI TRANSFORMACIÓN
+            </h2>
+            <p className="text-neutral-400 text-sm leading-relaxed">
+              "No fue genética. No fue suerte. Fue disciplina todos los días." Esta es la metodología real que aplico conmigo mismo y con cada uno de mis alumnos para lograr resultados físicos contundentes.
+            </p>
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <div className="bg-black/30 border border-white/5 p-3.5 rounded-xl">
+                <span className="text-gymNeon text-xs font-black uppercase block">Antes (2022)</span>
+                <span className="text-neutral-400 text-[11px]">Inicio sin estructura</span>
+              </div>
+              <div className="bg-black/30 border border-gymNeon/40 p-3.5 rounded-xl">
+                <span className="text-gymNeon text-xs font-black uppercase block">Ahora (Actual)</span>
+                <span className="text-white text-[11px] font-bold">Físico magro y fuerte</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-6 flex justify-center">
+            <div className="relative rounded-3xl overflow-hidden border-2 border-gymNeon/30 shadow-[0_0_40px_rgba(255,87,34,0.25)] group hover:border-gymNeon/60 transition-all duration-300">
+              <img 
+                src="/transformation.jpg" 
+                alt="Mi Transformación - Alejandro Sierra" 
+                className="w-full h-auto max-h-[480px] object-cover group-hover:scale-[1.02] transition-all duration-500"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* App Mobile Showcase Banner Section */}
+      <section className="max-w-7xl mx-auto px-6 py-12 w-full">
+        <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-gradient-to-r from-neutral-900 via-black to-neutral-900 p-6 md:p-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 flex flex-col gap-4">
+              <div className="flex items-center gap-2 text-gymNeon text-[10px] font-black uppercase tracking-widest">
+                <Smartphone className="w-4 h-4" />
+                <span>Aplicación Web & PWA</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black uppercase text-white tracking-tight leading-tight">
+                TODO TU ENTRENAMIENTO EN UNA SOLA APP
+              </h2>
+              <p className="text-neutral-300 text-sm leading-relaxed">
+                Lleva tus rutinas, tu semáforo de macronutrientes, el cálculo de calorías y tu progreso de fuerza directamente en tu teléfono o computadora sin instalar nada pesado.
+              </p>
+              <div className="flex flex-wrap gap-4 mt-2">
+                <button
+                  onClick={() => { setIsLogin(false); setShowAuthModal(true); }}
+                  className="bg-gymNeon text-black font-extrabold uppercase py-3 px-6 rounded-xl text-xs tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg"
+                >
+                  Unirme Ahora →
+                </button>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 flex justify-center">
+              <img 
+                src="/app_banner.jpg" 
+                alt="Todo tu entrenamiento en una sola app - Sierra Coaching" 
+                className="w-full h-auto max-h-[420px] object-contain rounded-2xl border border-white/10 shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Bottom Features Row */}
       <section className="max-w-7xl mx-auto px-6 py-12 border-t border-white/5 mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 w-full transition-colors duration-300">
         <div className="flex items-start gap-4">
@@ -771,9 +848,14 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
             </button>
 
             {/* Form Header */}
-            <div className="text-center mb-6">
+            <div className="text-center mb-6 flex flex-col items-center">
+              <img 
+                src="/sierra_logo.jpg" 
+                alt="Sierra Coaching Official Logo" 
+                className="w-14 h-14 rounded-full border-2 border-gymNeon object-cover shadow-[0_0_15px_rgba(255,87,34,0.5)] mb-2"
+              />
               <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Sierra Coaching App</span>
-              <h2 className="text-2xl font-extrabold uppercase text-white mt-1">
+              <h2 className="text-2xl font-extrabold uppercase text-white mt-0.5">
                 {isLogin ? 'Ingresar a la App' : 'Crea tu Cuenta'}
               </h2>
               <p className="text-neutral-400 text-xs mt-1">

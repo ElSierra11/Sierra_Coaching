@@ -91,28 +91,32 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
   };
 
   return (
-    <header className="glass-panel flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 rounded-2xl border-l-4 border-gymNeon mb-8 shadow-xl relative">
-      
+    <header className="glass-panel flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 rounded-3xl border border-white/10 border-l-4 border-l-gymNeon mb-8 shadow-2xl relative overflow-hidden bg-gradient-to-r from-neutral-900/90 via-neutral-900/60 to-black/80">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gymNeon/10 rounded-full blur-[100px] pointer-events-none"></div>
+
       {/* Profile info left side */}
-      <div className="flex items-center gap-5">
-        <div className="relative flex-shrink-0">
+      <div className="flex items-center gap-5 relative z-10">
+        <div className="relative flex-shrink-0 group">
           <img 
-            src="/coach.png" 
-            alt="Coach Alejandro Sierra" 
-            className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-gymNeon shadow-[0_0_15px_rgba(255,87,34,0.25)]" 
+            src="/sierra_logo.jpg" 
+            alt="Sierra Coaching - Official Logo" 
+            className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-gymNeon shadow-[0_0_20px_rgba(255,87,34,0.4)] group-hover:scale-105 transition-all duration-300" 
             onError={(e) => {
-              e.target.src = "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=150";
+              e.target.src = "/coach.png";
             }}
           />
-          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-gymNeon text-black font-extrabold text-[10px] tracking-wider px-2 py-0.5 rounded-full shadow">
-            COACH
+          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-gymNeon text-black font-black text-[9px] tracking-widest uppercase px-2.5 py-0.5 rounded-full shadow-lg border border-black">
+            OFFICIAL
           </div>
         </div>
         
         <div className="flex flex-col gap-1">
-          <span className="text-gymNeon text-[10px] font-bold tracking-widest uppercase">Tu Asesoría Activa con</span>
-          <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-white">Alejandro Sierra Rincones</h1>
-          <p className="text-neutral-400 text-xs italic leading-relaxed max-w-lg mt-1">
+          <div className="flex items-center gap-2">
+            <span className="text-gymNeon text-[10px] font-black tracking-widest uppercase bg-gymNeon/10 border border-gymNeon/20 px-2 py-0.5 rounded-md">Sierra Coaching</span>
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-ping"></span>
+          </div>
+          <h1 className="text-xl md:text-2xl font-black tracking-tight text-white mt-0.5">Alejandro Sierra Rincones</h1>
+          <p className="text-neutral-400 text-xs italic leading-relaxed max-w-lg mt-0.5 font-medium">
             "No soy entrenador certificado, pero sí soy prueba viviente de que la constancia funciona. Te voy a enseñar lo que a mí me funcionó."
           </p>
         </div>
