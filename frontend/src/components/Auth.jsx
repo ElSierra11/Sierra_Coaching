@@ -562,8 +562,11 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
           <div className="inline-flex items-center gap-2 bg-gymNeon/10 text-gymNeon border border-gymNeon/30 rounded-full px-4 py-1.5 text-xs font-bold tracking-widest uppercase self-start">
             <Crown className="w-3.5 h-3.5" /> Asesoría Online Premium
           </div>
-          <h1 className="text-5xl sm:text-7xl font-black uppercase tracking-tight leading-none text-white">
-            NEVER<br />GIVE UP!
+          <h1 className="text-4xl sm:text-6xl font-black uppercase tracking-tight leading-tight text-white">
+            BIENVENIDO A LA<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-gymNeon via-orange-400 to-amber-500">
+              CONSTRUCCIÓN DE TU CUERPO
+            </span>
           </h1>
           <p className="text-neutral-400 text-sm sm:text-base leading-relaxed max-w-xl transition-colors duration-300">
             No soy entrenador certificado, pero soy prueba viviente del impacto de un sistema estructurado. Accede a rutinas planificadas, menús de alimentación personalizados y monitorea tu sobrecarga progresiva día a día en una sola app.
@@ -878,12 +881,12 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
 
       {/* Auth Modal Overlay */}
       {showAuthModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-all duration-300">
-          <div className="glass-panel w-full max-w-md rounded-2xl p-6 md:p-8 shadow-2xl relative border-gymNeon/20 bg-gymDark-900/95 animate-slide-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md transition-all duration-300">
+          <div className="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto no-scrollbar rounded-3xl p-6 md:p-8 shadow-2xl relative border border-gymNeon/30 bg-neutral-900/98 backdrop-blur-xl animate-slide-in">
             {/* Close Button */}
             <button
               onClick={() => setShowAuthModal(false)}
-              className="absolute top-4 right-4 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+              className="absolute top-4 right-4 text-neutral-400 hover:text-white bg-white/5 p-1.5 rounded-full border border-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -931,8 +934,17 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
             {/* Actual Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {errorMessage && (
-                <div className="bg-red-500/10 text-red-500 border border-red-500/25 p-3 rounded-lg text-xs leading-relaxed">
-                  {errorMessage}
+                <div className="bg-red-500/10 text-red-400 border border-red-500/30 p-3.5 rounded-xl text-xs leading-relaxed flex flex-col gap-1.5">
+                  <span>{errorMessage}</span>
+                  {!isLogin && (errorMessage.includes('registrado') || errorMessage.includes('sesión')) && (
+                    <button
+                      type="button"
+                      onClick={() => { setIsLogin(true); setErrorMessage(''); }}
+                      className="text-gymNeon underline font-bold text-left hover:text-white cursor-pointer uppercase text-[10px]"
+                    >
+                      👉 Ir a Iniciar Sesión
+                    </button>
+                  )}
                 </div>
               )}
 
