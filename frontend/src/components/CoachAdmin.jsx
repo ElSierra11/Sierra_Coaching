@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles, Calculator, Info, Edit3, X, UserCheck, UserX, Clock, ShieldAlert, MessageCircle, RefreshCw } from 'lucide-react';
+import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles, Calculator, Info, Edit3, X, UserCheck, UserX, Clock, ShieldAlert, MessageCircle, RefreshCw, Play, ExternalLink, Search, Loader2, HelpCircle } from 'lucide-react';
 import ChatWindow from './ChatWindow';
+import { parseVideoUrl, getTechnicalVideoUrl } from '../utils/videoUtils';
 
 const WeightChart = ({ history, initialWeight }) => {
   // Combine initial weight (from profile) and history
@@ -114,6 +115,20 @@ export default function CoachAdmin({ showToast }) {
   const [saving, setSaving] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
   const [challengeText, setChallengeText] = useState("");
+
+  // Video Preview State for Coach
+  const [previewVideoModal, setPreviewVideoModal] = useState({ isOpen: false, parsedVideo: null, name: '', isLoading: true });
+
+  const handleOpenVideoPreview = (exercise) => {
+    const rawUrl = (exercise.video_url && exercise.video_url.trim()) ? exercise.video_url.trim() : getTechnicalVideoUrl(exercise);
+    const parsed = parseVideoUrl(rawUrl, exercise.name);
+    setPreviewVideoModal({
+      isOpen: true,
+      parsedVideo: parsed,
+      name: exercise.name || 'Ejercicio',
+      isLoading: true
+    });
+  };
 
   const handleAIGenerateRoutine = async () => {
     if (generatingAI || !selectedClient) return;
@@ -1123,13 +1138,24 @@ export default function CoachAdmin({ showToast }) {
                                 </div>
                                 <div className="sm:col-span-2 flex flex-col gap-1">
                                   <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-wider">URL Video Técnico (Opcional)</span>
-                                  <input
-                                    type="text"
-                                    placeholder="Ej. https://www.youtube.com/watch?v=..."
-                                    value={ex.video_url || ''}
-                                    onChange={(e) => handleExerciseChange(idx, 'video_url', e.target.value)}
-                                    className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white"
-                                  />
+                                  <div className="flex gap-1.5 items-center">
+                                    <input
+                                      type="text"
+                                      placeholder="Ej. YouTube, Shorts, MP4, Reel..."
+                                      value={ex.video_url || ''}
+                                      onChange={(e) => handleExerciseChange(idx, 'video_url', e.target.value)}
+                                      className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white flex-1"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenVideoPreview(ex)}
+                                      className="px-2.5 py-1.5 bg-gymNeon/10 hover:bg-gymNeon/20 border border-gymNeon/30 text-gymNeon text-[10px] font-bold rounded flex items-center gap-1 transition-colors cursor-pointer flex-shrink-0"
+                                      title="Probar Video de Ejemplo"
+                                    >
+                                      <Play className="w-3 h-3 fill-gymNeon text-gymNeon" />
+                                      <span>Probar</span>
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
 
@@ -1401,6 +1427,86 @@ export default function CoachAdmin({ showToast }) {
         )}
 
       </div>
+
+      {/* Video Preview Modal for Coach */}
+      {previewVideoModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-slide-in">
+          <div className="glass-panel w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex flex-col bg-gymDark-900">
+            <div className="p-4 flex justify-between items-center border-b border-white/5">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <Play className="w-4 h-4 text-gymNeon fill-gymNeon" />
+                <span>Vista Previa: {previewVideoModal.name}</span>
+              </h3>
+              <button
+                onClick={() => setPreviewVideoModal({ isOpen: false, parsedVideo: null, name: '', isLoading: true })}
+                className="text-neutral-400 hover:text-white transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-5 flex flex-col gap-4">
+              {previewVideoModal.parsedVideo && previewVideoModal.parsedVideo.embedUrl ? (
+                <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 bg-black">
+                  {previewVideoModal.isLoading && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-10 gap-2">
+                      <Loader2 className="w-8 h-8 text-gymNeon animate-spin" />
+                      <span className="text-xs text-neutral-400 font-medium">Cargando demostración...</span>
+                    </div>
+                  )}
+
+                  {previewVideoModal.parsedVideo.isDirectFile ? (
+                    <video
+                      src={previewVideoModal.parsedVideo.embedUrl}
+                      controls
+                      autoPlay
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-contain"
+                      onLoadedData={() => setPreviewVideoModal(prev => ({ ...prev, isLoading: false }))}
+                      onError={() => setPreviewVideoModal(prev => ({ ...prev, isLoading: false }))}
+                    />
+                  ) : (
+                    <iframe
+                      src={previewVideoModal.parsedVideo.embedUrl}
+                      title={`Video técnica ${previewVideoModal.name}`}
+                      className="absolute inset-0 w-full h-full"
+                      allowFullScreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      onLoad={() => setPreviewVideoModal(prev => ({ ...prev, isLoading: false }))}
+                    ></iframe>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-10 flex flex-col items-center gap-3 border border-dashed border-white/10 rounded-xl bg-white/[0.01]">
+                  <HelpCircle className="w-10 h-10 text-neutral-500" />
+                  <p className="text-xs text-neutral-400 max-w-sm">
+                    No se detectó un video específico. Si guardas, el alumno verá la búsqueda recomendada en YouTube.
+                  </p>
+                </div>
+              )}
+              
+              <div className="flex flex-wrap justify-between items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                <span className="text-[10px] text-neutral-500 font-medium">Tipo detectado: {previewVideoModal.parsedVideo?.type || 'N/A'}</span>
+                
+                <div className="flex items-center gap-2">
+                  {previewVideoModal.parsedVideo && previewVideoModal.parsedVideo.rawUrl && (
+                    <a
+                      href={previewVideoModal.parsedVideo.rawUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white font-bold text-[10px] tracking-wider px-3 py-2.5 rounded-lg border border-white/10 transition-all cursor-pointer"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Abrir Link Directo</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

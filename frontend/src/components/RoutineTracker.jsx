@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { ClipboardList, Zap, Check, ChevronDown, Clock, Play, Search, ExternalLink, HelpCircle, X } from 'lucide-react';
+import { ClipboardList, Zap, Check, ChevronDown, Clock, Play, Search, ExternalLink, HelpCircle, X, Loader2 } from 'lucide-react';
+import { parseVideoUrl, getTechnicalVideoUrl } from '../utils/videoUtils';
 
 export default function RoutineTracker({ client, onUpdateClient, showToast }) {
   const [activeDay, setActiveDay] = useState('Lunes');
@@ -17,7 +18,7 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
   const [timerActive, setTimerActive] = useState(false);
 
   // Video Modal State
-  const [videoModal, setVideoModal] = useState({ isOpen: false, url: '', name: '', fallbackSearch: '' });
+  const [videoModal, setVideoModal] = useState({ isOpen: false, parsedVideo: null, name: '', isLoading: true });
 
   // Workout Feedback State
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -59,46 +60,15 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
     }
   };
 
-  const getTechnicalVideo = (exercise) => {
-    if (exercise.video_url && exercise.video_url.trim() !== '') {
-      return exercise.video_url;
-    }
-    const name = exercise.name.toLowerCase();
-    const mappings = [
-      { keys: ["banca", "chest", "pecho"], url: "https://www.youtube.com/embed/gViDbVeeXpU" },
-      { keys: ["sentadilla", "squat", "pierna"], url: "https://www.youtube.com/embed/yvD5_a6pI7M" },
-      { keys: ["peso muerto", "deadlift"], url: "https://www.youtube.com/embed/r4MzxtBKyNE" },
-      { keys: ["jalon", "espalda", "pulldown", "remo"], url: "https://www.youtube.com/embed/kK3hN7rQc34" },
-      { keys: ["biceps", "curl"], url: "https://www.youtube.com/embed/ly7d1FmB4v8" },
-      { keys: ["triceps", "extens", "copa"], url: "https://www.youtube.com/embed/sU1E2dG_dmo" },
-      { keys: ["militar", "hombro", "press press"], url: "https://www.youtube.com/embed/xS6Kj6B5q3k" },
-      { keys: ["zancada", "lung", "desplante"], url: "https://www.youtube.com/embed/COXYKsn949M" }
-    ];
-    for (const map of mappings) {
-      if (map.keys.some(key => name.includes(key))) {
-        return map.url;
-      }
-    }
-    return null;
-  };
-
-  const formatEmbedUrl = (url) => {
-    if (!url) return '';
-    if (url.includes('youtube.com/embed/')) return url;
-    if (url.includes('youtu.be/')) {
-      const id = url.split('youtu.be/')[1]?.split('?')[0];
-      return `https://www.youtube.com/embed/${id}`;
-    }
-    if (url.includes('youtube.com/watch')) {
-      try {
-        const urlParams = new URLSearchParams(url.split('?')[1]);
-        const id = urlParams.get('v');
-        return id ? `https://www.youtube.com/embed/${id}` : url;
-      } catch (e) {
-        return url;
-      }
-    }
-    return url;
+  const openVideoModal = (exercise) => {
+    const rawUrl = getTechnicalVideoUrl(exercise);
+    const parsed = parseVideoUrl(rawUrl, exercise.name);
+    setVideoModal({
+      isOpen: true,
+      parsedVideo: parsed,
+      name: exercise.name,
+      isLoading: true
+    });
   };
 
   const calc1RM = (weight, reps) => {
@@ -451,14 +421,7 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const videoUrl = getTechnicalVideo(ex);
-                            const embedUrl = formatEmbedUrl(videoUrl);
-                            setVideoModal({
-                              isOpen: true,
-                              url: embedUrl,
-                              name: ex.name,
-                              fallbackSearch: `https://www.youtube.com/results?search_query=tecnica+${encodeURIComponent(ex.name)}`
-                            });
+                            openVideoModal(ex);
                           }}
                           className="w-5.5 h-5.5 rounded-full bg-gymNeon/10 hover:bg-gymNeon/30 text-gymNeon flex items-center justify-center transition-all cursor-pointer border border-gymNeon/25"
                           title="Ver video de técnica"
@@ -715,7 +678,7 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
                 <span>Técnica: {videoModal.name}</span>
               </h3>
               <button
-                onClick={() => setVideoModal({ isOpen: false, url: '', name: '', fallbackSearch: '' })}
+                onClick={() => setVideoModal({ isOpen: false, parsedVideo: null, name: '', isLoading: true })}
                 className="text-neutral-400 hover:text-white transition-colors cursor-pointer p-1 rounded-lg hover:bg-white/5"
               >
                 <X className="w-5 h-5" />
@@ -724,15 +687,36 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
             
             {/* Modal Content */}
             <div className="p-5 flex flex-col gap-4">
-              {videoModal.url ? (
+              {videoModal.parsedVideo && videoModal.parsedVideo.embedUrl ? (
                 <div className="relative aspect-video rounded-xl overflow-hidden border border-white/5 bg-black">
-                  <iframe
-                    src={videoModal.url}
-                    title={`Video técnica ${videoModal.name}`}
-                    className="absolute inset-0 w-full h-full"
-                    allowFullScreen
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  ></iframe>
+                  {videoModal.isLoading && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-10 gap-2">
+                      <Loader2 className="w-8 h-8 text-gymNeon animate-spin" />
+                      <span className="text-xs text-neutral-400 font-medium">Cargando demostración de técnica...</span>
+                    </div>
+                  )}
+
+                  {videoModal.parsedVideo.isDirectFile ? (
+                    <video
+                      src={videoModal.parsedVideo.embedUrl}
+                      controls
+                      autoPlay
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-contain"
+                      onLoadedData={() => setVideoModal(prev => ({ ...prev, isLoading: false }))}
+                      onError={() => setVideoModal(prev => ({ ...prev, isLoading: false }))}
+                    />
+                  ) : (
+                    <iframe
+                      src={videoModal.parsedVideo.embedUrl}
+                      title={`Video técnica ${videoModal.name}`}
+                      className="absolute inset-0 w-full h-full"
+                      allowFullScreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      onLoad={() => setVideoModal(prev => ({ ...prev, isLoading: false }))}
+                    ></iframe>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-10 flex flex-col items-center gap-3 border border-dashed border-white/10 rounded-xl bg-white/[0.01]">
@@ -743,18 +727,34 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
                 </div>
               )}
               
-              <div className="flex justify-between items-center mt-2 border-t border-white/5 pt-4">
-                <span className="text-[10px] text-neutral-500">Sierra Coaching Técnica</span>
-                <a
-                  href={videoModal.fallbackSearch}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1.5 bg-gymNeon text-black font-extrabold uppercase text-[10px] tracking-wider px-4 py-2.5 rounded-lg shadow hover:opacity-90 active:scale-95 transition-all cursor-pointer"
-                >
-                  <Search className="w-3.5 h-3.5" />
-                  <span>Buscar técnica en YouTube</span>
-                  <ExternalLink className="w-3 h-3 ml-0.5" />
-                </a>
+              <div className="flex flex-wrap justify-between items-center gap-2 mt-2 border-t border-white/5 pt-4">
+                <span className="text-[10px] text-neutral-500 font-medium">Sierra Coaching Técnica</span>
+                
+                <div className="flex items-center gap-2">
+                  {videoModal.parsedVideo && videoModal.parsedVideo.rawUrl && (
+                    <a
+                      href={videoModal.parsedVideo.rawUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white font-bold text-[10px] tracking-wider px-3 py-2.5 rounded-lg border border-white/10 transition-all cursor-pointer"
+                      title="Abrir link directo en app o navegador"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Abrir Original</span>
+                    </a>
+                  )}
+
+                  <a
+                    href={videoModal.parsedVideo?.fallbackSearchUrl || `https://www.youtube.com/results?search_query=tecnica+${encodeURIComponent(videoModal.name)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 bg-gymNeon text-black font-extrabold uppercase text-[10px] tracking-wider px-4 py-2.5 rounded-lg shadow hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+                  >
+                    <Search className="w-3.5 h-3.5" />
+                    <span>Buscar en YouTube</span>
+                    <ExternalLink className="w-3 h-3 ml-0.5" />
+                  </a>
+                </div>
               </div>
             </div>
           </div>
