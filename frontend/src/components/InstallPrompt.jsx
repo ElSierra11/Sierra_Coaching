@@ -93,9 +93,18 @@ export default function InstallPrompt() {
 
         {/* Feature badges */}
         <div className="flex gap-2">
-          <span className="text-[10px] font-bold bg-white/5 border border-white/10 text-neutral-300 px-2.5 py-1 rounded-lg">⚡ Ultrarrápida</span>
-          <span className="text-[10px] font-bold bg-white/5 border border-white/10 text-neutral-300 px-2.5 py-1 rounded-lg">📲 Sin Tiendas</span>
-          <span className="text-[10px] font-bold bg-gymNeon/10 border border-gymNeon/30 text-gymNeon px-2.5 py-1 rounded-lg">🔥 100% Gratis</span>
+          <span className="text-[10px] font-bold bg-white/5 border border-white/10 text-neutral-300 px-2.5 py-1 rounded-lg flex items-center gap-1">
+            <Zap className="w-3 h-3 text-gymNeon" />
+            <span>Ultrarrápida</span>
+          </span>
+          <span className="text-[10px] font-bold bg-white/5 border border-white/10 text-neutral-300 px-2.5 py-1 rounded-lg flex items-center gap-1">
+            <Smartphone className="w-3 h-3 text-white" />
+            <span>Sin Tiendas</span>
+          </span>
+          <span className="text-[10px] font-bold bg-gymNeon/10 border border-gymNeon/30 text-gymNeon px-2.5 py-1 rounded-lg flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-gymNeon" />
+            <span>100% Gratis</span>
+          </span>
         </div>
 
         <div className="flex gap-2.5">

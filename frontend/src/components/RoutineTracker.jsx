@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { ClipboardList, Zap, Check, ChevronDown, Clock, Play, Search, ExternalLink, HelpCircle, X, Loader2 } from 'lucide-react';
+import { ClipboardList, Zap, Check, ChevronDown, Clock, Play, Search, ExternalLink, HelpCircle, X, Loader2, Smile, Activity, BatteryLow, AlertTriangle } from 'lucide-react';
 import { parseVideoUrl, getTechnicalVideoUrl } from '../utils/videoUtils';
 
 export default function RoutineTracker({ client, onUpdateClient, showToast }) {
@@ -614,31 +614,35 @@ export default function RoutineTracker({ client, onUpdateClient, showToast }) {
                 />
               </div>
 
-              {/* Estado de Ánimo (Emojis) */}
+              {/* Estado de Ánimo (Iconos Profesionales) */}
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] text-neutral-400 font-bold uppercase">Estado de Ánimo</label>
+                <label className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Sensación Física</label>
                 <div className="grid grid-cols-5 gap-2">
                   {[
-                    { emoji: "💪", label: "Fuerte" },
-                    { emoji: "😊", label: "Bien" },
-                    { emoji: "🥵", label: "Exhausto" },
-                    { emoji: "😴", label: "Cansado" },
-                    { emoji: "🤕", label: "Dolor" }
-                  ].map((item) => (
-                    <button
-                      key={item.emoji}
-                      type="button"
-                      onClick={() => setMoodEmoji(item.emoji)}
-                      className={`py-2 rounded-xl border text-xl flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                        moodEmoji === item.emoji 
-                          ? 'border-gymNeon bg-gymNeon/15 text-white' 
-                          : 'border-white/5 bg-black/20 text-neutral-500 hover:text-white'
-                      }`}
-                    >
-                      <span>{item.emoji}</span>
-                      <span className="text-[8px] font-semibold">{item.label}</span>
-                    </button>
-                  ))}
+                    { key: "Fuerte", label: "Fuerte", icon: Zap, color: "text-gymNeon" },
+                    { key: "Bien", label: "Excelente", icon: Smile, color: "text-emerald-400" },
+                    { key: "Exhausto", label: "Exhausto", icon: Activity, color: "text-amber-400" },
+                    { key: "Cansado", label: "Fatigado", icon: BatteryLow, color: "text-orange-400" },
+                    { key: "Dolor", label: "Molestia", icon: AlertTriangle, color: "text-red-400" }
+                  ].map((item) => {
+                    const IconComponent = item.icon;
+                    const isSelected = moodEmoji === item.key;
+                    return (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => setMoodEmoji(item.key)}
+                        className={`py-2.5 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
+                          isSelected 
+                            ? 'border-gymNeon bg-gymNeon/15 text-white shadow-md' 
+                            : 'border-white/5 bg-black/20 text-neutral-500 hover:text-white'
+                        }`}
+                      >
+                        <IconComponent className={`w-4 h-4 ${item.color}`} />
+                        <span className="text-[8px] font-bold tracking-tight">{item.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

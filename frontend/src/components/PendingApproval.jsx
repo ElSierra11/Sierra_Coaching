@@ -13,13 +13,13 @@ export default function PendingApproval({ user, onLogout, onApproved }) {
     try {
       const me = await api.getMe();
       if (me && me.is_approved) {
-        setStatusMessage('🎉 ¡Tu cuenta ha sido aprobada! Redirigiendo...');
+        setStatusMessage('¡Tu cuenta ha sido aprobada! Redirigiendo...');
         setTimeout(() => {
           if (onApproved) onApproved(me);
           else window.location.reload();
         }, 1000);
       } else {
-        setStatusMessage('⏳ Tu cuenta aún está pendiente de aprobación por el Coach.');
+        setStatusMessage('Tu cuenta aún está pendiente de aprobación por el Coach.');
       }
     } catch (err) {
       console.error(err);

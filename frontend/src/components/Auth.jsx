@@ -365,8 +365,12 @@ const InstagramFeed = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 flex flex-col justify-end p-3 transition-all duration-300">
               <span className="text-[10px] font-black text-gymNeon uppercase tracking-wider text-left">{post.title}</span>
               <div className="flex items-center justify-between text-xs font-bold text-white mt-1">
-                <span className="flex items-center gap-1 text-[11px]">❤️ {post.likes}</span>
-                <span className="flex items-center gap-1 text-[11px]">💬 {post.comments}</span>
+                <span className="flex items-center gap-1 text-[11px] text-white">
+                  <Heart className="w-3 h-3 text-red-500 fill-red-500" /> {post.likes}
+                </span>
+                <span className="flex items-center gap-1 text-[11px] text-white">
+                  <MessageCircle className="w-3 h-3 text-white" /> {post.comments}
+                </span>
               </div>
             </div>
           </a>
@@ -1040,9 +1044,10 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
                     <button
                       type="button"
                       onClick={() => { setIsLogin(true); setErrorMessage(''); }}
-                      className="text-gymNeon underline font-bold text-left hover:text-white cursor-pointer uppercase text-[10px]"
+                      className="text-gymNeon underline font-bold text-left hover:text-white cursor-pointer uppercase text-[10px] flex items-center gap-1"
                     >
-                      👉 Ir a Iniciar Sesión
+                      <ArrowRight className="w-3.5 h-3.5" />
+                      <span>Ir a Iniciar Sesión</span>
                     </button>
                   )}
                 </div>

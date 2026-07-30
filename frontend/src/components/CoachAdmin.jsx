@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles, Calculator, Info, Edit3, X, UserCheck, UserX, Clock, ShieldAlert, MessageCircle, RefreshCw, Play, ExternalLink, Search, Loader2, HelpCircle } from 'lucide-react';
+import { Trash2, Users, AlertCircle, CheckCircle2, FileDown, TrendingDown, TrendingUp, Sparkles, Calculator, Info, Edit3, X, UserCheck, UserX, Clock, ShieldAlert, MessageCircle, RefreshCw, Play, ExternalLink, Search, Loader2, HelpCircle, Copy, Bookmark, BookOpen, Flame, Zap, Award, Activity, Filter, Lock, Target, ChevronRight, Plus, FileText, Check, Share2, RotateCcw, Sliders, BarChart3, Smile, BatteryLow, AlertTriangle } from 'lucide-react';
 import ChatWindow from './ChatWindow';
 import { parseVideoUrl, getTechnicalVideoUrl } from '../utils/videoUtils';
 
@@ -118,6 +118,224 @@ export default function CoachAdmin({ showToast }) {
 
   // Video Preview State for Coach
   const [previewVideoModal, setPreviewVideoModal] = useState({ isOpen: false, parsedVideo: null, name: '', isLoading: true });
+
+  // Compliance Radar & Filters
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'active' | 'at_risk' | 'inactive'
+
+  // Private Coach Notes
+  const [privateNoteText, setPrivateNoteText] = useState("");
+
+  // Templates State
+  const [routineTemplates, setRoutineTemplates] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('coach_routine_templates') || '[]');
+    } catch (e) { return []; }
+  });
+
+  const [dietTemplates, setDietTemplates] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('coach_diet_templates') || '[]');
+    } catch (e) { return []; }
+  });
+
+  // TDEE Calculator State
+  const [showTdeeCalc, setShowTdeeCalc] = useState(false);
+  const [tdeeGender, setTdeeGender] = useState('M');
+  const [tdeeAge, setTdeeAge] = useState(25);
+  const [tdeeActivity, setTdeeActivity] = useState(1.375); // 1.2, 1.375, 1.55, 1.725
+  const [tdeeGoal, setTdeeGoal] = useState('deficit'); // deficit (-400), maintenance (0), bulk (+350)
+
+  // Copy/Clone Day States
+  const [cloneRoutineTargetDay, setCloneRoutineTargetDay] = useState('Martes');
+  const [cloneDietTargetDay, setCloneDietTargetDay] = useState(2);
+
+  // Load Private Note when student changes
+  useEffect(() => {
+    if (selectedClient) {
+      try {
+        const savedNotes = JSON.parse(localStorage.getItem('coach_private_notes') || '{}');
+        setPrivateNoteText(savedNotes[selectedClient.id] || "");
+      } catch (e) { setPrivateNoteText(""); }
+    }
+  }, [selectedClientId]);
+
+  const handleSavePrivateNote = () => {
+    if (!selectedClient) return;
+    try {
+      const savedNotes = JSON.parse(localStorage.getItem('coach_private_notes') || '{}');
+      savedNotes[selectedClient.id] = privateNoteText;
+      localStorage.setItem('coach_private_notes', JSON.stringify(savedNotes));
+      showToast("Nota confidencial del alumno guardada con éxito.", "success");
+    } catch (e) {
+      showToast("Error al guardar nota privada.", "error");
+    }
+  };
+
+  const getClientComplianceStatus = (c) => {
+    if (!c) return { status: 'unknown', label: 'Sin Datos', dotColor: 'bg-neutral-500', badgeBg: 'bg-neutral-500/10 text-neutral-400 border-neutral-500/20' };
+    const logs = c.workout_feedbacks || c.workout_logs || [];
+    const weightHist = c.weight_history || [];
+    
+    let lastDateMs = 0;
+    if (logs.length > 0) {
+      const dStr = logs[logs.length - 1].date || logs[logs.length - 1].created_at;
+      if (dStr) lastDateMs = new Date(dStr).getTime();
+    }
+    if (!lastDateMs && weightHist.length > 0) {
+      const wStr = weightHist[weightHist.length - 1].date;
+      if (wStr) lastDateMs = new Date(wStr).getTime();
+    }
+
+    if (!lastDateMs || isNaN(lastDateMs)) {
+      return { status: 'at_risk', label: 'En Riesgo', dotColor: 'bg-amber-500', badgeBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20' };
+    }
+
+    const hoursDiff = (Date.now() - lastDateMs) / (1000 * 3600);
+    if (hoursDiff <= 48) {
+      return { status: 'active', label: 'Activo', dotColor: 'bg-emerald-400 animate-pulse', badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' };
+    } else if (hoursDiff <= 120) {
+      return { status: 'at_risk', label: 'En Riesgo', dotColor: 'bg-amber-400', badgeBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20' };
+    } else {
+      return { status: 'inactive', label: 'Inactivo', dotColor: 'bg-red-500', badgeBg: 'bg-red-500/10 text-red-400 border-red-500/20' };
+    }
+  };
+
+  const renderMoodBadge = (mood) => {
+    if (mood === 'Fuerte' || mood === '💪') return <span className="flex items-center gap-1 bg-gymNeon/10 text-gymNeon border border-gymNeon/20 text-[10px] font-bold px-2.5 py-1 rounded-lg"><Zap className="w-3 h-3 text-gymNeon" /> Fuerte</span>;
+    if (mood === 'Bien' || mood === '😊') return <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2.5 py-1 rounded-lg"><Smile className="w-3 h-3 text-emerald-400" /> Excelente</span>;
+    if (mood === 'Exhausto' || mood === '🥵') return <span className="flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold px-2.5 py-1 rounded-lg"><Activity className="w-3 h-3 text-amber-400" /> Exhausto</span>;
+    if (mood === 'Cansado' || mood === '😴') return <span className="flex items-center gap-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] font-bold px-2.5 py-1 rounded-lg"><BatteryLow className="w-3 h-3 text-orange-400" /> Fatigado</span>;
+    if (mood === 'Dolor' || mood === '🤕') return <span className="flex items-center gap-1 bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold px-2.5 py-1 rounded-lg"><AlertTriangle className="w-3 h-3 text-red-400" /> Molestia</span>;
+    return <span className="flex items-center gap-1 bg-white/5 text-neutral-300 text-[10px] font-bold px-2.5 py-1 rounded-lg"><Activity className="w-3 h-3 text-neutral-400" /> {mood || 'Registrado'}</span>;
+  };
+
+  // Save current routine as a reusable template
+  const handleSaveRoutineTemplate = () => {
+    if (!editRoutineName || editExercises.length === 0) {
+      showToast("La rutina debe tener al menos un nombre y un ejercicio.", "info");
+      return;
+    }
+    const tplName = window.prompt("Nombre para esta plantilla de rutina:", editRoutineName);
+    if (!tplName) return;
+
+    const newTpl = {
+      id: 'tpl_' + Date.now(),
+      name: tplName,
+      routine_name: editRoutineName,
+      exercises: editExercises.map(e => ({ name: e.name, sets: e.sets, reps: e.reps, notes: e.notes, video_url: e.video_url || '' }))
+    };
+
+    const updated = [...routineTemplates, newTpl];
+    setRoutineTemplates(updated);
+    localStorage.setItem('coach_routine_templates', JSON.stringify(updated));
+    showToast(`Plantilla "${tplName}" guardada.`, "success");
+  };
+
+  const handleApplyRoutineTemplate = (tplId) => {
+    const tpl = routineTemplates.find(t => t.id === tplId);
+    if (!tpl) return;
+    setEditRoutineName(tpl.routine_name);
+    setEditExercises(tpl.exercises.map((e, idx) => ({ ...e, id: 'new_' + Date.now() + '_' + idx })));
+    showToast(`Plantilla "${tpl.name}" cargada. ¡Revisa y guarda!`, "success");
+  };
+
+  // Copy current day routine to another day
+  const handleCloneRoutineDayTo = () => {
+    if (!selectedClient || !cloneRoutineTargetDay) return;
+    const targetDay = cloneRoutineTargetDay;
+    if (targetDay === routineDay) {
+      showToast("Selecciona un día de destino diferente.", "info");
+      return;
+    }
+
+    const currentExercisesCopy = editExercises.map((e, idx) => ({
+      id: null,
+      name: e.name,
+      sets: parseInt(e.sets) || 0,
+      reps: e.reps,
+      notes: e.notes,
+      video_url: e.video_url || '',
+      order: idx
+    }));
+
+    const updatedRoutines = (selectedClient.routines || []).map(r => {
+      if (r.day === targetDay) {
+        return {
+          ...r,
+          routine_name: editRoutineName || `Rutina de ${targetDay}`,
+          exercises: currentExercisesCopy
+        };
+      }
+      return r;
+    });
+
+    api.updateClientRoutine(selectedClient.id, updatedRoutines).then(res => {
+      setSelectedClient(prev => ({ ...prev, routines: res }));
+      showToast(`¡Rutina clonada a ${targetDay} con éxito!`, "success");
+    }).catch(err => {
+      showToast("Error al clonar rutina: " + err.message, "error");
+    });
+  };
+
+  // Save current diet as template
+  const handleSaveDietTemplate = () => {
+    if (!editDiet || editDiet.length === 0) return;
+    const name = window.prompt("Nombre para la plantilla de dieta:", "Déficit Calórico Estándar");
+    if (!name) return;
+
+    const newTpl = {
+      id: 'dtpl_' + Date.now(),
+      name,
+      meals: editDiet
+    };
+
+    const updated = [...dietTemplates, newTpl];
+    setDietTemplates(updated);
+    localStorage.setItem('coach_diet_templates', JSON.stringify(updated));
+    showToast(`Plantilla de dieta "${name}" guardada.`, "success");
+  };
+
+  const handleApplyDietTemplate = (tplId) => {
+    const tpl = dietTemplates.find(t => t.id === tplId);
+    if (!tpl) return;
+    setEditDiet(tpl.meals);
+    showToast(`Plantilla de dieta "${tpl.name}" cargada.`, "success");
+  };
+
+  // Calculate Scientific TDEE/BMR
+  const calculateTDEEMacros = () => {
+    const w = parseFloat(latestWeight) || 70;
+    const h = parseFloat(selectedClient?.profile?.height * 100) || 170;
+    const age = parseFloat(tdeeAge) || 25;
+
+    let bmr = (10 * w) + (6.25 * h) - (5 * age);
+    bmr = tdeeGender === 'M' ? bmr + 5 : bmr - 161;
+
+    const tdee = Math.round(bmr * parseFloat(tdeeActivity));
+    
+    let targetCals = tdee;
+    if (tdeeGoal === 'deficit') targetCals = Math.max(1200, tdee - 400);
+    if (tdeeGoal === 'bulk') targetCals = tdee + 350;
+
+    const proteinGrams = Math.round(w * 2.0);
+    const fatGrams = Math.round(w * 0.9);
+    const remainingCals = targetCals - (proteinGrams * 4 + fatGrams * 9);
+    const carbGrams = Math.max(50, Math.round(remainingCals / 4));
+
+    return { bmr: Math.round(bmr), tdee, targetCals, proteinGrams, fatGrams, carbGrams };
+  };
+
+  const handleApplySuggestedMacrosToDiet = () => {
+    const macros = calculateTDEEMacros();
+    setEditDiet(prev => prev.map(m => ({
+      ...m,
+      calories: macros.targetCals,
+      proteins: macros.proteinGrams,
+      carbs: macros.carbGrams,
+      fats: macros.fatGrams
+    })));
+    showToast(`Macros automáticos aplicados: ${macros.targetCals} kcal (${macros.proteinGrams}P / ${macros.carbGrams}C / ${macros.fatGrams}G)`, "success");
+  };
 
   const handleOpenVideoPreview = (exercise) => {
     const rawUrl = (exercise.video_url && exercise.video_url.trim()) ? exercise.video_url.trim() : getTechnicalVideoUrl(exercise);
@@ -534,26 +752,69 @@ export default function CoachAdmin({ showToast }) {
 
       {/* DESKTOP CLIENTS LIST (Hidden on mobile) */}
       <div className="hidden lg:flex glass-panel p-5 rounded-2xl shadow-lg flex-col gap-4 self-start">
-        <h3 className="text-xs font-bold text-white uppercase tracking-wider">Mis Alumnos</h3>
+        <div className="flex justify-between items-center border-b border-white/5 pb-3">
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <Users className="w-4 h-4 text-gymNeon" />
+            <span>Mis Alumnos ({clients.length})</span>
+          </h3>
+        </div>
+
+        {/* Adherence Filter Bar */}
+        <div className="flex gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
+          {[
+            { key: 'all', label: 'Todos' },
+            { key: 'active', label: 'Activos' },
+            { key: 'at_risk', label: 'Riesgo' },
+            { key: 'inactive', label: 'Inactivos' }
+          ].map(f => (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setStatusFilter(f.key)}
+              className={`flex-1 py-1 rounded-lg text-[9px] font-bold transition-all ${
+                statusFilter === f.key ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
         
         {loadingList ? (
           <div className="text-center py-8 text-neutral-500 text-xs">Cargando alumnos...</div>
         ) : (
-          <div className="flex flex-col gap-2">
-            {clients.map(c => (
-              <button
-                key={c.id}
-                onClick={() => setSelectedClientId(c.id)}
-                className={`w-full text-left p-3.5 rounded-xl transition-all border ${
-                  selectedClientId === c.id
-                    ? 'bg-gymNeon text-black border-gymNeon font-bold'
-                    : 'bg-white/[0.02] border-white/5 text-neutral-400 hover:text-white hover:bg-white/[0.04]'
-                }`}
-              >
-                <div className="text-sm">{c.name}</div>
-                <div className={`text-[10px] ${selectedClientId === c.id ? 'text-black/60' : 'text-neutral-500'}`}>{c.email}</div>
-              </button>
-            ))}
+          <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1">
+            {clients
+              .filter(c => {
+                if (statusFilter === 'all') return true;
+                const comp = getClientComplianceStatus(c);
+                return comp.status === statusFilter;
+              })
+              .map(c => {
+                const comp = getClientComplianceStatus(c);
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setSelectedClientId(c.id)}
+                    className={`w-full text-left p-3 rounded-xl transition-all border relative flex items-center justify-between ${
+                      selectedClientId === c.id
+                        ? 'bg-gymNeon text-black border-gymNeon font-bold shadow-md'
+                        : 'bg-white/[0.02] border-white/5 text-neutral-400 hover:text-white hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    <div>
+                      <div className="text-xs font-bold truncate max-w-[140px]">{c.name}</div>
+                      <div className={`text-[9px] ${selectedClientId === c.id ? 'text-black/70' : 'text-neutral-500'} truncate max-w-[140px]`}>{c.email}</div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className={`w-2 h-2 rounded-full ${comp.dotColor}`}></span>
+                      <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border ${comp.badgeBg}`}>
+                        {comp.label}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
           </div>
         )}
       </div>
@@ -627,6 +888,15 @@ export default function CoachAdmin({ showToast }) {
                       }`}
                     >
                       Notas de Sesión
+                    </button>
+                    <button
+                      onClick={() => setAdminTab('notes')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
+                        adminTab === 'notes' ? 'bg-amber-400 text-black font-extrabold' : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      <Lock className="w-3.5 h-3.5" />
+                      <span>Notas Privadas</span>
                     </button>
                     <button
                       onClick={() => setAdminTab('chat')}
@@ -1051,6 +1321,57 @@ export default function CoachAdmin({ showToast }) {
                       ))}
                     </div>
 
+                    {/* Routine Toolbar: Templates & Cloning */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+                      <div className="flex items-center gap-2">
+                        <Bookmark className="w-4 h-4 text-gymNeon" />
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">Plantillas & Clonación de Rutinas</h4>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {routineTemplates.length > 0 && (
+                          <select
+                            onChange={(e) => { if (e.target.value) handleApplyRoutineTemplate(e.target.value); }}
+                            className="bg-black/50 border border-white/10 text-neutral-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer"
+                            defaultValue=""
+                          >
+                            <option value="" disabled>Cargar Plantilla...</option>
+                            {routineTemplates.map(t => (
+                              <option key={t.id} value={t.id}>{t.name}</option>
+                            ))}
+                          </select>
+                        )}
+                        <button
+                          type="button"
+                          onClick={handleSaveRoutineTemplate}
+                          className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          <Bookmark className="w-3 h-3 text-gymNeon" />
+                          <span>Guardar Plantilla</span>
+                        </button>
+                        <div className="flex items-center gap-1 bg-black/40 p-1 rounded-lg border border-white/5">
+                          <span className="text-[9px] text-neutral-400 font-bold px-1">Clonar a:</span>
+                          <select
+                            value={cloneRoutineTargetDay}
+                            onChange={(e) => setCloneRoutineTargetDay(e.target.value)}
+                            className="bg-neutral-900 border border-white/10 text-white text-[10px] rounded px-1.5 py-0.5 focus:outline-none cursor-pointer"
+                          >
+                            {['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(d => (
+                              <option key={d} value={d}>{d}</option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={handleCloneRoutineDayTo}
+                            className="bg-gymNeon/15 hover:bg-gymNeon/30 border border-gymNeon/30 text-gymNeon text-[9px] font-extrabold px-2 py-0.5 rounded cursor-pointer transition-all flex items-center gap-1"
+                            title="Copiar los ejercicios de hoy al día seleccionado"
+                          >
+                            <Copy className="w-2.5 h-2.5" />
+                            <span>Clonar</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Routine day name input */}
                     <div className="flex flex-col gap-2">
                       <label className="text-xs font-bold text-neutral-400 uppercase tracking-wide">Nombre / Grupo Muscular de la Rutina</label>
@@ -1187,7 +1508,110 @@ export default function CoachAdmin({ showToast }) {
                 {/* VIEW 3: DIET EDITOR TAB */}
                 {adminTab === 'diet' && (
                   <div className="glass-panel p-6 rounded-2xl shadow-lg flex flex-col gap-5">
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2">Editar Menú de Alimentación (7 Días)</h4>
+                    {/* Diet Toolbar: Templates & TDEE Calculator */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+                      <div className="flex items-center gap-2">
+                        <Calculator className="w-4 h-4 text-gymNeon" />
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">Plan Nutricional & Calculadora TDEE</h4>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {dietTemplates.length > 0 && (
+                          <select
+                            onChange={(e) => { if (e.target.value) handleApplyDietTemplate(e.target.value); }}
+                            className="bg-black/50 border border-white/10 text-neutral-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer"
+                            defaultValue=""
+                          >
+                            <option value="" disabled>Cargar Plantilla Dieta...</option>
+                            {dietTemplates.map(t => (
+                              <option key={t.id} value={t.id}>{t.name}</option>
+                            ))}
+                          </select>
+                        )}
+                        <button
+                          type="button"
+                          onClick={handleSaveDietTemplate}
+                          className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          <Bookmark className="w-3 h-3 text-gymNeon" />
+                          <span>Guardar Plantilla</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowTdeeCalc(!showTdeeCalc)}
+                          className="bg-gymNeon/15 hover:bg-gymNeon/25 border border-gymNeon/30 text-gymNeon font-extrabold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          <Calculator className="w-3 h-3" />
+                          <span>{showTdeeCalc ? 'Ocultar Calculadora TDEE' : 'Calculadora TDEE / Macros'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Interactive TDEE Panel */}
+                    {showTdeeCalc && (
+                      <div className="bg-black/40 border border-gymNeon/20 p-5 rounded-2xl flex flex-col gap-4 animate-slide-in">
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                          <span className="text-xs font-bold text-gymNeon uppercase tracking-wider flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>Calculadora de Requerimientos Calóricos (Mifflin-St Jeor)</span>
+                          </span>
+                          <span className="text-[10px] text-neutral-400">Peso actual: {latestWeight} kg</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] text-neutral-500 font-bold uppercase">Género Biológico</span>
+                            <select value={tdeeGender} onChange={(e) => setTdeeGender(e.target.value)} className="bg-black/60 border border-white/10 text-white rounded p-2 text-xs">
+                              <option value="M">Masculino</option>
+                              <option value="F">Femenino</option>
+                            </select>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] text-neutral-500 font-bold uppercase">Edad (años)</span>
+                            <input type="number" value={tdeeAge} onChange={(e) => setTdeeAge(e.target.value)} className="bg-black/60 border border-white/10 text-white rounded p-2 text-xs" />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] text-neutral-500 font-bold uppercase">Nivel de Actividad</span>
+                            <select value={tdeeActivity} onChange={(e) => setTdeeActivity(e.target.value)} className="bg-black/60 border border-white/10 text-white rounded p-2 text-xs">
+                              <option value="1.2">Sedentario (Poco ejercicio)</option>
+                              <option value="1.375">Moderado (3-4 días/semana)</option>
+                              <option value="1.55">Intenso (5-6 días/semana)</option>
+                              <option value="1.725">Atleta (Doble sesión)</option>
+                            </select>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] text-neutral-500 font-bold uppercase">Objetivo Nutricional</span>
+                            <select value={tdeeGoal} onChange={(e) => setTdeeGoal(e.target.value)} className="bg-black/60 border border-white/10 text-white rounded p-2 text-xs">
+                              <option value="deficit">Déficit (-400 kcal)</option>
+                              <option value="maintenance">Mantenimiento (0 kcal)</option>
+                              <option value="bulk">Volumen (+350 kcal)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {(() => {
+                          const m = calculateTDEEMacros();
+                          return (
+                            <div className="bg-gymNeon/10 border border-gymNeon/30 p-4 rounded-xl flex flex-wrap justify-between items-center gap-4">
+                              <div className="flex items-center gap-4 text-xs">
+                                <div><span className="text-[9px] text-neutral-400 block uppercase font-bold">BMR</span><strong className="text-white text-sm">{m.bmr}</strong> <span className="text-[9px] text-neutral-500">kcal</span></div>
+                                <div><span className="text-[9px] text-neutral-400 block uppercase font-bold">TDEE</span><strong className="text-white text-sm">{m.tdee}</strong> <span className="text-[9px] text-neutral-500">kcal</span></div>
+                                <div className="border-l border-white/10 pl-4"><span className="text-[9px] text-gymNeon block uppercase font-extrabold">Meta Diaria</span><strong className="text-gymNeon text-base font-black">{m.targetCals}</strong> <span className="text-[9px] text-gymNeon">kcal</span></div>
+                              </div>
+                              <div className="flex items-center gap-3 text-xs">
+                                <span className="text-neutral-300 font-bold text-[10px]">{m.proteinGrams}g Prot &middot; {m.carbGrams}g Carb &middot; {m.fatGrams}g Grasas</span>
+                                <button
+                                  type="button"
+                                  onClick={handleApplySuggestedMacrosToDiet}
+                                  className="bg-gymNeon text-black font-extrabold uppercase text-[10px] tracking-wider px-4 py-2 rounded-lg cursor-pointer shadow hover:opacity-90 transition-all"
+                                >
+                                  Aplicar a Todos los Días
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
                     
                     <div className="flex flex-col gap-4 max-h-[420px] overflow-y-auto pr-1">
                       {editDiet.map((meal) => (
@@ -1363,8 +1787,11 @@ export default function CoachAdmin({ showToast }) {
                 {adminTab === 'feedback' && (
                   <div className="flex flex-col gap-6">
                     <div>
-                      <h4 className="text-sm font-bold text-white uppercase tracking-wider">Diario de Entrenamientos — Notas de Sesión</h4>
-                      <p className="text-[10px] text-neutral-500 mt-0.5">Historial de entrenamientos finalizados por el alumno y sus comentarios.</p>
+                      <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-gymNeon" />
+                        <span>Diario de Entrenamientos & Sensaciones</span>
+                      </h4>
+                      <p className="text-[10px] text-neutral-500 mt-0.5">Historial de entrenamientos completados por el alumno y evaluación de esfuerzo RPE.</p>
                     </div>
 
                     <div className="flex flex-col gap-4">
@@ -1377,7 +1804,7 @@ export default function CoachAdmin({ showToast }) {
                           <div key={idx} className="glass-panel p-5 rounded-2xl flex flex-col gap-3 border border-white/5 bg-white/[0.01]">
                             <div className="flex justify-between items-center">
                               <div className="flex items-center gap-3">
-                                <span className="text-2xl">{f.mood_emoji}</span>
+                                {renderMoodBadge(f.mood_emoji)}
                                 <div>
                                   <span className="text-xs font-black text-white">{f.routine_name}</span>
                                   <span className="text-[9px] text-neutral-500 block">{f.date}</span>
@@ -1399,6 +1826,41 @@ export default function CoachAdmin({ showToast }) {
                           </div>
                         ))
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* VIEW: PRIVATE COACH NOTES TAB */}
+                {adminTab === 'notes' && (
+                  <div className="flex flex-col gap-6">
+                    <div>
+                      <h4 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-amber-400" />
+                        <span>Notas Confidenciales del Entrenador</span>
+                      </h4>
+                      <p className="text-[10px] text-neutral-500 mt-0.5">Espacio privado únicamente visible para el Coach sobre {selectedClient.name} (ej. lesiones previas, conducta, objetivos específicos).</p>
+                    </div>
+
+                    <div className="glass-panel p-5 rounded-2xl border border-white/10 bg-black/40 flex flex-col gap-4">
+                      <textarea
+                        rows={8}
+                        value={privateNoteText}
+                        onChange={(e) => setPrivateNoteText(e.target.value)}
+                        placeholder="Escribe aquí las observaciones privadas del alumno..."
+                        className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-amber-400/50 leading-relaxed resize-y font-mono"
+                      />
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] text-neutral-500">Privado &middot; Solo visible por Sierra Coaching</span>
+                        <button
+                          type="button"
+                          onClick={handleSavePrivateNote}
+                          className="bg-amber-400 hover:bg-amber-500 text-black font-extrabold uppercase text-xs tracking-wider px-6 py-2.5 rounded-xl transition-all cursor-pointer shadow-lg flex items-center gap-2"
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>Guardar Nota Privada</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
