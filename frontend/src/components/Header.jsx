@@ -98,7 +98,7 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
   };
 
   return (
-    <header className="glass-panel flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 rounded-3xl border border-slate-200 dark:border-white/10 border-l-4 border-l-gymNeon mb-8 shadow-md relative overflow-hidden bg-white dark:bg-gradient-to-r dark:from-neutral-900/90 dark:via-neutral-900/60 dark:to-black/80">
+    <header className="glass-panel flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 rounded-3xl border border-white/10 border-l-4 border-l-gymNeon mb-8 shadow-2xl relative overflow-hidden bg-gradient-to-r from-neutral-900/90 via-neutral-900/60 to-black/80">
       <div className="absolute top-0 right-0 w-96 h-96 bg-gymNeon/10 rounded-full blur-[100px] pointer-events-none"></div>
 
       {/* Profile info left side */}
@@ -115,14 +115,14 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
               href="https://www.instagram.com/sierrafitn_" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-xs font-bold text-pink-600 dark:text-pink-300 hover:text-pink-700 dark:hover:text-white bg-pink-500/10 border border-pink-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1 transition-all cursor-pointer hover:scale-105"
+              className="text-xs font-bold text-pink-400 hover:text-white bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-pink-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1 transition-all cursor-pointer hover:scale-105"
               title="Ver perfil oficial de Instagram"
             >
-              <InstagramIcon className="w-3.5 h-3.5 text-pink-500" />
+              <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
               <span>@sierrafitn_</span>
             </a>
           </div>
-          <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white mt-1">Alejandro Sierra Rincones</h1>
+          <h1 className="text-xl md:text-2xl font-black tracking-tight text-white mt-1">Alejandro Sierra Rincones</h1>
           <p className="text-gymNeon font-extrabold text-xs tracking-wider uppercase mt-0.5">
             Asesoría de Alto Rendimiento • Entrenamiento & Nutrición Personalizada
           </p>
@@ -161,8 +161,8 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
         
         {/* User state, theme and logout */}
         <div className="flex items-center justify-between sm:justify-start gap-4 w-full sm:w-auto">
-          <span className="text-slate-600 dark:text-neutral-300 text-xs">
-            Conectado como <strong className="text-slate-900 dark:text-white font-bold">{user.name}</strong>
+          <span className="text-neutral-400 text-xs">
+            Conectado como <strong className="text-white font-bold">{user.name}</strong>
           </span>
           <div className="flex items-center gap-2">
             

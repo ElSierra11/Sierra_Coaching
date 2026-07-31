@@ -734,8 +734,8 @@ export default function CoachAdmin({ showToast }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="glass-panel p-4 rounded-2xl flex items-center justify-between shadow-sm">
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-neutral-400">Total Alumnos</span>
-            <h3 className="text-xl font-black text-slate-900 dark:text-white mt-0.5">{clients.length}</h3>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400">Total Alumnos</span>
+            <h3 className="text-xl font-black text-white mt-0.5">{clients.length}</h3>
           </div>
           <div className="p-3 rounded-xl bg-orange-500/10 text-gymNeon border border-orange-500/20">
             <Users className="w-5 h-5" />
@@ -747,8 +747,8 @@ export default function CoachAdmin({ showToast }) {
           className="glass-panel p-4 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer hover:border-amber-500/50 transition-all"
         >
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400">En Riesgo</span>
-            <h3 className="text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-500">En Riesgo</span>
+            <h3 className="text-xl font-black text-amber-500 mt-0.5">
               {clients.filter(c => getClientComplianceStatus(c).status === 'at_risk').length}
             </h3>
           </div>
@@ -762,8 +762,8 @@ export default function CoachAdmin({ showToast }) {
           className="glass-panel p-4 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer hover:border-emerald-500/50 transition-all"
         >
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Activos al Día</span>
-            <h3 className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">Activos al Día</span>
+            <h3 className="text-xl font-black text-emerald-400 mt-0.5">
               {clients.filter(c => getClientComplianceStatus(c).status === 'active').length}
             </h3>
           </div>
@@ -777,8 +777,8 @@ export default function CoachAdmin({ showToast }) {
           className="glass-panel p-4 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer hover:border-blue-500/50 transition-all"
         >
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">Solicitudes</span>
-            <h3 className="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-400">Solicitudes</span>
+            <h3 className="text-xl font-black text-blue-400 mt-0.5">
               {pendingClients.length}
             </h3>
           </div>
@@ -794,7 +794,7 @@ export default function CoachAdmin({ showToast }) {
         <div className="lg:hidden glass-panel p-4 rounded-2xl flex flex-col gap-2 shadow-lg">
           <h3 className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Seleccionar Alumno</h3>
           {loadingList ? (
-            <div className="text-slate-500 dark:text-neutral-500 text-xs italic">Cargando alumnos...</div>
+            <div className="text-neutral-500 text-xs italic">Cargando alumnos...</div>
           ) : (
             <div className="flex gap-2 items-center overflow-x-auto no-scrollbar scroll-smooth pb-1 flex-nowrap">
               {clients.map(c => (
@@ -804,7 +804,7 @@ export default function CoachAdmin({ showToast }) {
                   className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all border whitespace-nowrap ${
                     selectedClientId === c.id
                       ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-500 font-extrabold shadow-md'
-                      : 'bg-slate-100 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-700 dark:text-neutral-400'
+                      : 'bg-white/[0.02] border-white/5 text-neutral-400'
                   }`}
                 >
                   {c.name}
@@ -816,8 +816,8 @@ export default function CoachAdmin({ showToast }) {
 
         {/* DESKTOP CLIENTS LIST (Hidden on mobile) */}
         <div className="hidden lg:flex glass-panel p-5 rounded-2xl shadow-lg flex-col gap-4 self-start">
-          <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/5 pb-3">
-            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+          <div className="flex justify-between items-center border-b border-white/5 pb-3">
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
               <Users className="w-4 h-4 text-gymNeon" />
               <span>Mis Alumnos ({clients.length})</span>
             </h3>
@@ -825,18 +825,18 @@ export default function CoachAdmin({ showToast }) {
 
           {/* Search Input */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
             <input
               type="text"
               placeholder="Buscar por nombre o email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-gymNeon"
+              className="w-full bg-black/40 border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-gymNeon"
             />
           </div>
 
           {/* Adherence Filter Bar (Slidable) */}
-          <div className="flex gap-1 bg-slate-100 dark:bg-black/40 p-1 rounded-xl border border-slate-200 dark:border-white/5 overflow-x-auto no-scrollbar scroll-smooth flex-nowrap">
+          <div className="flex gap-1 bg-black/40 p-1 rounded-xl border border-white/5 overflow-x-auto no-scrollbar scroll-smooth flex-nowrap">
             {[
               { key: 'all', label: 'Todos' },
               { key: 'active', label: 'Activos' },
@@ -850,7 +850,7 @@ export default function CoachAdmin({ showToast }) {
                 className={`flex-1 py-1 px-2 rounded-lg text-[9px] font-extrabold transition-all whitespace-nowrap ${
                   statusFilter === f.key
                     ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                    : 'text-neutral-400 hover:text-white'
                 }`}
               >
                 {f.label}
@@ -859,7 +859,7 @@ export default function CoachAdmin({ showToast }) {
           </div>
           
           {loadingList ? (
-            <div className="text-center py-8 text-slate-500 dark:text-neutral-500 text-xs">Cargando alumnos...</div>
+            <div className="text-center py-8 text-neutral-500 text-xs">Cargando alumnos...</div>
           ) : (
             <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1">
               {clients
@@ -880,12 +880,12 @@ export default function CoachAdmin({ showToast }) {
                       className={`w-full text-left p-3 rounded-xl transition-all border relative flex items-center justify-between cursor-pointer ${
                         isSelected
                           ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-500 font-bold shadow-md'
-                          : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-700 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
+                          : 'bg-white/[0.02] border-white/5 text-neutral-400 hover:bg-white/[0.04] hover:text-white'
                       }`}
                     >
                       <div>
-                        <div className={`text-xs font-extrabold truncate max-w-[130px] ${isSelected ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{c.name}</div>
-                        <div className={`text-[9px] truncate max-w-[130px] ${isSelected ? 'text-white/90' : 'text-slate-500 dark:text-neutral-500'}`}>{c.email}</div>
+                        <div className={`text-xs font-extrabold truncate max-w-[130px] ${isSelected ? 'text-white' : 'text-white'}`}>{c.name}</div>
+                        <div className={`text-[9px] truncate max-w-[130px] ${isSelected ? 'text-white/90' : 'text-neutral-500'}`}>{c.email}</div>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         <span className={`w-2 h-2 rounded-full ${comp.dotColor}`}></span>
@@ -906,22 +906,22 @@ export default function CoachAdmin({ showToast }) {
           {selectedClient ? (
             <>
               {/* Top Workspace Header */}
-              <div className="glass-panel p-5 rounded-2xl flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white dark:bg-white/[0.01] overflow-hidden w-full shadow-sm">
+              <div className="glass-panel p-5 rounded-2xl flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/[0.01] overflow-hidden w-full shadow-sm">
                 <div className="shrink-0">
                   <span className="text-[10px] font-extrabold text-gymNeon uppercase tracking-widest">Ficha del Alumno</span>
-                  <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">{selectedClient.name}</h2>
+                  <h2 className="text-lg font-extrabold text-white">{selectedClient.name}</h2>
                 </div>
                 
                 {/* Slidable Workspace tabs switcher */}
                 <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full xl:w-auto overflow-hidden">
                   <div className="overflow-x-auto w-full no-scrollbar scroll-smooth pb-1">
-                    <div className="flex bg-slate-100 dark:bg-neutral-900 border border-slate-200 dark:border-white/5 rounded-xl p-1 gap-1 min-w-max">
+                    <div className="flex bg-neutral-900 border border-white/5 rounded-xl p-1 gap-1 min-w-max">
                       <button
                         onClick={() => setAdminTab('pending')}
                         className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 relative cursor-pointer ${
                           adminTab === 'pending'
                             ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                            : 'text-neutral-400 hover:text-white'
                         }`}
                       >
                         <Clock className="w-3.5 h-3.5" />
@@ -937,7 +937,7 @@ export default function CoachAdmin({ showToast }) {
                         className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                           adminTab === 'overview'
                             ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                            : 'text-neutral-400 hover:text-white'
                         }`}
                       >
                         <BarChart3 className="w-3.5 h-3.5" />
@@ -948,7 +948,7 @@ export default function CoachAdmin({ showToast }) {
                         className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                           adminTab === 'summary'
                             ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                            : 'text-neutral-400 hover:text-white'
                         }`}
                       >
                         <FileText className="w-3.5 h-3.5" />
@@ -959,7 +959,7 @@ export default function CoachAdmin({ showToast }) {
                         className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                           adminTab === 'routine'
                             ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                            : 'text-neutral-400 hover:text-white'
                         }`}
                       >
                         <Activity className="w-3.5 h-3.5" />
@@ -970,7 +970,7 @@ export default function CoachAdmin({ showToast }) {
                         className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                           adminTab === 'diet'
                             ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                            : 'text-neutral-400 hover:text-white'
                         }`}
                       >
                         <Sliders className="w-3.5 h-3.5" />
@@ -981,7 +981,7 @@ export default function CoachAdmin({ showToast }) {
                         className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                           adminTab === 'feedback'
                             ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                            : 'text-neutral-400 hover:text-white'
                         }`}
                       >
                         <Edit3 className="w-3.5 h-3.5" />
@@ -992,7 +992,7 @@ export default function CoachAdmin({ showToast }) {
                         className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                           adminTab === 'notes'
                             ? 'bg-amber-500 text-white font-extrabold shadow-md'
-                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                            : 'text-neutral-400 hover:text-white'
                         }`}
                       >
                         <Lock className="w-3.5 h-3.5" />
@@ -1003,7 +1003,7 @@ export default function CoachAdmin({ showToast }) {
                         className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 relative cursor-pointer ${
                           adminTab === 'chat'
                             ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                            : 'text-neutral-400 hover:text-white'
                         }`}
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
@@ -1014,7 +1014,7 @@ export default function CoachAdmin({ showToast }) {
                         className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                           adminTab === 'business'
                             ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                            : 'text-neutral-400 hover:text-white'
                         }`}
                       >
                         <Target className="w-3.5 h-3.5" />

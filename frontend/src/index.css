@@ -2,24 +2,26 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --gym-dark-950: #09090c;
   --gym-dark-900: #121217;
   --gym-dark-800: #1a1a24;
   --gym-dark-700: #262633;
   
-  --bg-panel: rgba(18, 18, 23, 0.7);
-  --border-color: rgba(255, 255, 255, 0.05);
+  --bg-panel: rgba(18, 18, 23, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
 }
 
 .light-theme {
   --gym-dark-950: #f4f6f8;
   --gym-dark-900: #ffffff;
-  --gym-dark-800: #e2e8f0;
-  --gym-dark-700: #cbd5e1;
+  --gym-dark-800: #f1f5f9;
+  --gym-dark-700: #e2e8f0;
   
-  --bg-panel: rgba(255, 255, 255, 0.95);
-  --border-color: rgba(0, 0, 0, 0.08);
+  --bg-panel: #ffffff;
+  --border-color: #e2e8f0;
 }
 
 @layer base {
@@ -111,13 +113,22 @@
   animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Clean Light Theme Overrides */
+/* Light Theme Typography & Background Overrides */
 .light-theme {
   color: #0f172a;
 }
 
 .light-theme body {
   background-color: #f4f6f8 !important;
+  color: #0f172a !important;
+}
+
+.light-theme h1,
+.light-theme h2,
+.light-theme h3,
+.light-theme h4,
+.light-theme h5,
+.light-theme h6 {
   color: #0f172a !important;
 }
 
@@ -131,11 +142,52 @@
 }
 
 .light-theme .bg-gymDark-800 {
-  background-color: #e2e8f0 !important;
+  background-color: #f1f5f9 !important;
 }
 
 .light-theme .glass-panel {
   background-color: #ffffff !important;
   border-color: #e2e8f0 !important;
   box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02) !important;
+}
+
+.light-theme .border-white\/5,
+.light-theme .border-white\/10,
+.light-theme .border-white\/20 {
+  border-color: #e2e8f0 !important;
+}
+
+.light-theme .bg-black\/20,
+.light-theme .bg-black\/25,
+.light-theme .bg-black\/30,
+.light-theme .bg-black\/40,
+.light-theme .bg-black\/50 {
+  background-color: #f1f5f9 !important;
+}
+
+.light-theme .text-neutral-400,
+.light-theme .text-neutral-500 {
+  color: #475569 !important;
+}
+
+.light-theme .text-neutral-300,
+.light-theme .text-neutral-200 {
+  color: #334155 !important;
+}
+
+.light-theme .text-neutral-100 {
+  color: #0f172a !important;
+}
+
+/* Retain white text on solid background buttons & gradient cards in both themes */
+.light-theme .bg-gymNeon .text-white,
+.light-theme .bg-gymNeon *,
+.light-theme button.bg-gymNeon,
+.light-theme .bg-gradient-to-r.from-orange-500 *,
+.light-theme .bg-gradient-to-r.from-purple-600 *,
+.light-theme .bg-emerald-500.text-white,
+.light-theme .bg-red-500.text-white,
+.light-theme .bg-amber-500.text-white,
+.light-theme .bg-orange-500 * {
+  color: #ffffff !important;
 }
