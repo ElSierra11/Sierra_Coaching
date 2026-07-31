@@ -71,6 +71,25 @@
   transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* =========================================================
+   FORCE WHITE TEXT - applies in ALL themes (light & dark)
+   Use on text inside permanently dark backgrounds (e.g. dark gradient sections)
+   ========================================================= */
+.text-white-force,
+.text-white-force * {
+  color: #ffffff !important;
+}
+
+/* Permanently dark sections - all text inside stays white regardless of theme */
+.dark-section,
+.dark-section * {
+  color: #ffffff !important;
+}
+.dark-section p,
+.dark-section span:not(.text-gymNeon):not([class*="text-gym"]) {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
 .glass-panel-neon {
   background: var(--bg-panel);
   backdrop-filter: blur(12px);
