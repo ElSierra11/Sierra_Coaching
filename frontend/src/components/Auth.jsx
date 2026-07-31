@@ -769,24 +769,25 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       </section>
 
       {/* App Mobile Showcase Banner Section */}
+      {/* NOTE: This section has a permanently dark bg-gradient, so all text must stay white in BOTH themes */}
       <section className="max-w-7xl mx-auto px-6 py-12 w-full">
         <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-gradient-to-r from-neutral-900 via-black to-neutral-900 p-6 md:p-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-7 flex flex-col gap-4">
               <div className="flex items-center gap-2 text-gymNeon text-[10px] font-black uppercase tracking-widest">
                 <Smartphone className="w-4 h-4" />
-                <span>Aplicación Web & PWA</span>
+                <span className="text-white-force">Aplicación Web &amp; PWA</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-black uppercase text-white tracking-tight leading-tight">
+              <h2 className="text-3xl sm:text-4xl font-black uppercase text-white-force tracking-tight leading-tight">
                 TODO TU ENTRENAMIENTO EN UNA SOLA APP
               </h2>
-              <p className="text-neutral-300 text-sm leading-relaxed">
+              <p className="text-white-force opacity-70 text-sm leading-relaxed">
                 Lleva tus rutinas, tu semáforo de macronutrientes, el cálculo de calorías y tu progreso de fuerza directamente en tu teléfono o computadora sin instalar nada pesado.
               </p>
               <div className="flex flex-wrap gap-4 mt-2">
                 <button
                   onClick={() => { setIsLogin(false); setShowAuthModal(true); }}
-                  className="bg-gymNeon text-black font-extrabold uppercase py-3 px-6 rounded-xl text-xs tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg"
+                  className="bg-gymNeon text-white-force font-extrabold uppercase py-3 px-6 rounded-xl text-xs tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg"
                 >
                   Unirme Ahora →
                 </button>
