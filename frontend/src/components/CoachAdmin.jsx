@@ -16,7 +16,7 @@ const WeightChart = ({ history, initialWeight }) => {
 
   if (data.length < 2) {
     return (
-      <div className="bg-black/25 rounded-xl p-6 border border-white/5 text-center text-neutral-500 text-xs italic">
+      <div className="bg-slate-100 dark:bg-black/25 rounded-xl p-6 border border-slate-200 dark:border-white/5 text-center text-slate-500 dark:text-neutral-400 text-xs italic">
         Insuficientes datos para graficar el peso. Registra al menos un peso en el historial del alumno.
       </div>
     );
@@ -41,16 +41,19 @@ const WeightChart = ({ history, initialWeight }) => {
   const areaD = `${pathD} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
 
   return (
-    <div className="bg-black/25 rounded-2xl p-4 border border-white/5 flex flex-col gap-2 relative overflow-hidden">
-      <div className="flex justify-between items-center text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
-        <span>Curva de Variación de Peso (kg)</span>
+    <div className="bg-white dark:bg-black/25 rounded-2xl p-4 border border-slate-200 dark:border-white/5 flex flex-col gap-2 relative overflow-hidden shadow-sm">
+      <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-neutral-400 font-bold uppercase tracking-wider">
+        <span className="flex items-center gap-1.5">
+          <TrendingUp className="w-3.5 h-3.5 text-gymNeon" />
+          <span>Curva de Variación de Peso (kg)</span>
+        </span>
         <span className="text-gymNeon font-black text-xs">{data[data.length - 1].weight} kg</span>
       </div>
       <div className="relative w-full h-[140px] mt-2">
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
           <defs>
             <linearGradient id="coachChartGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ff5722" stopOpacity="0.25" />
+              <stop offset="0%" stopColor="#ff5722" stopOpacity="0.3" />
               <stop offset="100%" stopColor="#ff5722" stopOpacity="0.0" />
             </linearGradient>
           </defs>
@@ -61,8 +64,8 @@ const WeightChart = ({ history, initialWeight }) => {
             const val = (maxW - ratio * rangeW).toFixed(1);
             return (
               <g key={idx}>
-                <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="rgba(255,255,255,0.03)" strokeDasharray="3 3" />
-                <text x={padding - 5} y={y + 3} fill="rgba(255,255,255,0.3)" fontSize="8" textAnchor="end">{val}</text>
+                <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="currentColor" className="text-slate-200 dark:text-white/10" strokeDasharray="3 3" />
+                <text x={padding - 5} y={y + 3} className="fill-slate-500 dark:fill-neutral-400 font-medium" fontSize="8" textAnchor="end">{val}</text>
               </g>
             );
           })}
@@ -76,11 +79,11 @@ const WeightChart = ({ history, initialWeight }) => {
           {/* Data Points */}
           {points.map((p, idx) => (
             <g key={idx} className="group cursor-pointer">
-              <circle cx={p.x} cy={p.y} r="3.5" fill="#111" stroke="#ff5722" strokeWidth="2" />
-              <text x={p.x} y={p.y - 8} fill="#fff" fontSize="8" fontWeight="black" textAnchor="middle" className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <circle cx={p.x} cy={p.y} r="4" className="fill-white dark:fill-slate-900" stroke="#ff5722" strokeWidth="2.5" />
+              <text x={p.x} y={p.y - 8} className="fill-slate-900 dark:fill-white font-extrabold opacity-0 group-hover:opacity-100 transition-opacity" fontSize="8" textAnchor="middle">
                 {p.weight}
               </text>
-              <text x={p.x} y={height - 5} fill="rgba(255,255,255,0.4)" fontSize="7" textAnchor="middle">
+              <text x={p.x} y={height - 5} className="fill-slate-500 dark:fill-neutral-400 font-medium" fontSize="7" textAnchor="middle">
                 {p.date}
               </text>
             </g>
@@ -121,6 +124,7 @@ export default function CoachAdmin({ showToast }) {
 
   // Compliance Radar & Filters
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'active' | 'at_risk' | 'inactive'
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Private Coach Notes
   const [privateNoteText, setPrivateNoteText] = useState("");
@@ -724,209 +728,311 @@ export default function CoachAdmin({ showToast }) {
   };
 
   return (
-    <div className="flex flex-col lg:grid lg:grid-cols-4 gap-6">
+    <div className="flex flex-col gap-6">
       
-      {/* MOBILE CLIENT SWITCHER (Hidden on lg) */}
-      <div className="lg:hidden glass-panel p-4 rounded-2xl flex flex-col gap-2 shadow-lg">
-        <h3 className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Seleccionar Alumno</h3>
-        {loadingList ? (
-          <div className="text-neutral-500 text-xs italic">Cargando alumnos...</div>
-        ) : (
-          <div className="flex gap-2 items-center overflow-x-auto no-scrollbar pb-1">
-            {clients.map(c => (
+      {/* TOP KPI STATS BANNER FOR COACH */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="glass-panel p-4 rounded-2xl flex items-center justify-between shadow-sm">
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-neutral-400">Total Alumnos</span>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white mt-0.5">{clients.length}</h3>
+          </div>
+          <div className="p-3 rounded-xl bg-orange-500/10 text-gymNeon border border-orange-500/20">
+            <Users className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div 
+          onClick={() => setStatusFilter('at_risk')}
+          className="glass-panel p-4 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer hover:border-amber-500/50 transition-all"
+        >
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400">En Riesgo</span>
+            <h3 className="text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5">
+              {clients.filter(c => getClientComplianceStatus(c).status === 'at_risk').length}
+            </h3>
+          </div>
+          <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div 
+          onClick={() => setStatusFilter('active')}
+          className="glass-panel p-4 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer hover:border-emerald-500/50 transition-all"
+        >
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Activos al Día</span>
+            <h3 className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {clients.filter(c => getClientComplianceStatus(c).status === 'active').length}
+            </h3>
+          </div>
+          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+            <UserCheck className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div 
+          onClick={() => setAdminTab('pending')}
+          className="glass-panel p-4 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer hover:border-blue-500/50 transition-all"
+        >
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">Solicitudes</span>
+            <h3 className="text-xl font-black text-blue-600 dark:text-blue-400 mt-0.5">
+              {pendingClients.length}
+            </h3>
+          </div>
+          <div className="p-3 rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20">
+            <Clock className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:grid lg:grid-cols-4 gap-6">
+        
+        {/* MOBILE CLIENT SWITCHER (Hidden on lg) */}
+        <div className="lg:hidden glass-panel p-4 rounded-2xl flex flex-col gap-2 shadow-lg">
+          <h3 className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Seleccionar Alumno</h3>
+          {loadingList ? (
+            <div className="text-slate-500 dark:text-neutral-500 text-xs italic">Cargando alumnos...</div>
+          ) : (
+            <div className="flex gap-2 items-center overflow-x-auto no-scrollbar scroll-smooth pb-1 flex-nowrap">
+              {clients.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedClientId(c.id)}
+                  className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all border whitespace-nowrap ${
+                    selectedClientId === c.id
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-500 font-extrabold shadow-md'
+                      : 'bg-slate-100 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-700 dark:text-neutral-400'
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* DESKTOP CLIENTS LIST (Hidden on mobile) */}
+        <div className="hidden lg:flex glass-panel p-5 rounded-2xl shadow-lg flex-col gap-4 self-start">
+          <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/5 pb-3">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+              <Users className="w-4 h-4 text-gymNeon" />
+              <span>Mis Alumnos ({clients.length})</span>
+            </h3>
+          </div>
+
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500" />
+            <input
+              type="text"
+              placeholder="Buscar por nombre o email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-neutral-500 focus:outline-none focus:border-gymNeon"
+            />
+          </div>
+
+          {/* Adherence Filter Bar (Slidable) */}
+          <div className="flex gap-1 bg-slate-100 dark:bg-black/40 p-1 rounded-xl border border-slate-200 dark:border-white/5 overflow-x-auto no-scrollbar scroll-smooth flex-nowrap">
+            {[
+              { key: 'all', label: 'Todos' },
+              { key: 'active', label: 'Activos' },
+              { key: 'at_risk', label: 'Riesgo' },
+              { key: 'inactive', label: 'Inactivos' }
+            ].map(f => (
               <button
-                key={c.id}
-                onClick={() => setSelectedClientId(c.id)}
-                className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                  selectedClientId === c.id
-                    ? 'bg-gymNeon text-black border-gymNeon font-extrabold'
-                    : 'bg-white/[0.02] border-white/5 text-neutral-400'
+                key={f.key}
+                type="button"
+                onClick={() => setStatusFilter(f.key)}
+                className={`flex-1 py-1 px-2 rounded-lg text-[9px] font-extrabold transition-all whitespace-nowrap ${
+                  statusFilter === f.key
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm'
+                    : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                {c.name}
+                {f.label}
               </button>
             ))}
           </div>
-        )}
-      </div>
-
-      {/* DESKTOP CLIENTS LIST (Hidden on mobile) */}
-      <div className="hidden lg:flex glass-panel p-5 rounded-2xl shadow-lg flex-col gap-4 self-start">
-        <div className="flex justify-between items-center border-b border-white/5 pb-3">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <Users className="w-4 h-4 text-gymNeon" />
-            <span>Mis Alumnos ({clients.length})</span>
-          </h3>
-        </div>
-
-        {/* Adherence Filter Bar */}
-        <div className="flex gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
-          {[
-            { key: 'all', label: 'Todos' },
-            { key: 'active', label: 'Activos' },
-            { key: 'at_risk', label: 'Riesgo' },
-            { key: 'inactive', label: 'Inactivos' }
-          ].map(f => (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => setStatusFilter(f.key)}
-              className={`flex-1 py-1 rounded-lg text-[9px] font-bold transition-all ${
-                statusFilter === f.key ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-        
-        {loadingList ? (
-          <div className="text-center py-8 text-neutral-500 text-xs">Cargando alumnos...</div>
-        ) : (
-          <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1">
-            {clients
-              .filter(c => {
-                if (statusFilter === 'all') return true;
-                const comp = getClientComplianceStatus(c);
-                return comp.status === statusFilter;
-              })
-              .map(c => {
-                const comp = getClientComplianceStatus(c);
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedClientId(c.id)}
-                    className={`w-full text-left p-3 rounded-xl transition-all border relative flex items-center justify-between ${
-                      selectedClientId === c.id
-                        ? 'bg-gymNeon text-black border-gymNeon font-bold shadow-md'
-                        : 'bg-white/[0.02] border-white/5 text-neutral-400 hover:text-white hover:bg-white/[0.04]'
-                    }`}
-                  >
-                    <div>
-                      <div className="text-xs font-bold truncate max-w-[140px]">{c.name}</div>
-                      <div className={`text-[9px] ${selectedClientId === c.id ? 'text-black/70' : 'text-neutral-500'} truncate max-w-[140px]`}>{c.email}</div>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className={`w-2 h-2 rounded-full ${comp.dotColor}`}></span>
-                      <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border ${comp.badgeBg}`}>
-                        {comp.label}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-          </div>
-        )}
-      </div>
-
-      {/* 2. RIGHT COLUMN: ADMIN WORKSPACE */}
-      <div className="lg:col-span-3 flex flex-col gap-6">
-        
-        {selectedClient ? (
-          <>
-            {/* Top Workspace Header */}
-            <div className="glass-panel p-5 rounded-2xl flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white/[0.01] overflow-hidden w-full">
-              <div className="shrink-0">
-                <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Ficha del Alumno</span>
-                <h2 className="text-lg font-extrabold text-white">{selectedClient.name}</h2>
-              </div>
-              
-              {/* Workspace tabs switcher */}
-              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full xl:w-auto overflow-hidden">
-                <div className="overflow-x-auto w-full no-scrollbar pb-1">
-                  <div className="flex bg-neutral-900 border border-white/5 rounded-xl p-1 gap-1 min-w-max">
+          
+          {loadingList ? (
+            <div className="text-center py-8 text-slate-500 dark:text-neutral-500 text-xs">Cargando alumnos...</div>
+          ) : (
+            <div className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1">
+              {clients
+                .filter(c => {
+                  const matchesSearch = !searchTerm || c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.email.toLowerCase().includes(searchTerm.toLowerCase());
+                  if (!matchesSearch) return false;
+                  if (statusFilter === 'all') return true;
+                  const comp = getClientComplianceStatus(c);
+                  return comp.status === statusFilter;
+                })
+                .map(c => {
+                  const comp = getClientComplianceStatus(c);
+                  const isSelected = selectedClientId === c.id;
+                  return (
                     <button
-                      onClick={() => setAdminTab('pending')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 relative ${
-                        adminTab === 'pending' ? 'bg-amber-500 text-black' : 'text-neutral-400 hover:text-white'
+                      key={c.id}
+                      onClick={() => setSelectedClientId(c.id)}
+                      className={`w-full text-left p-3 rounded-xl transition-all border relative flex items-center justify-between cursor-pointer ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-500 font-bold shadow-md'
+                          : 'bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-700 dark:text-neutral-400 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
                       }`}
                     >
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>Pendientes</span>
-                      {pendingClients.length > 0 && (
-                        <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
-                          {pendingClients.length}
+                      <div>
+                        <div className={`text-xs font-extrabold truncate max-w-[130px] ${isSelected ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{c.name}</div>
+                        <div className={`text-[9px] truncate max-w-[130px] ${isSelected ? 'text-white/90' : 'text-slate-500 dark:text-neutral-500'}`}>{c.email}</div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className={`w-2 h-2 rounded-full ${comp.dotColor}`}></span>
+                        <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border ${comp.badgeBg}`}>
+                          {comp.label}
                         </span>
-                      )}
+                      </div>
                     </button>
-                    <button
-                      onClick={() => setAdminTab('overview')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                        adminTab === 'overview' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      Vista General
-                    </button>
-                    <button
-                      onClick={() => setAdminTab('summary')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                        adminTab === 'summary' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      Resumen
-                    </button>
-                    <button
-                      onClick={() => setAdminTab('routine')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                        adminTab === 'routine' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      Editar Rutina
-                    </button>
-                    <button
-                      onClick={() => setAdminTab('diet')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                        adminTab === 'diet' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      Editar Dieta
-                    </button>
-                    <button
-                      onClick={() => setAdminTab('feedback')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                        adminTab === 'feedback' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      Notas de Sesión
-                    </button>
-                    <button
-                      onClick={() => setAdminTab('notes')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${
-                        adminTab === 'notes' ? 'bg-amber-400 text-black font-extrabold' : 'text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      <Lock className="w-3.5 h-3.5" />
-                      <span>Notas Privadas</span>
-                    </button>
-                    <button
-                      onClick={() => setAdminTab('chat')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 relative ${
-                        adminTab === 'chat' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      Chat
-                    </button>
-                    <button
-                      onClick={() => setAdminTab('business')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
-                        adminTab === 'business' ? 'bg-gymNeon text-black' : 'text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      Negocio & Retos
-                    </button>
-                  </div>
-                </div>
-                {selectedClient && (
-                  <button
-                    onClick={handleExportPDF}
-                    className="flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-bold uppercase px-3 py-2.5 rounded-xl transition-all cursor-pointer w-full sm:w-auto sm:ml-auto"
-                  >
-                    <FileDown className="w-3.5 h-3.5 text-gymNeon" />
-                    <span>Exportar PDF</span>
-                  </button>
-                )}
-              </div>
+                  );
+                })}
             </div>
+          )}
+        </div>
+
+        {/* 2. RIGHT COLUMN: ADMIN WORKSPACE */}
+        <div className="lg:col-span-3 flex flex-col gap-6">
+          
+          {selectedClient ? (
+            <>
+              {/* Top Workspace Header */}
+              <div className="glass-panel p-5 rounded-2xl flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 bg-white dark:bg-white/[0.01] overflow-hidden w-full shadow-sm">
+                <div className="shrink-0">
+                  <span className="text-[10px] font-extrabold text-gymNeon uppercase tracking-widest">Ficha del Alumno</span>
+                  <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">{selectedClient.name}</h2>
+                </div>
+                
+                {/* Slidable Workspace tabs switcher */}
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full xl:w-auto overflow-hidden">
+                  <div className="overflow-x-auto w-full no-scrollbar scroll-smooth pb-1">
+                    <div className="flex bg-slate-100 dark:bg-neutral-900 border border-slate-200 dark:border-white/5 rounded-xl p-1 gap-1 min-w-max">
+                      <button
+                        onClick={() => setAdminTab('pending')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 relative cursor-pointer ${
+                          adminTab === 'pending'
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Pendientes</span>
+                        {pendingClients.length > 0 && (
+                          <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
+                            {pendingClients.length}
+                          </span>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setAdminTab('overview')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                          adminTab === 'overview'
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <BarChart3 className="w-3.5 h-3.5" />
+                        <span>Vista General</span>
+                      </button>
+                      <button
+                        onClick={() => setAdminTab('summary')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                          adminTab === 'summary'
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>Resumen</span>
+                      </button>
+                      <button
+                        onClick={() => setAdminTab('routine')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                          adminTab === 'routine'
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <Activity className="w-3.5 h-3.5" />
+                        <span>Editar Rutina</span>
+                      </button>
+                      <button
+                        onClick={() => setAdminTab('diet')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                          adminTab === 'diet'
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <Sliders className="w-3.5 h-3.5" />
+                        <span>Editar Dieta</span>
+                      </button>
+                      <button
+                        onClick={() => setAdminTab('feedback')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                          adminTab === 'feedback'
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Notas de Sesión</span>
+                      </button>
+                      <button
+                        onClick={() => setAdminTab('notes')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                          adminTab === 'notes'
+                            ? 'bg-amber-500 text-white font-extrabold shadow-md'
+                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <Lock className="w-3.5 h-3.5" />
+                        <span>Notas Privadas</span>
+                      </button>
+                      <button
+                        onClick={() => setAdminTab('chat')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 relative cursor-pointer ${
+                          adminTab === 'chat'
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>Chat</span>
+                      </button>
+                      <button
+                        onClick={() => setAdminTab('business')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                          adminTab === 'business'
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                            : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <Target className="w-3.5 h-3.5" />
+                        <span>Negocio & Retos</span>
+                      </button>
+                    </div>
+                  </div>
+                  {selectedClient && (
+                    <button
+                      onClick={handleExportPDF}
+                      className="flex items-center justify-center gap-1.5 bg-gymNeon text-white font-extrabold text-[10px] uppercase px-4 py-2.5 rounded-xl shadow-sm hover:opacity-90 transition-all cursor-pointer w-full sm:w-auto sm:ml-auto shrink-0"
+                    >
+                      <FileDown className="w-3.5 h-3.5" />
+                      <span>Exportar PDF</span>
+                    </button>
+                  )}
+                </div>
+              </div>
 
             {loadingDetail ? (
               <div className="glass-panel p-16 text-center text-neutral-500 text-xs rounded-2xl">
@@ -1141,21 +1247,21 @@ export default function CoachAdmin({ showToast }) {
                         </button>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-black/25 p-4 rounded-xl border border-white/5">
-                          <div className="text-[10px] text-neutral-500 font-bold uppercase">Objetivo</div>
-                          <div className="text-white text-sm font-bold mt-1">{selectedClient.profile?.target}</div>
+                        <div className="bg-slate-50 dark:bg-black/25 p-4 rounded-xl border border-slate-200 dark:border-white/5 shadow-sm">
+                          <div className="text-[10px] text-slate-500 dark:text-neutral-400 font-extrabold uppercase">Objetivo</div>
+                          <div className="text-slate-900 dark:text-white text-sm font-extrabold mt-1">{selectedClient.profile?.target}</div>
                         </div>
-                        <div className="bg-black/25 p-4 rounded-xl border border-white/5">
-                          <div className="text-[10px] text-neutral-500 font-bold uppercase">Estatura</div>
-                          <div className="text-white text-sm font-bold mt-1">{selectedClient.profile?.height ? Number(selectedClient.profile.height).toFixed(2) : '1.70'} m</div>
+                        <div className="bg-slate-50 dark:bg-black/25 p-4 rounded-xl border border-slate-200 dark:border-white/5 shadow-sm">
+                          <div className="text-[10px] text-slate-500 dark:text-neutral-400 font-extrabold uppercase">Estatura</div>
+                          <div className="text-slate-900 dark:text-white text-sm font-extrabold mt-1">{selectedClient.profile?.height ? Number(selectedClient.profile.height).toFixed(2) : '1.70'} m</div>
                         </div>
-                        <div className="bg-black/25 p-4 rounded-xl border border-white/5">
-                          <div className="text-[10px] text-neutral-500 font-bold uppercase">Peso de Partida</div>
-                          <div className="text-white text-sm font-bold mt-1">{selectedClient.profile?.initial_weight} kg</div>
+                        <div className="bg-slate-50 dark:bg-black/25 p-4 rounded-xl border border-slate-200 dark:border-white/5 shadow-sm">
+                          <div className="text-[10px] text-slate-500 dark:text-neutral-400 font-extrabold uppercase">Peso de Partida</div>
+                          <div className="text-slate-900 dark:text-white text-sm font-extrabold mt-1">{selectedClient.profile?.initial_weight} kg</div>
                         </div>
-                        <div className="bg-black/25 p-4 rounded-xl border border-white/5">
-                          <div className="text-[10px] text-neutral-500 font-bold uppercase">Peso Último Registro</div>
-                          <div className="text-gymNeon text-sm font-extrabold mt-1">{latestWeight} kg</div>
+                        <div className="bg-slate-50 dark:bg-black/25 p-4 rounded-xl border border-slate-200 dark:border-white/5 shadow-sm">
+                          <div className="text-[10px] text-slate-500 dark:text-neutral-400 font-extrabold uppercase">Peso Último Registro</div>
+                          <div className="text-gymNeon text-sm font-black mt-1">{latestWeight} kg</div>
                         </div>
                       </div>
                     </div>
@@ -1970,6 +2076,7 @@ export default function CoachAdmin({ showToast }) {
         </div>
       )}
 
+      </div>
     </div>
   );
 }
