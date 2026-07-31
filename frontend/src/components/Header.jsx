@@ -98,7 +98,7 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
   };
 
   return (
-    <header className="glass-panel flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 rounded-3xl border border-white/10 border-l-4 border-l-gymNeon mb-8 shadow-2xl relative overflow-hidden bg-gradient-to-r from-neutral-900/90 via-neutral-900/60 to-black/80">
+    <header className="glass-panel flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 rounded-3xl border border-sky-200 dark:border-white/10 border-l-4 border-l-gymNeon mb-8 shadow-2xl relative overflow-hidden bg-gradient-to-r from-white via-sky-50/80 to-blue-50/40 dark:from-neutral-900/90 dark:via-neutral-900/60 dark:to-black/80 transition-all">
       <div className="absolute top-0 right-0 w-96 h-96 bg-gymNeon/10 rounded-full blur-[100px] pointer-events-none"></div>
 
       {/* Profile info left side */}
@@ -115,14 +115,14 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
               href="https://www.instagram.com/sierrafitn_" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-xs font-bold text-pink-400 hover:text-white bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-pink-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1 transition-all cursor-pointer hover:scale-105"
+              className="text-xs font-bold text-pink-500 dark:text-pink-400 hover:text-pink-600 dark:hover:text-white bg-pink-50 dark:bg-gradient-to-r dark:from-purple-600/30 dark:to-pink-600/30 border border-pink-200 dark:border-pink-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1 transition-all cursor-pointer hover:scale-105"
               title="Ver perfil oficial de Instagram"
             >
-              <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
+              <InstagramIcon className="w-3.5 h-3.5 text-pink-500 dark:text-pink-400" />
               <span>@sierrafitn_</span>
             </a>
           </div>
-          <h1 className="text-xl md:text-2xl font-black tracking-tight text-white mt-1">Alejandro Sierra Rincones</h1>
+          <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white mt-1">Alejandro Sierra Rincones</h1>
           <p className="text-gymNeon font-extrabold text-xs tracking-wider uppercase mt-0.5">
             Asesoría de Alto Rendimiento • Entrenamiento & Nutrición Personalizada
           </p>
@@ -161,8 +161,8 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
         
         {/* User state, theme and logout */}
         <div className="flex items-center justify-between sm:justify-start gap-4 w-full sm:w-auto">
-          <span className="text-neutral-400 text-xs">
-            Conectado como <strong className="text-white font-bold">{user.name}</strong>
+          <span className="text-slate-600 dark:text-neutral-400 text-xs">
+            Conectado como <strong className="text-slate-900 dark:text-white font-bold">{user.name}</strong>
           </span>
           <div className="flex items-center gap-2">
             
@@ -171,7 +171,7 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
               <button
                 type="button"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer relative"
+                className="inline-flex items-center justify-center p-2.5 rounded-xl bg-sky-100 hover:bg-sky-200 dark:bg-white/5 border border-sky-200 dark:border-white/10 text-slate-800 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer relative"
                 title="Notificaciones"
               >
                 {unreadNotifications.length > 0 ? (
@@ -188,9 +188,9 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
 
               {/* Notifications Dropdown Panel */}
               {showNotifications && (
-                <div className="absolute right-0 mt-3 w-80 bg-neutral-900/95 border border-white/10 rounded-2xl shadow-2xl p-4 flex flex-col gap-3 backdrop-blur-xl z-50">
-                  <div className="flex justify-between items-center pb-2 border-b border-white/5">
-                    <span className="text-xs font-bold text-white uppercase tracking-wider">Centro de Notificaciones</span>
+                <div className="absolute right-0 mt-3 w-80 bg-white dark:bg-neutral-900/95 border border-sky-200 dark:border-white/10 rounded-2xl shadow-2xl p-4 flex flex-col gap-3 backdrop-blur-xl z-50">
+                  <div className="flex justify-between items-center pb-2 border-b border-sky-100 dark:border-white/5">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Centro de Notificaciones</span>
                     {unreadNotifications.length > 0 && (
                       <button 
                         onClick={handleMarkAllAsRead}
@@ -204,19 +204,19 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
                   {/* Push Notification permission activator */}
                   <div className="bg-gymNeon/10 border border-gymNeon/30 p-2.5 rounded-xl flex items-center justify-between gap-2">
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-white">Recordatorios de Entreno</span>
-                      <span className="text-[8px] text-neutral-400">Recibir avisos en tu pantalla</span>
+                      <span className="text-[10px] font-bold text-slate-900 dark:text-white">Recordatorios de Entreno</span>
+                      <span className="text-[8px] text-slate-600 dark:text-neutral-400">Recibir avisos en tu pantalla</span>
                     </div>
                     <button
                       onClick={handleEnablePushNotifications}
-                      className="px-2.5 py-1 bg-gymNeon text-black font-extrabold text-[9px] rounded-lg uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer"
+                      className="px-2.5 py-1 bg-gymNeon text-white font-extrabold text-[9px] rounded-lg uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer"
                     >
                       Activar
                     </button>
                   </div>
                   <div className="max-h-60 overflow-y-auto flex flex-col gap-2 no-scrollbar">
                     {notifications.length === 0 ? (
-                      <div className="text-center py-6 text-neutral-500 text-xs italic">
+                      <div className="text-center py-6 text-slate-500 dark:text-neutral-500 text-xs italic">
                         No tienes notificaciones
                       </div>
                     ) : (
@@ -226,16 +226,16 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
                           onClick={() => handleMarkAsRead(n.id)}
                           className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-1 ${
                             n.is_read 
-                              ? 'bg-black/10 border-white/5 opacity-60' 
+                              ? 'bg-slate-50 dark:bg-black/10 border-sky-100 dark:border-white/5 opacity-60' 
                               : 'bg-gymNeon/5 border-gymNeon/20 hover:bg-gymNeon/10'
                           }`}
                         >
                           <div className="flex justify-between items-start gap-2">
-                            <span className="text-xs font-bold text-white leading-snug">{n.title}</span>
+                            <span className="text-xs font-bold text-slate-900 dark:text-white leading-snug">{n.title}</span>
                             {!n.is_read && <span className="w-2 h-2 rounded-full bg-gymNeon flex-shrink-0 mt-1"></span>}
                           </div>
-                          <p className="text-[10px] text-neutral-400 leading-normal">{n.message}</p>
-                          <span className="text-[8px] text-neutral-600 self-end">{n.created_at.split(' ')[0]}</span>
+                          <p className="text-[10px] text-slate-600 dark:text-neutral-400 leading-normal">{n.message}</p>
+                          <span className="text-[8px] text-slate-400 dark:text-neutral-600 self-end">{n.created_at.split(' ')[0]}</span>
                         </div>
                       ))
                     )}
@@ -248,7 +248,7 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
             <button
               type="button"
               onClick={toggleTheme}
-              className="inline-flex items-center justify-center p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer"
+              className="inline-flex items-center justify-center p-2.5 rounded-xl bg-sky-100 dark:bg-white/5 border border-sky-200 dark:border-white/10 hover:bg-sky-200 dark:hover:bg-white/10 text-slate-800 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
               title={theme === 'light' ? 'Activar Modo Oscuro' : 'Activar Modo Claro'}
             >
               {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
@@ -258,7 +258,7 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
             <button 
               type="button" 
               onClick={onLogout}
-              className="inline-flex items-center gap-1.5 text-red-400 font-extrabold uppercase text-[10px] tracking-wider py-2 px-3.5 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 font-extrabold uppercase text-[10px] tracking-wider py-2 px-3.5 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 active:scale-95 transition-all cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Salir</span>

@@ -208,7 +208,7 @@ const FreeCalorieCalculator = () => {
 
         <button
           type="submit"
-          className="col-span-2 bg-gymNeon text-black font-extrabold uppercase py-3 rounded-xl tracking-wider text-xs shadow-lg mt-2 cursor-pointer"
+          className="col-span-2 bg-gymNeon text-white-force font-extrabold uppercase py-3 rounded-xl tracking-wider text-xs shadow-lg mt-2 cursor-pointer"
         >
           Calcular Requerimientos
         </button>
@@ -266,7 +266,7 @@ const FAQAccordion = () => {
     <div className="flex flex-col gap-4 w-full">
       <div className="text-center">
         <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Preguntas Frecuentes</span>
-        <h2 className="text-2xl font-black uppercase text-white mt-1">Dudas Comunes</h2>
+        <h2 className="text-2xl font-black uppercase text-slate-900 dark:text-white mt-1">Dudas Comunes</h2>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -275,12 +275,12 @@ const FAQAccordion = () => {
           return (
             <div 
               key={idx} 
-              className="glass-panel rounded-2xl border border-white/5 overflow-hidden transition-all duration-300"
+              className="glass-panel rounded-2xl border border-sky-100 dark:border-white/5 overflow-hidden transition-all duration-300"
             >
               <button
                 type="button"
                 onClick={() => setActiveIndex(isOpen ? null : idx)}
-                className="w-full text-left p-5 flex justify-between items-center text-sm font-bold text-white uppercase tracking-wide bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-pointer"
+                className="w-full text-left p-5 flex justify-between items-center text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide bg-white/[0.01] hover:bg-white/[0.03] transition-all cursor-pointer"
               >
                 <span>{faq.q}</span>
                 <span className="text-gymNeon text-lg">{isOpen ? '−' : '+'}</span>
@@ -288,10 +288,10 @@ const FAQAccordion = () => {
               
               <div 
                 className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                  isOpen ? 'max-h-40 border-t border-white/5' : 'max-h-0'
+                  isOpen ? 'max-h-40 border-t border-sky-100 dark:border-white/5' : 'max-h-0'
                 }`}
               >
-                <p className="p-5 text-xs text-neutral-400 leading-relaxed bg-black/10">
+                <p className="p-5 text-xs text-slate-600 dark:text-neutral-400 leading-relaxed bg-black/10">
                   {faq.a}
                 </p>
               </div>
@@ -319,21 +319,21 @@ const InstagramFeed = () => {
         <div className="flex items-center gap-3">
           <LogoInteractive size="sm" showBadge={false} />
           <div className="text-left">
-            <h3 className="text-base font-black text-white flex items-center gap-1.5">
+            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-1.5">
               <span>Alejandro Sierra</span>
               <span className="text-blue-400 text-xs" title="Verificado">✓</span>
             </h3>
-            <span className="text-xs text-neutral-400 font-bold">@sierrafitn_</span>
+            <span className="text-xs text-slate-600 dark:text-neutral-400 font-bold">@sierrafitn_</span>
           </div>
         </div>
 
         <span className="text-[10px] font-black text-gymNeon uppercase tracking-widest mt-2 bg-gymNeon/10 border border-gymNeon/30 px-3 py-1 rounded-full">
           Comunidad & Resultados
         </span>
-        <h2 className="text-3xl font-black uppercase text-white mt-1">
+        <h2 className="text-3xl font-black uppercase text-slate-900 dark:text-white mt-1">
           SIGUE EL PROGRESO EN INSTAGRAM
         </h2>
-        <p className="text-neutral-400 text-xs max-w-md">
+        <p className="text-slate-600 dark:text-neutral-400 text-xs max-w-md">
           Transformaciones reales. No excusas. Rutinas y nutrición inteligente.
         </p>
 
@@ -501,22 +501,22 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between text-white bg-gymDark-950 pb-12 transition-colors duration-300">
+    <div className="min-h-screen flex flex-col justify-between text-slate-900 dark:text-white bg-gymDark-950 pb-12 transition-colors duration-300">
       {/* Top Navbar */}
-      <header className="border-b border-white/5 bg-gymDark-900/50 backdrop-blur-md sticky top-0 z-40 transition-colors duration-300">
+      <header className="border-b border-sky-200 dark:border-white/5 bg-white/90 dark:bg-gymDark-900/50 backdrop-blur-md sticky top-0 z-40 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <LogoInteractive size="sm" showBadge={false} />
-            <span className="text-sm font-black tracking-widest uppercase text-white">SIERRA COACHING</span>
+            <span className="text-sm font-black tracking-widest uppercase text-slate-900 dark:text-white">SIERRA COACHING</span>
           </div>
-          <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-neutral-400">
-            <a href="#beneficios" className="hover:text-white transition-colors">Beneficios</a>
-            <a href="#calcs" className="hover:text-white transition-colors">Calculadora</a>
-            <a href="#precios" className="hover:text-white transition-colors">Precios</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+          <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-400">
+            <a href="#beneficios" className="hover:text-gymNeon dark:hover:text-white transition-colors">Beneficios</a>
+            <a href="#calcs" className="hover:text-gymNeon dark:hover:text-white transition-colors">Calculadora</a>
+            <a href="#precios" className="hover:text-gymNeon dark:hover:text-white transition-colors">Precios</a>
+            <a href="#faq" className="hover:text-gymNeon dark:hover:text-white transition-colors">FAQ</a>
             <button 
               onClick={() => { setIsLogin(true); setShowAuthModal(true); }}
-              className="text-gymNeon hover:text-white transition-colors uppercase cursor-pointer"
+              className="text-gymNeon font-black hover:underline uppercase cursor-pointer"
             >
               Acceso Alumnos
             </button>
@@ -526,7 +526,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
             {/* Theme Toggle Switch */}
             <button
               onClick={toggleTheme}
-              className="inline-flex items-center justify-center p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer"
+              className="inline-flex items-center justify-center p-2 rounded-xl bg-sky-100 dark:bg-white/5 border border-sky-200 dark:border-white/10 hover:bg-sky-200 dark:hover:bg-white/10 text-slate-800 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
               title={theme === 'light' ? 'Modo Oscuro' : 'Modo Claro'}
             >
               {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
@@ -536,16 +536,16 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
               href="https://wa.me/573022114190"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-extrabold uppercase px-3 py-2 rounded-xl transition-all"
+              className="hidden sm:flex items-center gap-1.5 bg-sky-100 dark:bg-white/5 border border-sky-200 dark:border-white/10 hover:bg-sky-200 dark:hover:bg-white/10 text-slate-900 dark:text-white text-xs font-extrabold uppercase px-3 py-2 rounded-xl transition-all"
             >
-              <MessageCircle className="w-4 h-4 text-green-500" />
+              <MessageCircle className="w-4 h-4 text-green-600 dark:text-green-500" />
               <span>Contacto Coach</span>
             </a>
 
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden inline-flex items-center justify-center p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer"
+              className="md:hidden inline-flex items-center justify-center p-2 rounded-xl bg-sky-100 dark:bg-white/5 border border-sky-200 dark:border-white/10 hover:bg-sky-200 dark:hover:bg-white/10 text-slate-800 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
               title="Menu"
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -554,38 +554,38 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
         </div>
         {/* Mobile Menu Panel */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-white/5 bg-gymDark-900/95 backdrop-blur-lg px-6 py-4 flex flex-col gap-4 animate-slide-in">
+          <div className="md:hidden border-t border-sky-200 dark:border-white/5 bg-white/95 dark:bg-gymDark-900/95 backdrop-blur-lg px-6 py-4 flex flex-col gap-4 animate-slide-in">
             <a 
               href="#beneficios" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-colors py-2 border-b border-white/5"
+              className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 hover:text-gymNeon transition-colors py-2 border-b border-sky-100 dark:border-white/5"
             >
               Beneficios
             </a>
             <a 
               href="#calcs" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-colors py-2 border-b border-white/5"
+              className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 hover:text-gymNeon transition-colors py-2 border-b border-sky-100 dark:border-white/5"
             >
               Calculadora
             </a>
             <a 
               href="#precios" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-colors py-2 border-b border-white/5"
+              className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 hover:text-gymNeon transition-colors py-2 border-b border-sky-100 dark:border-white/5"
             >
               Precios
             </a>
             <a 
               href="#faq" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-bold uppercase tracking-wider text-neutral-300 hover:text-white transition-colors py-2 border-b border-white/5"
+              className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-neutral-300 hover:text-gymNeon transition-colors py-2 border-b border-sky-100 dark:border-white/5"
             >
               FAQ
             </a>
             <button 
               onClick={() => { setMobileMenuOpen(false); setIsLogin(true); setShowAuthModal(true); }}
-              className="text-sm font-bold uppercase tracking-wider text-gymNeon hover:text-white transition-colors py-2 border-b border-white/5 text-left cursor-pointer"
+              className="text-sm font-bold uppercase tracking-wider text-gymNeon hover:text-white transition-colors py-2 border-b border-sky-100 dark:border-white/5 text-left cursor-pointer"
             >
               Acceso Alumnos
             </button>
@@ -594,7 +594,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-1.5 bg-gymNeon text-black font-extrabold uppercase py-3 rounded-xl transition-all text-xs tracking-wider shadow-lg"
+              className="flex items-center justify-center gap-1.5 bg-gymNeon text-white-force font-extrabold uppercase py-3 rounded-xl transition-all text-xs tracking-wider shadow-lg"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Contacto Coach</span>
@@ -610,25 +610,25 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
           <div className="inline-flex items-center gap-2 bg-gymNeon/10 text-gymNeon border border-gymNeon/30 rounded-full px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase self-start">
             <Crown className="w-3 h-3" /> Asesoría Online Premium
           </div>
-          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-tight text-white break-words">
+          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-tight text-slate-900 dark:text-white break-words">
             BIENVENIDO A LA<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-gymNeon via-orange-400 to-amber-500">
               CONSTRUCCIÓN<br className="sm:hidden" /> DE TU CUERPO
             </span>
           </h1>
-          <p className="text-neutral-300 text-xs sm:text-sm md:text-base leading-relaxed max-w-xl transition-colors duration-300 font-medium">
+          <p className="text-slate-600 dark:text-neutral-300 text-xs sm:text-sm md:text-base leading-relaxed max-w-xl transition-colors duration-300 font-medium">
             Transforma tu cuerpo con un sistema de entrenamiento estructurado, menús de alimentación personalizados y monitoreo diario de sobrecarga progresiva en una sola aplicación.
           </p>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <button
               onClick={() => { setIsLogin(false); setShowAuthModal(true); }}
-              className="bg-gymNeon text-black font-extrabold uppercase py-3 px-6 rounded-xl tracking-wider text-xs shadow-[0_4px_14px_rgba(255,87,34,0.3)] hover:bg-white hover:shadow-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
+              className="bg-gymNeon text-white-force font-extrabold uppercase py-3 px-6 rounded-xl tracking-wider text-xs shadow-[0_4px_14px_rgba(255,87,34,0.3)] hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
             >
               Comenzar Ahora →
             </button>
             <button
               onClick={() => { setIsLogin(true); setShowAuthModal(true); }}
-              className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-extrabold uppercase py-3 px-5 rounded-xl tracking-wider text-xs transition-all cursor-pointer"
+              className="bg-sky-100 dark:bg-white/5 border border-sky-200 dark:border-white/10 hover:bg-sky-200 dark:hover:bg-white/10 text-slate-800 dark:text-white font-extrabold uppercase py-3 px-5 rounded-xl tracking-wider text-xs transition-all cursor-pointer"
             >
               Ver Planes
             </button>
@@ -662,42 +662,42 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
           </div>
 
           {/* Floating Widget 1: Calories */}
-          <div className="absolute top-2 left-2 sm:left-4 bg-gymDark-900/90 border border-white/10 backdrop-blur-md rounded-xl p-2.5 flex items-center gap-2.5 z-20 shadow-lg transition-colors duration-300">
+          <div className="absolute top-2 left-2 sm:left-4 bg-white/95 dark:bg-gymDark-900/90 border border-sky-200 dark:border-white/10 backdrop-blur-md rounded-xl p-2.5 flex items-center gap-2.5 z-20 shadow-lg transition-colors duration-300">
             <div className="bg-gymNeon/10 text-gymNeon p-1.5 rounded-lg">
               <Activity className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[8px] text-neutral-400 font-bold uppercase block">Calorías Quemadas</span>
-              <span className="text-[11px] font-black text-white">220 kcal</span>
+              <span className="text-[8px] text-slate-500 dark:text-neutral-400 font-bold uppercase block">Calorías Quemadas</span>
+              <span className="text-[11px] font-black text-slate-900 dark:text-white">220 kcal</span>
             </div>
           </div>
 
           {/* Floating Widget 2: Fat burning */}
-          <div className="absolute top-1/2 -translate-y-1/2 right-2 sm:-right-8 bg-gymDark-900/90 border border-white/10 backdrop-blur-md rounded-xl p-2.5 flex items-center gap-2.5 z-20 shadow-lg transition-colors duration-300">
+          <div className="absolute top-1/2 -translate-y-1/2 right-2 sm:-right-8 bg-white/95 dark:bg-gymDark-900/90 border border-sky-200 dark:border-white/10 backdrop-blur-md rounded-xl p-2.5 flex items-center gap-2.5 z-20 shadow-lg transition-colors duration-300">
             <div className="bg-red-500/10 text-red-500 p-1.5 rounded-lg">
               <Flame className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[8px] text-neutral-400 font-bold uppercase block">Quema de Grasa</span>
-              <span className="text-[11px] font-black text-white">57%</span>
+              <span className="text-[8px] text-slate-500 dark:text-neutral-400 font-bold uppercase block">Quema de Grasa</span>
+              <span className="text-[11px] font-black text-slate-900 dark:text-white">57%</span>
             </div>
           </div>
 
           {/* Floating Widget 3: Heart Rate */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-gymDark-900/90 border border-white/10 backdrop-blur-md rounded-xl p-2.5 flex items-center gap-2.5 z-20 shadow-lg transition-colors duration-300">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-white/95 dark:bg-gymDark-900/90 border border-sky-200 dark:border-white/10 backdrop-blur-md rounded-xl p-2.5 flex items-center gap-2.5 z-20 shadow-lg transition-colors duration-300">
             <div className="bg-gymNeon/10 text-gymNeon p-1.5 rounded-lg">
               <Heart className="w-3.5 h-3.5 text-red-500 animate-pulse" />
             </div>
             <div>
-              <span className="text-[8px] text-neutral-400 font-bold uppercase block">Ritmo Cardíaco</span>
-              <span className="text-[11px] font-black text-white">130 lpm</span>
+              <span className="text-[8px] text-slate-500 dark:text-neutral-400 font-bold uppercase block">Ritmo Cardíaco</span>
+              <span className="text-[11px] font-black text-slate-900 dark:text-white">130 lpm</span>
             </div>
           </div>
         </div>
       </main>
 
       {/* Visual transformation slider and free calorie calculator grid */}
-      <section className="max-w-7xl mx-auto w-full px-6 py-12 border-t border-white/5 pt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start" id="calcs">
+      <section className="max-w-7xl mx-auto w-full px-6 py-12 border-t border-sky-100 dark:border-white/5 pt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start" id="calcs">
         <BeforeAfterSlider />
         <FreeCalorieCalculator />
       </section>
@@ -709,21 +709,21 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
           <div>
             <span className="text-[9px] font-bold text-gymNeon uppercase tracking-widest">Plan Mensual Asesoría Completa</span>
             <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-3xl font-black text-white">$50.000</span>
-              <span className="text-xs text-neutral-400 font-bold uppercase">COP / mes</span>
+              <span className="text-3xl font-black text-slate-900 dark:text-white">$50.000</span>
+              <span className="text-xs text-slate-600 dark:text-neutral-400 font-bold uppercase">COP / mes</span>
             </div>
-            <p className="text-[10px] text-neutral-500 mt-2">Acceso completo e interactivo a la Web App.</p>
+            <p className="text-[10px] text-slate-500 dark:text-neutral-500 mt-2">Acceso completo e interactivo a la Web App.</p>
           </div>
-          <div className="flex flex-col gap-2.5 w-full sm:w-auto border-t sm:border-t-0 sm:border-l border-white/5 pt-4 sm:pt-0 sm:pl-6">
-            <div className="flex items-center gap-2 text-xs font-bold text-neutral-300 transition-colors">
+          <div className="flex flex-col gap-2.5 w-full sm:w-auto border-t sm:border-t-0 sm:border-l border-sky-100 dark:border-white/5 pt-4 sm:pt-0 sm:pl-6">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-neutral-300 transition-colors">
               <Check className="w-4 h-4 text-gymNeon" />
               <span>Acceso completo a la Web App</span>
             </div>
-            <div className="flex items-center gap-2 text-xs font-bold text-neutral-300 transition-colors">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-neutral-300 transition-colors">
               <Check className="w-4 h-4 text-gymNeon" />
               <span>Soporte por WhatsApp con tu Coach</span>
             </div>
-            <div className="flex items-center gap-2 text-xs font-bold text-neutral-300 transition-colors">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-neutral-300 transition-colors">
               <Check className="w-4 h-4 text-gymNeon" />
               <span>Modificación de dieta y rutina</span>
             </div>
@@ -732,26 +732,26 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       </section>
 
       {/* Transformation & Proof Section */}
-      <section className="max-w-7xl mx-auto px-6 py-12 w-full border-t border-white/5">
+      <section className="max-w-7xl mx-auto px-6 py-12 w-full border-t border-sky-100 dark:border-white/5">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-6 flex flex-col gap-4">
             <span className="text-[10px] font-black text-gymNeon uppercase tracking-widest bg-gymNeon/10 border border-gymNeon/30 px-3 py-1 rounded-full self-start">
               Prueba Real & Disciplina
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black uppercase text-white tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-black uppercase text-slate-900 dark:text-white tracking-tight leading-tight">
               MI TRANSFORMACIÓN
             </h2>
-            <p className="text-neutral-400 text-sm leading-relaxed">
+            <p className="text-slate-600 dark:text-neutral-400 text-sm leading-relaxed">
               "No fue genética. No fue suerte. Fue disciplina todos los días." Esta es la metodología real que aplico conmigo mismo y con cada uno de mis alumnos para lograr resultados físicos contundentes.
             </p>
             <div className="grid grid-cols-2 gap-3 mt-2">
-              <div className="bg-black/30 border border-white/5 p-3.5 rounded-xl">
+              <div className="bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/5 p-3.5 rounded-xl">
                 <span className="text-gymNeon text-xs font-black uppercase block">Antes (2022)</span>
-                <span className="text-neutral-400 text-[11px]">Inicio sin estructura</span>
+                <span className="text-slate-600 dark:text-neutral-400 text-[11px]">Inicio sin estructura</span>
               </div>
-              <div className="bg-black/30 border border-gymNeon/40 p-3.5 rounded-xl">
+              <div className="bg-slate-50 dark:bg-black/30 border border-gymNeon/40 p-3.5 rounded-xl">
                 <span className="text-gymNeon text-xs font-black uppercase block">Ahora (Actual)</span>
-                <span className="text-white text-[11px] font-bold">Físico magro y fuerte</span>
+                <span className="text-slate-900 dark:text-white text-[11px] font-bold">Físico magro y fuerte</span>
               </div>
             </div>
           </div>
@@ -805,36 +805,36 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       </section>
 
       {/* Bottom Features Row */}
-      <section className="max-w-7xl mx-auto px-6 py-12 border-t border-white/5 mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 w-full transition-colors duration-300">
+      <section className="max-w-7xl mx-auto px-6 py-12 border-t border-sky-100 dark:border-white/5 mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 w-full transition-colors duration-300">
         <div className="flex items-start gap-4">
-          <div className="bg-gymNeon text-black p-3 rounded-xl flex-shrink-0 flex items-center justify-center font-bold">
+          <div className="bg-gymNeon text-white-force p-3 rounded-xl flex-shrink-0 flex items-center justify-center font-bold">
             <Dumbbell className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">Entrenamiento Personalizado</h3>
-            <p className="text-xs text-neutral-400 mt-2 leading-relaxed transition-colors">
+            <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">Entrenamiento Personalizado</h3>
+            <p className="text-xs text-slate-600 dark:text-neutral-400 mt-2 leading-relaxed transition-colors">
               Rutinas adaptadas con precisión a tu nivel y metas de fuerza o hipertrofia.
             </p>
           </div>
         </div>
         <div className="flex items-start gap-4">
-          <div className="bg-gymNeon text-black p-3 rounded-xl flex-shrink-0 flex items-center justify-center font-bold">
+          <div className="bg-gymNeon text-white-force p-3 rounded-xl flex-shrink-0 flex items-center justify-center font-bold">
             <TrendingUp className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">Programas de Rutinas</h3>
-            <p className="text-xs text-neutral-400 mt-2 leading-relaxed transition-colors">
+            <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">Programas de Rutinas</h3>
+            <p className="text-xs text-slate-600 dark:text-neutral-400 mt-2 leading-relaxed transition-colors">
               Semanas estructuradas de sobrecarga progresiva guiadas paso a paso en la app.
             </p>
           </div>
         </div>
         <div className="flex items-start gap-4">
-          <div className="bg-gymNeon text-black p-3 rounded-xl flex-shrink-0 flex items-center justify-center font-bold">
+          <div className="bg-gymNeon text-white-force p-3 rounded-xl flex-shrink-0 flex items-center justify-center font-bold">
             <Apple className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">Planes de Alimentación</h3>
-            <p className="text-xs text-neutral-400 mt-2 leading-relaxed transition-colors">
+            <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">Planes de Alimentación</h3>
+            <p className="text-xs text-slate-600 dark:text-neutral-400 mt-2 leading-relaxed transition-colors">
               Dieta calculada según tus calorías y requerimientos diarios de macronutrientes.
             </p>
           </div>
@@ -854,8 +854,8 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
               <div className="bg-gymNeon/10 p-2.5 rounded-xl border border-gymNeon/20 group-hover:bg-gymNeon/15 transition-all">
                 <Icon className="w-5 h-5 text-gymNeon" />
               </div>
-              <span className="text-3xl font-black text-white">{number}</span>
-              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">{label}</span>
+              <span className="text-3xl font-black text-slate-900 dark:text-white">{number}</span>
+              <span className="text-[10px] font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-wider">{label}</span>
             </div>
           ))}
         </div>
@@ -865,7 +865,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       <section className="max-w-7xl mx-auto px-6 py-10 w-full" id="beneficios">
         <div className="text-center mb-8">
           <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Proceso Simple</span>
-          <h2 className="text-2xl font-black uppercase text-white mt-1">¿Cómo Funciona?</h2>
+          <h2 className="text-2xl font-black uppercase text-slate-900 dark:text-white mt-1">¿Cómo Funciona?</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
           {/* Connecting line on md+ */}
@@ -877,13 +877,13 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
           ].map(({ step, icon: Icon, title, desc }) => (
             <div key={step} className="flex flex-col items-center text-center gap-4 relative z-10">
               <div className="relative">
-                <div className="bg-gymNeon text-black w-16 h-16 rounded-2xl flex items-center justify-center shadow-[0_4px_20px_rgba(255,87,34,0.3)]">
+                <div className="bg-gymNeon text-white-force w-16 h-16 rounded-2xl flex items-center justify-center shadow-[0_4px_20px_rgba(255,87,34,0.3)]">
                   <Icon className="w-7 h-7" />
                 </div>
                 <span className="absolute -top-2 -right-2 bg-gymDark-950 text-gymNeon text-[9px] font-black border border-gymNeon/30 rounded-full w-6 h-6 flex items-center justify-center">{step}</span>
               </div>
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-white">{title}</h3>
-              <p className="text-xs text-neutral-400 leading-relaxed max-w-xs">{desc}</p>
+              <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">{title}</h3>
+              <p className="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed max-w-xs">{desc}</p>
             </div>
           ))}
         </div>
@@ -893,7 +893,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       <section className="max-w-7xl mx-auto px-6 py-10 w-full">
         <div className="text-center mb-8">
           <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Resultados Reales</span>
-          <h2 className="text-2xl font-black uppercase text-white mt-1">Lo que Dicen mis Alumnos</h2>
+          <h2 className="text-2xl font-black uppercase text-slate-900 dark:text-white mt-1">Lo que Dicen mis Alumnos</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {[
@@ -907,9 +907,9 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
                   <Star key={i} className="w-4 h-4 fill-gymNeon text-gymNeon" />
                 ))}
               </div>
-              <p className="text-sm text-neutral-300 leading-relaxed italic flex-1">{text}</p>
-              <div className="border-t border-white/5 pt-3">
-                <div className="text-xs font-extrabold text-white">{name}</div>
+              <p className="text-sm text-slate-600 dark:text-neutral-300 leading-relaxed italic flex-1">{text}</p>
+              <div className="border-t border-sky-100 dark:border-white/5 pt-3">
+                <div className="text-xs font-extrabold text-slate-900 dark:text-white">{name}</div>
                 <div className="text-[10px] text-gymNeon font-bold mt-0.5">{result}</div>
               </div>
             </div>
@@ -918,25 +918,25 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       </section>
 
       {/* Pricing Section — Single All-Inclusive Plan */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-12 border-t border-white/5 w-full" id="planes">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-12 border-t border-sky-100 dark:border-white/5 w-full" id="planes">
         <div className="text-center mb-8">
           <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Transparencia Total</span>
-          <h2 className="text-2xl sm:text-3xl font-black uppercase text-white mt-1">Plan Todo Incluido</h2>
-          <p className="text-neutral-400 text-xs sm:text-sm mt-2">Todo el poder de la plataforma y el coaching por una sola tarifa mensual.</p>
+          <h2 className="text-2xl sm:text-3xl font-black uppercase text-slate-900 dark:text-white mt-1">Plan Todo Incluido</h2>
+          <p className="text-slate-600 dark:text-neutral-400 text-xs sm:text-sm mt-2">Todo el poder de la plataforma y el coaching por una sola tarifa mensual.</p>
         </div>
 
-        <div className="glass-panel p-6 sm:p-10 rounded-3xl border-2 border-gymNeon/40 bg-neutral-900/90 relative shadow-[0_0_50px_rgba(255,87,34,0.15)] flex flex-col md:flex-row items-center justify-between gap-8 backdrop-blur-xl">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:left-10 md:translate-x-0 bg-gymNeon text-black text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-lg">
+        <div className="glass-panel p-6 sm:p-10 rounded-3xl border-2 border-gymNeon/40 relative shadow-[0_0_50px_rgba(255,87,34,0.15)] flex flex-col md:flex-row items-center justify-between gap-8 backdrop-blur-xl">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:left-10 md:translate-x-0 bg-gymNeon text-white-force text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-lg">
             Plan Único Sierra Coaching
           </div>
 
           <div className="flex-1 text-left w-full mt-2 md:mt-0">
             <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-5xl font-black text-white">50K</span>
-              <span className="text-sm font-bold text-neutral-400">COP / mes</span>
+              <span className="text-5xl font-black text-slate-900 dark:text-white">50K</span>
+              <span className="text-sm font-bold text-slate-600 dark:text-neutral-400">COP / mes</span>
             </div>
 
-            <p className="text-xs text-neutral-300 mb-6 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-neutral-300 mb-6 leading-relaxed">
               Accede a absolutamente todas las funcionalidades de la aplicación sin restricciones ni cobros adicionales:
             </p>
 
@@ -951,7 +951,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
                 'Copiloto e Inteligencia Artificial (IA) 24/7',
                 'Acceso completo a la App Web & PWA',
               ].map(f => (
-                <div key={f} className="flex items-center gap-2.5 text-xs text-neutral-200">
+                <div key={f} className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-neutral-200">
                   <div className="w-5 h-5 rounded-full bg-gymNeon/15 border border-gymNeon/30 flex items-center justify-center shrink-0">
                     <Check className="w-3 h-3 text-gymNeon" />
                   </div>
@@ -964,33 +964,33 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
           <div className="w-full md:w-auto shrink-0 flex flex-col items-center gap-3">
             <button
               onClick={() => { setIsLogin(false); setShowAuthModal(true); }}
-              className="w-full md:w-auto py-4 px-8 rounded-2xl bg-gymNeon text-black font-black uppercase text-xs tracking-widest shadow-[0_0_25px_rgba(255,87,34,0.4)] hover:bg-white hover:shadow-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer text-center whitespace-nowrap"
+              className="w-full md:w-auto py-4 px-8 rounded-2xl bg-gymNeon text-white-force font-black uppercase text-xs tracking-widest shadow-[0_0_25px_rgba(255,87,34,0.4)] hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer text-center whitespace-nowrap"
             >
               Unirme por $50.000 COP →
             </button>
-            <span className="text-[10px] text-neutral-500 font-medium">Pago mensual • Sin permanencia</span>
+            <span className="text-[10px] text-slate-500 dark:text-neutral-500 font-medium">Pago mensual • Sin permanencia</span>
           </div>
         </div>
       </section>
 
       {/* FAQs Section */}
-      <section className="max-w-4xl mx-auto w-full px-6 py-12 border-t border-white/5 pt-16" id="faq">
+      <section className="max-w-4xl mx-auto w-full px-6 py-12 border-t border-sky-100 dark:border-white/5 pt-16" id="faq">
         <FAQAccordion />
       </section>
 
       {/* Instagram Feed Section */}
-      <section className="max-w-7xl mx-auto w-full px-6 py-12 border-t border-white/5 pt-16">
+      <section className="max-w-7xl mx-auto w-full px-6 py-12 border-t border-sky-100 dark:border-white/5 pt-16">
         <InstagramFeed />
       </section>
 
       {/* Auth Modal Overlay */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md transition-all duration-300">
-          <div className="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto no-scrollbar rounded-3xl p-6 md:p-8 shadow-2xl relative border border-gymNeon/30 bg-neutral-900/98 backdrop-blur-xl animate-slide-in">
+          <div className="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto no-scrollbar rounded-3xl p-6 md:p-8 shadow-2xl relative border border-gymNeon/30 backdrop-blur-xl animate-slide-in">
             {/* Close Button */}
             <button
               onClick={() => setShowAuthModal(false)}
-              className="absolute top-4 right-4 text-neutral-400 hover:text-white bg-white/5 p-1.5 rounded-full border border-white/10 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/5 p-1.5 rounded-full border border-slate-200 dark:border-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -999,24 +999,24 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
             <div className="text-center mb-6 flex flex-col items-center">
               <LogoInteractive size="md" showBadge={false} className="mb-2" />
               <span className="text-[10px] font-bold text-gymNeon uppercase tracking-widest">Sierra Coaching App</span>
-              <h2 className="text-2xl font-extrabold uppercase text-white mt-0.5">
+              <h2 className="text-2xl font-extrabold uppercase text-slate-900 dark:text-white mt-0.5">
                 {isLogin ? 'Ingresar a la App' : 'Crea tu Cuenta'}
               </h2>
-              <p className="text-neutral-400 text-xs mt-1">
+              <p className="text-slate-600 dark:text-neutral-400 text-xs mt-1">
                 {isLogin ? 'Accede para ver tu plan y registrar avances.' : 'Regístrate para iniciar tu asesoría personalizada.'}
               </p>
             </div>
 
             {/* Role toggler (Only on Login) */}
             {isLogin && (
-              <div className="flex bg-neutral-950 rounded-xl p-1 mb-6 border border-white/5">
+              <div className="flex bg-slate-100 dark:bg-neutral-950 rounded-xl p-1 mb-6 border border-slate-200 dark:border-white/5">
                 <button 
                   type="button"
                   onClick={() => { setRole('client'); setErrorMessage(''); }}
                   className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all cursor-pointer ${
                     role === 'client' 
-                      ? 'bg-gymNeon text-black shadow-md font-extrabold' 
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-gymNeon text-white-force shadow-md font-extrabold' 
+                      : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   Soy Alumno
@@ -1026,8 +1026,8 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
                   onClick={() => { setRole('coach'); setErrorMessage(''); }}
                   className={`flex-1 py-2 text-xs font-bold uppercase rounded-lg transition-all cursor-pointer ${
                     role === 'coach' 
-                      ? 'bg-gymNeon text-black shadow-md font-extrabold' 
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-gymNeon text-white-force shadow-md font-extrabold' 
+                      : 'text-slate-600 dark:text-neutral-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   Soy Entrenador
@@ -1055,45 +1055,45 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
 
               {!isLogin && (
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Nombre Completo</label>
+                  <label className="text-slate-600 dark:text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Nombre Completo</label>
                   <input 
                     type="text" 
                     placeholder="Ej. Denilson Rincones" 
                     value={name} 
                     onChange={(e) => setName(e.target.value)} 
-                    className="bg-black/40 border border-white/10 rounded-lg text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-neutral-600"
+                    className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600"
                     required 
                   />
                 </div>
               )}
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Correo Electrónico</label>
+                <label className="text-slate-600 dark:text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Correo Electrónico</label>
                 <input 
                   type="email" 
                   placeholder="ejemplo@correo.com" 
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
-                  className="bg-black/40 border border-white/10 rounded-lg text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-neutral-600"
+                  className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600"
                   required 
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Contraseña</label>
+                <label className="text-slate-600 dark:text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Contraseña</label>
                 <div className="relative">
                   <input 
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••" 
                     value={password} 
                     onChange={(e) => setPassword(e.target.value)} 
-                    className="w-full bg-black/40 border border-white/10 rounded-lg text-white px-4 py-2.5 pr-11 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-neutral-600"
+                    className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 pr-11 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600"
                     required 
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(p => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-gymNeon transition-colors cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-neutral-400 hover:text-gymNeon transition-colors cursor-pointer"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -1135,39 +1135,39 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
                 <>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Peso Inicial (kg)</label>
+                      <label className="text-slate-600 dark:text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Peso Inicial (kg)</label>
                       <input 
                         type="number" 
                         step="0.1" 
                         placeholder="83" 
                         value={initialWeight} 
                         onChange={(e) => setInitialWeight(e.target.value)} 
-                        className="bg-black/40 border border-white/10 rounded-lg text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-neutral-600"
+                        className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600"
                         required 
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Estatura (m)</label>
+                      <label className="text-slate-600 dark:text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Estatura (m)</label>
                       <input 
                         type="number" 
                         step="0.01" 
                         placeholder="1.67" 
                         value={height} 
                         onChange={(e) => setHeight(e.target.value)} 
-                        className="bg-black/40 border border-white/10 rounded-lg text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-neutral-600"
+                        className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600"
                         required 
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Objetivo Fitness</label>
+                    <label className="text-slate-600 dark:text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Objetivo Fitness</label>
                     <input 
                       type="text" 
                       placeholder="Ej. Tonificar y reducir grasa" 
                       value={target} 
                       onChange={(e) => setTarget(e.target.value)} 
-                      className="bg-black/40 border border-white/10 rounded-lg text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-neutral-600"
+                      className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600"
                       required 
                     />
                   </div>
@@ -1177,7 +1177,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-gymNeon text-black font-extrabold uppercase py-3 rounded-xl tracking-wider text-xs shadow-[0_4px_14px_rgba(255,87,34,0.25)] hover:bg-white hover:shadow-none hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1.5 mt-2"
+                className="w-full bg-gymNeon text-white-force font-extrabold uppercase py-3 rounded-xl tracking-wider text-xs shadow-[0_4px_14px_rgba(255,87,34,0.25)] hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1.5 mt-2"
               >
                 <span>{loading ? 'Procesando...' : isLogin ? 'Iniciar Sesión' : 'Registrarme e Iniciar'}</span>
                 {!loading && <ArrowRight className="w-4 h-4" />}
@@ -1186,8 +1186,8 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
 
             {/* Switch between Login and Registration */}
             {role === 'client' && (
-              <div className="text-center mt-5 pt-4 border-t border-white/5">
-                <p className="text-neutral-500 text-xs mb-1.5">
+              <div className="text-center mt-5 pt-4 border-t border-sky-100 dark:border-white/5">
+                <p className="text-slate-500 dark:text-neutral-500 text-xs mb-1.5">
                   {isLogin ? '¿No tienes cuenta de alumno?' : '¿Ya tienes una cuenta registrada?'}
                 </p>
                 <button 
@@ -1209,10 +1209,10 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       {/* Forgot Password Modal */}
       {showForgotModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setShowForgotModal(false)}>
-          <div className="bg-[#17171e] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="glass-panel border border-gymNeon/30 rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-bold uppercase tracking-widest text-sm">Recuperar Contraseña</h3>
-              <button onClick={() => setShowForgotModal(false)} className="text-neutral-500 hover:text-white transition-colors cursor-pointer"><X className="w-4 h-4"/></button>
+              <h3 className="text-slate-900 dark:text-white font-bold uppercase tracking-widest text-sm">Recuperar Contraseña</h3>
+              <button onClick={() => setShowForgotModal(false)} className="text-slate-500 dark:text-neutral-500 hover:text-gymNeon transition-colors cursor-pointer"><X className="w-4 h-4"/></button>
             </div>
 
             {forgotSuccess ? (
@@ -1220,28 +1220,28 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
                 <div className="w-14 h-14 rounded-full bg-gymNeon/10 border border-gymNeon/30 flex items-center justify-center mx-auto mb-3">
                   <Check className="w-7 h-7 text-gymNeon" />
                 </div>
-                <p className="text-white font-bold text-sm mb-1">¡Correo enviado!</p>
-                <p className="text-neutral-400 text-xs">Si el correo existe, recibirás un enlace de recuperación en tu bandeja de entrada.</p>
-                <button onClick={() => setShowForgotModal(false)} className="mt-4 bg-gymNeon text-black font-bold text-xs uppercase py-2.5 px-6 rounded-lg w-full cursor-pointer">Cerrar</button>
+                <p className="text-slate-900 dark:text-white font-bold text-sm mb-1">¡Correo enviado!</p>
+                <p className="text-slate-600 dark:text-neutral-400 text-xs">Si el correo existe, recibirás un enlace de recuperación en tu bandeja de entrada.</p>
+                <button onClick={() => setShowForgotModal(false)} className="mt-4 bg-gymNeon text-white-force font-bold text-xs uppercase py-2.5 px-6 rounded-lg w-full cursor-pointer">Cerrar</button>
               </div>
             ) : (
               <form onSubmit={handleForgotPassword} className="flex flex-col gap-4">
-                <p className="text-neutral-400 text-xs">Escribe tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+                <p className="text-slate-600 dark:text-neutral-400 text-xs">Escribe tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Correo Electrónico</label>
+                  <label className="text-slate-600 dark:text-neutral-400 text-[10px] font-bold uppercase tracking-wider">Correo Electrónico</label>
                   <input
                     type="email"
                     value={forgotEmail}
                     onChange={e => setForgotEmail(e.target.value)}
                     placeholder="tucorreo@gmail.com"
-                    className="bg-black/40 border border-white/10 rounded-lg text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-neutral-600"
+                    className="bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white px-4 py-2.5 text-sm focus:outline-none focus:border-gymNeon focus:ring-1 focus:ring-gymNeon transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600"
                     required
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="bg-gymNeon text-black font-extrabold uppercase py-2.5 text-xs rounded-lg tracking-wider disabled:opacity-60 cursor-pointer"
+                  className="bg-gymNeon text-white-force font-extrabold uppercase py-2.5 text-xs rounded-lg tracking-wider disabled:opacity-60 cursor-pointer"
                 >
                   {forgotLoading ? 'Enviando...' : 'Enviar enlace de recuperación'}
                 </button>
@@ -1252,7 +1252,7 @@ export default function Auth({ onLogin, showToast, theme, toggleTheme }) {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-white/5 pt-6 text-center text-[10px] text-neutral-500 uppercase tracking-widest max-w-7xl mx-auto w-full px-6 transition-colors duration-300">
+      <footer className="border-t border-sky-100 dark:border-white/5 pt-6 text-center text-[10px] text-slate-500 dark:text-neutral-500 uppercase tracking-widest max-w-7xl mx-auto w-full px-6 transition-colors duration-300">
         <p>&copy; {new Date().getFullYear()} Sierra Coaching. Todos los derechos reservados. Diseñado para alto rendimiento.</p>
       </footer>
     </div>
