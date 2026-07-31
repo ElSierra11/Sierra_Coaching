@@ -1229,9 +1229,9 @@ export default function CoachAdmin({ showToast }) {
                 {adminTab === 'summary' && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* General physical metrics */}
-                    <div className="glass-panel p-6 rounded-2xl md:col-span-3 flex flex-col gap-4">
+                    <div className="glass-panel p-6 rounded-2xl md:col-span-3 flex flex-col gap-4 bg-white dark:bg-neutral-900/90 border border-slate-200 dark:border-white/5">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold text-white uppercase tracking-wider">Métricas de Progreso</h4>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Métricas de Progreso</h4>
                         <button
                           onClick={() => {
                             setEditClientHeight(selectedClient.profile?.height || 1.70);
@@ -1240,26 +1240,26 @@ export default function CoachAdmin({ showToast }) {
                             setEditClientName(selectedClient.name || "");
                             setShowEditClientModal(true);
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white rounded-xl text-xs font-semibold transition-all cursor-pointer"
                         >
                           <Edit3 className="w-3.5 h-3.5 text-gymNeon" />
                           <span>Editar Datos Alumno</span>
                         </button>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-slate-50 dark:bg-black/25 p-4 rounded-xl border border-slate-200 dark:border-white/5 shadow-sm">
+                        <div className="bg-slate-50 dark:bg-neutral-900/90 p-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
                           <div className="text-[10px] text-slate-500 dark:text-neutral-400 font-extrabold uppercase">Objetivo</div>
                           <div className="text-slate-900 dark:text-white text-sm font-extrabold mt-1">{selectedClient.profile?.target}</div>
                         </div>
-                        <div className="bg-slate-50 dark:bg-black/25 p-4 rounded-xl border border-slate-200 dark:border-white/5 shadow-sm">
+                        <div className="bg-slate-50 dark:bg-neutral-900/90 p-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
                           <div className="text-[10px] text-slate-500 dark:text-neutral-400 font-extrabold uppercase">Estatura</div>
                           <div className="text-slate-900 dark:text-white text-sm font-extrabold mt-1">{selectedClient.profile?.height ? Number(selectedClient.profile.height).toFixed(2) : '1.70'} m</div>
                         </div>
-                        <div className="bg-slate-50 dark:bg-black/25 p-4 rounded-xl border border-slate-200 dark:border-white/5 shadow-sm">
+                        <div className="bg-slate-50 dark:bg-neutral-900/90 p-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
                           <div className="text-[10px] text-slate-500 dark:text-neutral-400 font-extrabold uppercase">Peso de Partida</div>
                           <div className="text-slate-900 dark:text-white text-sm font-extrabold mt-1">{selectedClient.profile?.initial_weight} kg</div>
                         </div>
-                        <div className="bg-slate-50 dark:bg-black/25 p-4 rounded-xl border border-slate-200 dark:border-white/5 shadow-sm">
+                        <div className="bg-slate-50 dark:bg-neutral-900/90 p-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
                           <div className="text-[10px] text-slate-500 dark:text-neutral-400 font-extrabold uppercase">Peso Último Registro</div>
                           <div className="text-gymNeon text-sm font-black mt-1">{latestWeight} kg</div>
                         </div>

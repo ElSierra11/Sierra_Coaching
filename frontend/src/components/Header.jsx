@@ -98,7 +98,7 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
   };
 
   return (
-    <header className="glass-panel flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 rounded-3xl border border-white/10 border-l-4 border-l-gymNeon mb-8 shadow-2xl relative overflow-hidden bg-gradient-to-r from-neutral-900/90 via-neutral-900/60 to-black/80">
+    <header className="glass-panel flex flex-col md:flex-row justify-between items-start md:items-center gap-6 p-6 rounded-3xl border border-slate-200 dark:border-white/10 border-l-4 border-l-gymNeon mb-8 shadow-md relative overflow-hidden bg-white dark:bg-gradient-to-r dark:from-neutral-900/90 dark:via-neutral-900/60 dark:to-black/80">
       <div className="absolute top-0 right-0 w-96 h-96 bg-gymNeon/10 rounded-full blur-[100px] pointer-events-none"></div>
 
       {/* Profile info left side */}
@@ -107,23 +107,23 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
         
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2 mt-0.5">
-            <span className="text-gymNeon text-[10px] font-black tracking-widest uppercase bg-gymNeon/10 border border-gymNeon/20 px-2.5 py-0.5 rounded-md flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-ping"></span>
+            <span className="text-gymNeon text-[10px] font-black tracking-widest uppercase bg-gymNeon/10 border border-gymNeon/30 px-2.5 py-0.5 rounded-md flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
               <span>Asesoría Activa</span>
             </span>
             <a 
               href="https://www.instagram.com/sierrafitn_" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-xs font-bold text-neutral-300 hover:text-white bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-pink-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1 transition-all cursor-pointer hover:scale-105"
+              className="text-xs font-bold text-pink-600 dark:text-pink-300 hover:text-pink-700 dark:hover:text-white bg-pink-500/10 border border-pink-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1 transition-all cursor-pointer hover:scale-105"
               title="Ver perfil oficial de Instagram"
             >
-              <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
+              <InstagramIcon className="w-3.5 h-3.5 text-pink-500" />
               <span>@sierrafitn_</span>
             </a>
           </div>
-          <h1 className="text-xl md:text-2xl font-black tracking-tight text-white mt-1">Alejandro Sierra Rincones</h1>
-          <p className="text-gymNeon/90 text-xs font-extrabold tracking-wider uppercase mt-0.5">
+          <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white mt-1">Alejandro Sierra Rincones</h1>
+          <p className="text-gymNeon font-extrabold text-xs tracking-wider uppercase mt-0.5">
             Asesoría de Alto Rendimiento • Entrenamiento & Nutrición Personalizada
           </p>
         </div>
@@ -138,7 +138,7 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
             <button 
               type="button" 
               onClick={() => setShowChat(true)}
-              className="relative inline-flex items-center gap-2 bg-gymNeon text-black font-extrabold uppercase py-2.5 px-4 rounded-xl text-xs tracking-wider shadow-[0_4px_12px_rgba(255,87,34,0.15)] hover:opacity-90 active:scale-95 transition-all flex-1 sm:flex-initial justify-center cursor-pointer"
+              className="relative inline-flex items-center gap-2 bg-gymNeon text-white font-extrabold uppercase py-2.5 px-4 rounded-xl text-xs tracking-wider shadow-md hover:opacity-90 active:scale-95 transition-all flex-1 sm:flex-initial justify-center cursor-pointer"
             >
               <MessageSquare className="w-4 h-4" />
               <span>Chat Interno</span>
@@ -151,7 +151,7 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
             <button 
               type="button" 
               onClick={handleWhatsAppClick}
-              className="inline-flex items-center gap-2 bg-[#25D366] text-white font-extrabold uppercase py-2.5 px-4 rounded-xl text-xs tracking-wider shadow-[0_4px_12px_rgba(37,211,102,0.15)] hover:opacity-90 active:scale-95 transition-all flex-1 sm:flex-initial justify-center cursor-pointer"
+              className="inline-flex items-center gap-2 bg-[#25D366] text-white font-extrabold uppercase py-2.5 px-4 rounded-xl text-xs tracking-wider shadow-md hover:opacity-90 active:scale-95 transition-all flex-1 sm:flex-initial justify-center cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" />
               <span>WhatsApp</span>
@@ -161,8 +161,8 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
         
         {/* User state, theme and logout */}
         <div className="flex items-center justify-between sm:justify-start gap-4 w-full sm:w-auto">
-          <span className="text-neutral-400 text-xs">
-            Conectado como <strong className="text-white font-semibold">{user.name}</strong>
+          <span className="text-slate-600 dark:text-neutral-300 text-xs">
+            Conectado como <strong className="text-slate-900 dark:text-white font-bold">{user.name}</strong>
           </span>
           <div className="flex items-center gap-2">
             
@@ -171,7 +171,7 @@ export default function Header({ user, onLogout, theme, toggleTheme }) {
               <button
                 type="button"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="inline-flex items-center justify-center p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer relative"
+                className="inline-flex items-center justify-center p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-neutral-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer relative"
                 title="Notificaciones"
               >
                 {unreadNotifications.length > 0 ? (
